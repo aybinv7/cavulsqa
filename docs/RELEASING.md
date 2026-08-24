@@ -3,10 +3,11 @@
 Everything under `packages/` publishes to npm under the `@cavulsqa` scope. Anything marked
 `private: true` is skipped.
 
-| Package                 | What it is                                    |
-| ----------------------- | --------------------------------------------- |
-| `@cavulsqa/mobile-db`   | Capacitor SQLite persistence for Kysely.      |
-| `@cavulsqa/reactive-db` | Framework-agnostic reactive query primitives. |
+| Package                  | What it is                                    |
+| ------------------------ | --------------------------------------------- |
+| `@cavulsqa/mobile-db`    | Capacitor SQLite persistence for Kysely.      |
+| `@cavulsqa/reactive-db`  | Framework-agnostic reactive query primitives. |
+| `@cavulsqa/reactive-vue` | Vue bindings for reactive-db.                 |
 
 ## How a release happens
 

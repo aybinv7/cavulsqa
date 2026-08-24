@@ -7,10 +7,11 @@ unrelated apps can share them. Anything tied to a specific backend stayed behind
 
 ## Packages
 
-| Package                                         | What it is                                                                                                                                                         |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [`@cavulsqa/mobile-db`](packages/mobile-db)     | Capacitor SQLite persistence for Kysely: a shared-connection dialect, migration runner, transaction-aware writes, column helpers, and an sql.js dialect for tests. |
-| [`@cavulsqa/reactive-db`](packages/reactive-db) | Framework-agnostic reactive query primitives: table-change bus, result cache, visibility gate, mutation proxy, query metrics.                                      |
+| Package                                           | What it is                                                                                                                                                         |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`@cavulsqa/mobile-db`](packages/mobile-db)       | Capacitor SQLite persistence for Kysely: a shared-connection dialect, migration runner, transaction-aware writes, column helpers, and an sql.js dialect for tests. |
+| [`@cavulsqa/reactive-db`](packages/reactive-db)   | Framework-agnostic reactive query primitives: table-change bus, result cache, visibility gate, mutation proxy, query metrics.                                      |
+| [`@cavulsqa/reactive-vue`](packages/reactive-vue) | Vue bindings for the above: a `useReactiveQuery` composable, Framework7 page visibility, and a reactive metrics view.                                              |
 
 ## Deliberately not here
 

@@ -13,8 +13,8 @@ export interface TableChangeEvent extends TableChangeMeta {
 }
 
 export interface ChangeBus {
-  emit(table: string, type: ChangeType, meta?: TableChangeMeta): void;
-  on(tables: string[], listener: (event: TableChangeEvent) => void): () => void;
+  emit: (table: string, type: ChangeType, meta?: TableChangeMeta) => void;
+  on: (tables: string[], listener: (event: TableChangeEvent) => void) => () => void;
 }
 
 export function createChangeBus(): ChangeBus {

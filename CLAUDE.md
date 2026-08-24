@@ -38,6 +38,12 @@ private Odoo-facing monorepo so unrelated apps can share them.
   back defeats the point. Local SQLite is the source of truth.
 - **No framework dependency in `reactive-db`.** It deliberately has no `vue` import — `isVisible?:
 { value: boolean }` is a structural stand-in for a ref. Keep it that way so non-Vue callers work.
+  Vue-specific code belongs in `reactive-vue`, and a future `reactive-svelte` would sit beside it
+  rather than inside `reactive-db`.
+- **`reactive-vue` injects, never owns, the app's singletons.** The change bus and the metrics
+  recorder are arguments to `createReactiveQuery`, because writes must emit on the same bus the
+  queries listen to. Do not introduce a module-level bus or recorder in the package — importing
+  app globals directly is what made this layer un-shareable where it came from.
 - **No backend, domain models, or transport.** Those live in the consuming app.
 - **`vp` is the toolchain.** Do not add pnpm scripts, vitest configs, eslint, or prettier. Use
   `vp check`, `vp run -r test`, `vp run -r build`.
