@@ -26,10 +26,13 @@ builds. There is no separate pnpm/vitest/eslint/prettier configuration.
 
 ```bash
 vp install         # install everything
+vp run -r build    # build every package
 vp check           # format + lint + type check
 vp run -r test     # test every package
-vp run -r build    # build every package
 ```
+
+Build before check on a fresh clone. Each package's `exports` points into `dist`, which is not
+committed, so `reactive-vue` cannot resolve `reactive-db`'s declarations until they exist.
 
 ## Scaffolding
 

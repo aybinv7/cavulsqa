@@ -57,8 +57,10 @@ jobs:
       # A broken package is worse than a late one, and npm has no useful undo:
       # unpublishing is restricted to 72 hours and forbidden once anything
       # depends on the version.
-      - run: vp check
+      # Build before check: a package's `exports` points into the gitignored
+      # `dist`, so a sibling's declarations must exist before it type-checks.
       - run: vp run -r build
+      - run: vp check
       - run: vp run -r test
 
       - name: Confirm npm can do the OIDC exchange

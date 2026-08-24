@@ -23,11 +23,13 @@ jobs:
 
       - run: vp install --frozen-lockfile
 
+      # Build first: `dist` is gitignored, and a package's `exports` points into
+      # it, so type-checking a package that depends on a sibling needs the
+      # sibling's declarations to exist. `vp run -r` walks the workspace
+      # dependency graph, so each one is built before its dependents.
+      - run: vp run -r build
+
       # Format, lint and type check the whole workspace in one pass.
       - run: vp check
-
-      # `vp run -r` walks the workspace dependency graph, so a package is built
-      # before anything that depends on it.
-      - run: vp run -r build
 
       - run: vp run -r test
