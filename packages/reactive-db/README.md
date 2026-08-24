@@ -13,6 +13,10 @@ Framework-agnostic primitives for keeping a UI in step with a local SQLite datab
 - `ReactiveQueryOptions`, `calcRetryDelay`, `noopMetrics` — the option contract and retry policy a
   framework binding builds on.
 
+`kysely` is an **optional** peer: it is imported for types only. Marking it optional keeps npm
+from auto-installing a kysely major that `@cavulsqa/mobile-db` cannot use - which otherwise
+resolves the whole tree onto an older mobile-db.
+
 **No framework dependency.** There is no `vue` import; `isVisible?: { value: boolean }` is a
 structural stand-in for a ref, so any framework (or none) can drive it. Vue bindings live in
 [`@cavulsqa/reactive-vue`](../reactive-vue).
