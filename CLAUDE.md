@@ -64,5 +64,9 @@ private Odoo-facing monorepo so unrelated apps can share them.
 - **Watch the tarball.** tsdown externalizes `dependencies` and `peerDependencies` but bundles
   `devDependencies`. A test-only dependency belongs in `peerDependencies` with
   `peerDependenciesMeta.optional`, or it ends up inlined in the published output.
+- **A peer range is a promise you have tested.** The workspace pins one version, so a wide range
+  like `>=0.28` ships untested majors to consumers - that is how `mobile-db@0.1.0` reached npm
+  broken against kysely 0.29, which moved `Migrator` to a subpath. Widen a range only after
+  installing the published tarball against the top of it.
 - **Relative imports need explicit `.js` extensions** — the packages type-check under
   `moduleResolution: nodenext`.

@@ -18,6 +18,12 @@ Capacitor SQLite persistence for [Kysely](https://kysely.dev).
 
 There is no sync contract here: no `_ruid`, no `_sync_status`, no push/pull queue.
 
+## kysely 0.28 only
+
+`Migrator` lives at the root of kysely 0.28 and moved to a `kysely/migration` subpath in 0.29, and
+0.28 has no such subpath - so one import cannot serve both. The peer range is `^0.28` deliberately;
+`>=0.28` let npm install 0.29 and the package failed at import time.
+
 ## Install
 
 ```bash
