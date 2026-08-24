@@ -1,4 +1,4 @@
-import { expect, test, vi } from "vite-plus/test";
+import { afterEach, beforeEach, expect, test, vi } from "vite-plus/test";
 import { createApp, defineComponent, h, ref, type Ref } from "vue";
 import { createChangeBus, type TableChangeEvent } from "@cavulsqa/reactive-db";
 import { createReactiveQuery, type ReactiveQuery } from "../src/reactiveQuery.js";
@@ -24,8 +24,16 @@ function mount<T>(setup: () => ReactiveQuery<T>): { query: ReactiveQuery<T>; unm
   return { query: captured, unmount: () => app.unmount() };
 }
 
-const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
-const afterDebounce = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+beforeEach(() => {
+  vi.useFakeTimers();
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
+
+const flush = () => vi.advanceTimersByTimeAsync(0);
+const afterDebounce = (ms: number) => vi.advanceTimersByTimeAsync(ms);
 
 test("fetches on mount and exposes the result", async () => {
   const bus = createChangeBus();

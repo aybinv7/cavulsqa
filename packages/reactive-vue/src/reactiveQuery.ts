@@ -22,6 +22,18 @@ const DEFAULT_DEBOUNCE = 100;
 
 const ALWAYS_VISIBLE: { value: boolean } = { value: true };
 
+export interface ReactiveQueryLogger {
+  debug: (message: string, ...details: unknown[]) => void;
+  warn: (message: string, ...details: unknown[]) => void;
+  error: (message: string, ...details: unknown[]) => void;
+}
+
+const consoleLogger: ReactiveQueryLogger = {
+  debug: (message, ...details) => console.log(message, ...details),
+  warn: (message, ...details) => console.warn(message, ...details),
+  error: (message, ...details) => console.error(message, ...details),
+};
+
 /**
  * `enabled` may be a ref, so a screen can defer its first read until it is actually shown.
  * Framework7 mounts every tab at startup; without this, a tab the user has not opened still
@@ -62,6 +74,11 @@ export interface CreateReactiveQueryDeps {
    * production.
    */
   warnOnKeyConflict?: boolean;
+  /**
+   * Where a failed query and the `debug` traces go. Defaults to the console; pass the app's error
+   * service so a failure reaches the same place as every other one.
+   */
+  logger?: ReactiveQueryLogger;
 }
 
 export interface ReactiveQueryComposables {
@@ -90,6 +107,7 @@ export function createReactiveQuery(deps: CreateReactiveQueryDeps): ReactiveQuer
   const metrics = deps.metrics ?? noopMetrics;
   const resolveVisibility = deps.useVisibility ?? (() => ALWAYS_VISIBLE);
   const warnOnKeyConflict = deps.warnOnKeyConflict ?? true;
+  const logger = deps.logger ?? consoleLogger;
 
   // Shared across every call site: two screens asking for the same key at the same moment should
   // await one query, not two.
@@ -109,7 +127,7 @@ export function createReactiveQuery(deps: CreateReactiveQueryDeps): ReactiveQuer
     }
 
     if (warnOnKeyConflict && existing.tables !== signature) {
-      console.warn(
+      logger.warn(
         `[useReactiveQuery] queryKey "${queryKey}" is mounted twice watching different tables ` +
           `("${existing.tables}" and "${signature}"). These are different queries sharing an ` +
           `identity, so one will receive the other's result. Use uniqueQueryKey() for a key that ` +
@@ -140,6 +158,9 @@ export function createReactiveQuery(deps: CreateReactiveQueryDeps): ReactiveQuer
     const retryCount = ref(0);
 
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+    let retryTimer: ReturnType<typeof setTimeout> | null = null;
+    let abandonRetry: (() => void) | null = null;
+    let disposed = false;
     let activeRequestId = 0;
     const debounceMs = options.debounce ?? DEFAULT_DEBOUNCE;
     const enabledRef = isRef(options.enabled) ? options.enabled : ref(options.enabled !== false);
@@ -168,6 +189,27 @@ export function createReactiveQuery(deps: CreateReactiveQueryDeps): ReactiveQuer
       return isCacheValid.value;
     }
 
+    /**
+     * Resolves when the backoff elapses, or immediately when the query is torn down. Waiting on a
+     * bare `setTimeout` meant an unmount mid-backoff still woke up and ran `queryFn` again -
+     * against the one native database thread this composable exists to protect.
+     */
+    function waitForRetry(delay: number): Promise<void> {
+      return new Promise<void>((resolve) => {
+        abandonRetry = () => {
+          if (retryTimer) clearTimeout(retryTimer);
+          retryTimer = null;
+          abandonRetry = null;
+          resolve();
+        };
+        retryTimer = setTimeout(() => {
+          retryTimer = null;
+          abandonRetry = null;
+          resolve();
+        }, delay);
+      });
+    }
+
     async function executeQueryWithRetry(
       showLoading = true,
       attempt = 0,
@@ -175,7 +217,7 @@ export function createReactiveQuery(deps: CreateReactiveQueryDeps): ReactiveQuer
     ): Promise<void> {
       if (!force && inFlightQueries.has(queryKey)) {
         if (options.debug) {
-          console.log(`[useReactiveQuery] Deduping query: ${queryKey}`);
+          logger.debug(`[useReactiveQuery] Deduping query: ${queryKey}`);
         }
         try {
           data.value = (await inFlightQueries.get(queryKey)) as T;
@@ -216,7 +258,7 @@ export function createReactiveQuery(deps: CreateReactiveQueryDeps): ReactiveQuer
         metrics.recordQuery(queryKey, duration);
 
         if (options.debug) {
-          console.log(`[useReactiveQuery] Query executed (${duration.toFixed(1)}ms):`, result);
+          logger.debug(`[useReactiveQuery] Query executed (${duration.toFixed(1)}ms):`, result);
         }
 
         options.onSuccess?.(result);
@@ -229,16 +271,17 @@ export function createReactiveQuery(deps: CreateReactiveQueryDeps): ReactiveQuer
           const delay = calcRetryDelay(attempt, options.retryDelay);
           inFlightQueries.delete(queryKey);
           if (options.debug) {
-            console.log(`[useReactiveQuery] Retry ${attempt + 1}/${maxRetries} in ${delay}ms`);
+            logger.debug(`[useReactiveQuery] Retry ${attempt + 1}/${maxRetries} in ${delay}ms`);
           }
-          await new Promise((resolve) => setTimeout(resolve, delay));
+          await waitForRetry(delay);
+          if (disposed || requestId !== activeRequestId) return;
           return executeQueryWithRetry(showLoading, attempt + 1, force);
         }
 
         error.value = errorObj;
         isStale.value = false;
 
-        console.error("[useReactiveQuery] Query failed:", err);
+        logger.error("[useReactiveQuery] Query failed:", err);
         metrics.recordError(queryKey);
         options.onError?.(errorObj);
       } finally {
@@ -252,7 +295,7 @@ export function createReactiveQuery(deps: CreateReactiveQueryDeps): ReactiveQuer
     function scheduledRefetch() {
       if (isCacheValidNow()) {
         if (options.debug) {
-          console.log("[useReactiveQuery] Cache valid, skipping refetch");
+          logger.debug("[useReactiveQuery] Cache valid, skipping refetch");
         }
         metrics.recordCacheHit();
         return;
@@ -284,14 +327,14 @@ export function createReactiveQuery(deps: CreateReactiveQueryDeps): ReactiveQuer
     function shouldTriggerRefetch(event: TableChangeEvent): boolean {
       if (options.refetchOn && !options.refetchOn.includes(event.type)) {
         if (options.debug) {
-          console.log(`[useReactiveQuery] Skipping ${event.type} (not in refetchOn)`);
+          logger.debug(`[useReactiveQuery] Skipping ${event.type} (not in refetchOn)`);
         }
         return false;
       }
 
       if (options.shouldRefetch && !options.shouldRefetch(event)) {
         if (options.debug) {
-          console.log("[useReactiveQuery] Skipping (shouldRefetch returned false)");
+          logger.debug("[useReactiveQuery] Skipping (shouldRefetch returned false)");
         }
         return false;
       }
@@ -314,7 +357,7 @@ export function createReactiveQuery(deps: CreateReactiveQueryDeps): ReactiveQuer
 
       unsubscribe = deps.onTableChange(options.tables, (event) => {
         if (options.debug) {
-          console.log("[useReactiveQuery] Table changed:", event);
+          logger.debug("[useReactiveQuery] Table changed:", event);
         }
 
         if (!shouldTriggerRefetch(event)) return;
@@ -360,9 +403,11 @@ export function createReactiveQuery(deps: CreateReactiveQueryDeps): ReactiveQuer
     });
 
     onUnmounted(() => {
+      disposed = true;
       stopEnabledWatch?.();
       deactivate();
       if (debounceTimer) clearTimeout(debounceTimer);
+      abandonRetry?.();
       if (cancelOnUnmount) cancel();
     });
 

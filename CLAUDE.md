@@ -52,6 +52,10 @@ private Odoo-facing monorepo so unrelated apps can share them.
   revalidation window and `createResultCache` is deliberately unwired. A shared cache needs
   by-table invalidation of cached entries, which is most of TanStack Query - if that is the
   requirement, drive `invalidateQueries` from `bus.on` rather than reimplementing it here.
+- **Nothing in a package calls `console` directly** except the default logger itself. Failures and
+  debug traces go through the injected `logger`, so a consumer can route them to its error service.
+- **Timer-dependent tests use `vi.useFakeTimers()`**, not real sleeps. Fake timers cover `Date` and
+  `performance` too, which is why no clock is injected into the production API.
 - **No backend, domain models, or transport.** Those live in the consuming app.
 - **`vp` is the toolchain.** Do not add pnpm scripts, vitest configs, eslint, or prettier. Use
   `vp check`, `vp run -r test`, `vp run -r build`.

@@ -1,4 +1,4 @@
-import { expect, test, vi } from "vite-plus/test";
+import { afterEach, beforeEach, expect, test, vi } from "vite-plus/test";
 import { createApp, defineComponent, h } from "vue";
 import { createChangeBus } from "@cavulsqa/reactive-db";
 import { createReactiveQuery } from "../src/reactiveQuery.js";
@@ -17,7 +17,15 @@ function mount(setup: () => unknown): () => void {
   return () => app.unmount();
 }
 
-const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
+beforeEach(() => {
+  vi.useFakeTimers();
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
+
+const flush = () => vi.advanceTimersByTimeAsync(0);
 
 test("uniqueQueryKey never repeats a key for the same prefix", () => {
   const first = uniqueQueryKey("sale:list");
@@ -145,7 +153,7 @@ test("visibility defaults to always-visible when no adapter is given", async () 
 
   await flush();
   bus.emit("sale_order", "insert", { timestamp: Date.now() });
-  await new Promise((resolve) => setTimeout(resolve, 30));
+  await vi.advanceTimersByTimeAsync(30);
 
   expect(queryFn).toHaveBeenCalledTimes(2);
   unmount();

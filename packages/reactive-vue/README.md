@@ -9,6 +9,7 @@ copy between apps.
   cache window, cancel on unmount, and a deferred first read via a reactive `enabled`.
 - `uniqueQueryKey(prefix)` — a key that is never shared, so a query is never deduplicated against
   another.
+- An injectable `logger`, so failures reach your error service rather than only the console.
 - `createVueQueryMetrics()` — the recorder with its state in `reactive()`, plus a `useQueryMetrics`
   composable of derived counters for a dev-tools panel.
 - `@cavulsqa/reactive-vue/framework7` — `providePageVisibility()` / `usePageVisibility()`, which
@@ -55,7 +56,15 @@ const { data, loading, error, refetch } = useReactiveQuery(
 ```
 
 `metrics` defaults to a no-op recorder. `useVisibility` defaults to always-visible — without an
-adapter, a screen the user cannot see still refetches.
+adapter, a screen the user cannot see still refetches. `logger` defaults to the console; pass your
+app's error service and a failed query lands where every other failure does:
+
+```ts
+createReactiveQuery({
+  onTableChange: bus.on,
+  logger: { debug: noop, warn: reportWarning, error: reportError },
+});
+```
 
 ## queryKey is an identity, not a label
 
