@@ -1,4 +1,3 @@
-/// <reference path="./sqlJs.d.ts" />
 import {
   SqliteAdapter,
   SqliteIntrospector,

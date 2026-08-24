@@ -1,0 +1,155 @@
+name: release
+
+# Publishes every publishable workspace package to npm via **trusted publishing**
+# (OIDC). No NPM_TOKEN exists anywhere: the workflow exchanges a short-lived
+# GitHub identity token for a publish credential scoped to this repository and
+# this workflow file.
+#
+# Why the two-step pack-then-publish below, rather than `pnpm publish -r`:
+#
+#   - The manifests use `catalog:` and `workspace:*`, which npm cannot resolve.
+#     `pnpm pack` rewrites both into concrete ranges inside the tarball while
+#     leaving the repository untouched, so the tarball is npm-publishable.
+#   - The OIDC exchange is implemented by the npm CLI (>= 11.5.1), and pnpm does
+#     not document supporting it. So npm publishes, pnpm packs.
+#   - npm is run from outside the checkout on purpose. The workspace root
+#     declares `devEngines.packageManager: pnpm`, and npm refuses to run at all
+#     inside it (EBADDEVENGINES) - including `npm publish`.
+#
+# Trusted publishing has to be configured per package on npmjs.com (Settings >
+# Trusted publisher: this repository, workflow `release.yml`), and that requires
+# the package to already exist. The first version of each package is therefore
+# published by hand; see docs/RELEASING.md.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: "Pack and validate without publishing"
+        type: boolean
+        default: true
+      provenance:
+        description: "Attach npm provenance (needs a public repository)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write # the OIDC token trusted publishing exchanges
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: voidzero-dev/setup-vp@07d0b0e993009eb3b908ea06e49e88e933b728a2 # v1.17.0
+        with:
+          node-version: "24"
+          cache: true
+
+      - run: vp install --frozen-lockfile
+
+      # A broken package is worse than a late one, and npm has no useful undo:
+      # unpublishing is restricted to 72 hours and forbidden once anything
+      # depends on the version.
+      - run: vp check
+      - run: vp run -r build
+      - run: vp run -r test
+
+      - name: Confirm npm can do the OIDC exchange
+        run: |
+          echo "npm $(npm --version) / node $(node --version)"
+          npm --version | node -e '
+            const v = require("fs").readFileSync(0, "utf8").trim().split(".").map(Number);
+            const ok = v[0] > 11 || (v[0] === 11 && (v[1] > 5 || (v[1] === 5 && v[2] >= 1)));
+            if (!ok) { console.error("trusted publishing needs npm >= 11.5.1"); process.exit(1); }'
+
+      # `pnpm pack` writes a publishable tarball per package: `files` is
+      # honoured, and `catalog:` / `workspace:*` become concrete ranges.
+      # setup-vp provides `vp`, which has no package-manager passthrough.
+      - name: Provide pnpm
+        run: |
+          corepack enable pnpm
+          pnpm --version
+
+      - name: Pack
+        run: |
+          mkdir -p "$RUNNER_TEMP/tarballs"
+          for dir in packages/*/; do
+            if [ "$(node -p "!!require('./$dir/package.json').private")" = "true" ]; then
+              echo "skipping $dir (private)"
+              continue
+            fi
+            echo "::group::pack $dir"
+            (cd "$dir" && pnpm pack --pack-destination "$RUNNER_TEMP/tarballs")
+            echo "::endgroup::"
+          done
+          ls -la "$RUNNER_TEMP/tarballs"
+
+      # Run from $RUNNER_TEMP, not the checkout: npm will not start inside a
+      # workspace that pins pnpm via devEngines.
+      - name: Publish
+        working-directory: ${{ runner.temp }}
+        run: |
+          flags="--access public"
+          if [ "${{ inputs.dry-run }}" = "true" ]; then flags="$flags --dry-run"; fi
+
+          # Under trusted publishing npm attaches provenance *by default*, and
+          # generating it needs a public source repository - so on a private one
+          # the publish fails unless it is turned off explicitly.
+          if [ "${{ inputs.provenance }}" = "true" ]; then
+            flags="$flags --provenance"
+          else
+            export NPM_CONFIG_PROVENANCE=false
+          fi
+          echo "npm publish $flags (provenance=${{ inputs.provenance }})"
+
+          # Absolute paths only. Given `tarballs/x.tgz`, npm treats the argument
+          # as a package spec rather than a file and tries to git-clone
+          # ssh://git@github.com/tarballs/x.tgz.git.
+          #
+          # A version already on the registry is a *skip*, not a failure: this
+          # workflow packs every publishable package, so a release that bumped
+          # one of them would otherwise fail on the others. Anything else is a
+          # real error, and `set -e` would have stopped at the first one - so the
+          # loop collects the status and reports it at the end.
+          status=0
+          for tarball in "$RUNNER_TEMP"/tarballs/*.tgz; do
+            name=$(basename "$tarball")
+            echo "::group::$name"
+            if output=$(npm publish "$tarball" $flags 2>&1); then
+              echo "$output"
+            else
+              echo "$output"
+              if grep -qiE "cannot publish over|previously published|EPUBLISHCONFLICT" <<<"$output"; then
+                echo "::notice title=Skipped::$name is already on the registry at this version"
+              else
+                echo "::error title=Publish failed::$name"
+                status=1
+              fi
+            fi
+            echo "::endgroup::"
+          done
+          exit $status
+
+      - name: Summarise
+        if: always()
+        run: |
+          {
+            echo "### Publishable packages at their current versions"
+            echo
+            echo '| package | version |'
+            echo '| --- | --- |'
+            node -e '
+              const fs = require("fs");
+              const files = fs.globSync(["packages/*/package.json", "apps/*/package.json"]);
+              for (const file of files.sort()) {
+                const pkg = JSON.parse(fs.readFileSync(file, "utf8"));
+                if (!pkg.private) console.log(`| ${pkg.name} | ${pkg.version} |`);
+              }'
+          } >> "$GITHUB_STEP_SUMMARY"
