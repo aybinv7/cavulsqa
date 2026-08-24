@@ -1,6 +1,6 @@
 {
   "name": "@cavulsqa/reactive-vue",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Vue bindings for @cavulsqa/reactive-db: a reactive query composable, Framework7 page visibility, and a reactive metrics view.",
   "keywords": [
     "framework7",
@@ -26,6 +26,7 @@
   "type": "module",
   "exports": {
     ".": "./dist/index.mjs",
+    "./framework7": "./dist/framework7.mjs",
     "./package.json": "./package.json"
   },
   "publishConfig": {
@@ -49,7 +50,7 @@
     "vue": "catalog:"
   },
   "peerDependencies": {
-    "@cavulsqa/reactive-db": ">=0.0.0",
+    "@cavulsqa/reactive-db": "^0.1.0",
     "vue": ">=3.5"
   }
 }

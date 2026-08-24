@@ -17,9 +17,10 @@ import {
   type ReactiveQueryOptions,
   type TableChangeEvent,
 } from "@cavulsqa/reactive-db";
-import { usePageVisibility } from "./pageVisibility.js";
 
 const DEFAULT_DEBOUNCE = 100;
+
+const ALWAYS_VISIBLE: { value: boolean } = { value: true };
 
 /**
  * `enabled` may be a ref, so a screen can defer its first read until it is actually shown.
@@ -50,9 +51,17 @@ export interface CreateReactiveQueryDeps {
   metrics?: QueryMetrics;
   /**
    * Resolves the visibility of the surrounding page when a call site does not pass `isVisible`.
-   * Defaults to the Framework7 page-visibility composable.
+   * Defaults to always-visible, which means a screen the user cannot see still refetches. On a
+   * router that mounts every tab up front, pass an adapter - `usePageVisibility` from
+   * `@cavulsqa/reactive-vue/framework7` is one.
    */
   useVisibility?: () => { value: boolean };
+  /**
+   * Warn when two mounted queries share a `queryKey` but watch different tables - they are
+   * different queries, so the second is handed the first's rows. Defaults to on outside
+   * production.
+   */
+  warnOnKeyConflict?: boolean;
 }
 
 export interface ReactiveQueryComposables {
@@ -79,11 +88,44 @@ export interface ReactiveQueryComposables {
  */
 export function createReactiveQuery(deps: CreateReactiveQueryDeps): ReactiveQueryComposables {
   const metrics = deps.metrics ?? noopMetrics;
-  const resolveVisibility = deps.useVisibility ?? usePageVisibility;
+  const resolveVisibility = deps.useVisibility ?? (() => ALWAYS_VISIBLE);
+  const warnOnKeyConflict = deps.warnOnKeyConflict ?? true;
 
   // Shared across every call site: two screens asking for the same key at the same moment should
   // await one query, not two.
   const inFlightQueries = new Map<string, Promise<unknown>>();
+
+  // A key is an identity, and a duplicated one silently crosses two queries' results. Tables are
+  // the cheapest signal that two call sites are not in fact the same query.
+  const watchedTablesByKey = new Map<string, { tables: string; holders: number }>();
+
+  function claimKey(queryKey: string, tables: string[]): void {
+    const signature = [...tables].sort().join(",");
+    const existing = watchedTablesByKey.get(queryKey);
+
+    if (!existing) {
+      watchedTablesByKey.set(queryKey, { tables: signature, holders: 1 });
+      return;
+    }
+
+    if (warnOnKeyConflict && existing.tables !== signature) {
+      console.warn(
+        `[useReactiveQuery] queryKey "${queryKey}" is mounted twice watching different tables ` +
+          `("${existing.tables}" and "${signature}"). These are different queries sharing an ` +
+          `identity, so one will receive the other's result. Use uniqueQueryKey() for a key that ` +
+          `is never shared.`,
+      );
+    }
+
+    existing.holders += 1;
+  }
+
+  function releaseKey(queryKey: string): void {
+    const existing = watchedTablesByKey.get(queryKey);
+    if (!existing) return;
+    existing.holders -= 1;
+    if (existing.holders <= 0) watchedTablesByKey.delete(queryKey);
+  }
 
   function useReactiveQuery<T>(
     queryFn: () => Promise<T>,
@@ -266,6 +308,7 @@ export function createReactiveQuery(deps: CreateReactiveQueryDeps): ReactiveQuer
     function activate() {
       if (active) return;
       active = true;
+      claimKey(queryKey, options.tables);
 
       if (fetchOnMount) void executeQueryWithRetry();
 
@@ -295,6 +338,7 @@ export function createReactiveQuery(deps: CreateReactiveQueryDeps): ReactiveQuer
     function deactivate() {
       if (!active) return;
       active = false;
+      releaseKey(queryKey);
       unsubscribe?.();
       unsubscribe = null;
       stopVisibilityWatch?.();
