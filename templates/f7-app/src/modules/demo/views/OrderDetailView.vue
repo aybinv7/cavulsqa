@@ -75,6 +75,7 @@
 </template>
 
 <script setup lang="ts">
+import { useHiddenTabbar } from "@/shared/composables/useTabbarVisibility";
 import type { Router } from "framework7/types";
 import {
   deleteOrder,
@@ -86,6 +87,9 @@ import { getDatabase, rdb } from "@/shared/database/database";
 import { uniqueQueryKey, useReactiveQuery } from "@/shared/database/queries";
 
 const { t } = useI18n();
+
+// A pushed page owns the whole screen; the tab bar belongs to the tab roots.
+useHiddenTabbar();
 const props = defineProps<{ f7route: Router.Route; f7router: Router.Router }>();
 
 const orderId = Number(props.f7route.params.id ?? 0);

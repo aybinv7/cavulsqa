@@ -67,7 +67,9 @@
     "statusConfirmed": "Confirmée",
     "statusDelivered": "Livrée",
     "deleteConfirm": "Supprimer cette commande et ses lignes ?",
-    "tapHint": "Touchez une commande pour l'ouvrir."
+    "tapHint": "Touchez une commande pour l'ouvrir.",
+    "allOrders": "Commandes récentes",
+    "matches": "{count} résultats"
   },
   "metrics": {
     "totalQueries": "Requêtes exécutées",

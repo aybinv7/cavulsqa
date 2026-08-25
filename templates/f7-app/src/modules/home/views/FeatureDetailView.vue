@@ -39,11 +39,11 @@
         <template #text>{{ t("detail.transitionNote") }}</template>
       </F7ListItem>
       <F7ListItem :title="t('detail.navbar')" :subtitle="navbarSummary">
-        <template #media><F7Icon f7="rectangle3_offgrid_fill" color="purple" /></template>
+        <template #media><F7Icon f7="rectangle_3_offgrid_fill" color="purple" /></template>
         <template #text>{{ t("detail.navbarNote") }}</template>
       </F7ListItem>
       <F7ListItem :title="t('detail.nesting')" :subtitle="t('detail.nestingAfter')">
-        <template #media><F7Icon f7="square_stack3d_down_right_fill" color="green" /></template>
+        <template #media><F7Icon f7="square_stack_3d_down_right_fill" color="green" /></template>
         <template #text>{{ t("detail.nestingNote") }}</template>
       </F7ListItem>
     </F7List>
@@ -73,10 +73,14 @@
 </template>
 
 <script setup lang="ts">
+import { useHiddenTabbar } from "@/shared/composables/useTabbarVisibility";
 import type { Router } from "framework7/types";
 import { features, findFeature } from "@/modules/home/composables/useHomeFeatures";
 
 const { t } = useI18n();
+
+// A pushed page owns the whole screen; the tab bar belongs to the tab roots.
+useHiddenTabbar();
 
 // Framework7 passes the route and this view's router to a route component as props.
 const props = defineProps<{ f7route: Router.Route; f7router: Router.Router }>();

@@ -1,5 +1,7 @@
-// Shell-level state: the tab bar is rendered by the shell, but what hides it (a keyboard, a full
-// screen page) happens elsewhere in the tree.
+import type { ComputedRef } from "vue";
+
+// Shell-level state: the tab bar is rendered by the shell, but what hides it - a keyboard, a pushed
+// page - happens elsewhere in the tree.
 const keyboardOpen = ref(false);
 const hiddenRequests = ref(0);
 
@@ -26,4 +28,23 @@ export function useTabbarVisibility(): TabbarVisibility {
       };
     },
   };
+}
+
+/**
+ * Drop this into any pushed page and the tab bar gets out of the way for as long as that page is
+ * mounted. The bar belongs to the tab roots: on a detail or a search screen it is navigation to
+ * somewhere you are not, and it steals a row from content.
+ */
+export function useHiddenTabbar(): void {
+  const { hideTabbar } = useTabbarVisibility();
+  let release: (() => void) | null = null;
+
+  onMounted(() => {
+    release = hideTabbar();
+  });
+
+  onUnmounted(() => {
+    release?.();
+    release = null;
+  });
 }

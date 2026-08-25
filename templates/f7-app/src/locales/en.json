@@ -67,7 +67,9 @@
     "statusConfirmed": "Confirmed",
     "statusDelivered": "Delivered",
     "deleteConfirm": "Delete this order and its lines?",
-    "tapHint": "Tap an order to open it."
+    "tapHint": "Tap an order to open it.",
+    "allOrders": "Recent orders",
+    "matches": "{count} matches"
   },
   "metrics": {
     "totalQueries": "Queries run",

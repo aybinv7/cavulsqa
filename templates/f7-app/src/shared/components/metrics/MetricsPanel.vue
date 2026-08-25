@@ -30,7 +30,7 @@
         :title="table"
         :after="String(count)"
       >
-        <template #media><F7Icon f7="arrow2_circlepath" color="teal" /></template>
+        <template #media><F7Icon f7="arrow_2_circlepath" color="teal" /></template>
       </F7ListItem>
     </F7List>
     <F7Block v-else strong inset class="rounded-2xl!">
