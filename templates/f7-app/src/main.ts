@@ -3,6 +3,7 @@ import Framework7Vue from "framework7-vue";
 
 import "framework7/css/bundle";
 import "framework7-icons";
+import "./assets/css/icons.css";
 import "./assets/css/app.css";
 
 import App from "./App.vue";

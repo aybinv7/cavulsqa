@@ -9,14 +9,8 @@
     "intro": "is a starter for offline-first mobile apps: Vue 3, Framework7 and Capacitor over a local SQLite database that screens read reactively.",
     "included": "Core features",
     "next": "See it work",
-    "openDemo": "Reactive SQLite demo",
     "welcome": "Welcome",
-    "demos": "Interactive demos",
-    "openDemoSubtitle": "Writes, the change bus, and pipelining",
-    "openMetrics": "Query metrics",
-    "openMetricsSubtitle": "Durations, cache hits, listeners",
-    "tryIt": "Try it",
-    "startBuilding": "Start building by adding a module in src/modules/."
+    "tapAny": "Tap any feature — each opens inside this tab with its own transition and navbar style."
   },
   "demo": {
     "title": "Reactive",
@@ -76,7 +70,6 @@
     "testToast": "Show a toast",
     "testDialog": "Show a dialog",
     "testSheet": "Open a sheet",
-    "openMetrics": "Open query metrics",
     "about": "About",
     "appName": "Name",
     "version": "Version",
@@ -134,5 +127,21 @@
       "subtitle": "Auto-imports and resolvers",
       "text": "Composition API, i18n, Framework7 components and icons resolve without import lines."
     }
+  },
+  "detail": {
+    "what": "What",
+    "how": "How",
+    "howText": "This page is a child route of the Home tab's own view. The tab bar never moves, the back gesture unwinds only this tab, and the other tabs keep whatever screen they were on.",
+    "thisScreen": "What this screen demonstrates",
+    "transition": "Transition",
+    "transitionNote": "Passed per navigation, so two rows can open the same route differently.",
+    "navbar": "Navbar",
+    "navbarNote": "large collapses on scroll, transparent fades in over content, hide-on-scroll gets out of the way, subnavbar stays while the title collapses.",
+    "nesting": "Nested view",
+    "nestingAfter": "Home tab",
+    "nestingNote": "Pushed onto this tab's history, not the app's, which is why the tab bar stays put.",
+    "scrollMe": "Scroll to see the navbar react",
+    "row": "Row",
+    "next": "Open the next one"
   }
 }

@@ -9,14 +9,8 @@
     "intro": "est un modèle pour applications mobiles hors-ligne : Vue 3, Framework7 et Capacitor sur une base SQLite locale lue de façon réactive.",
     "included": "Fonctionnalités",
     "next": "Voir le fonctionnement",
-    "openDemo": "Démo SQLite réactive",
     "welcome": "Bienvenue",
-    "demos": "Démos interactives",
-    "openDemoSubtitle": "Écritures, bus de changements, parallélisme",
-    "openMetrics": "Métriques de requêtes",
-    "openMetricsSubtitle": "Durées, cache, écouteurs",
-    "tryIt": "Essayer",
-    "startBuilding": "Commencez en ajoutant un module dans src/modules/."
+    "tapAny": "Touchez une fonctionnalité — chacune s'ouvre dans cet onglet avec sa transition et son style de navbar."
   },
   "demo": {
     "title": "Réactif",
@@ -76,7 +70,6 @@
     "testToast": "Afficher un toast",
     "testDialog": "Afficher un dialogue",
     "testSheet": "Ouvrir une feuille",
-    "openMetrics": "Ouvrir les métriques",
     "about": "À propos",
     "appName": "Nom",
     "version": "Version",
@@ -134,5 +127,21 @@
       "subtitle": "Auto-imports et resolvers",
       "text": "API de composition, i18n, composants et icônes sans ligne d'import."
     }
+  },
+  "detail": {
+    "what": "Quoi",
+    "how": "Comment",
+    "howText": "Cette page est une route enfant de la vue de l'onglet Accueil. La barre d'onglets ne bouge pas, le retour ne déroule que cet onglet, et les autres gardent leur écran.",
+    "thisScreen": "Ce que cet écran démontre",
+    "transition": "Transition",
+    "transitionNote": "Passée à chaque navigation : deux lignes peuvent ouvrir la même route différemment.",
+    "navbar": "Navbar",
+    "navbarNote": "large se replie au défilement, transparent apparaît sur le contenu, hide-on-scroll s'escamote, subnavbar reste en place.",
+    "nesting": "Vue imbriquée",
+    "nestingAfter": "Onglet Accueil",
+    "nestingNote": "Empilée dans l'historique de cet onglet, pas celui de l'application.",
+    "scrollMe": "Défilez pour voir la navbar réagir",
+    "row": "Ligne",
+    "next": "Ouvrir la suivante"
   }
 }

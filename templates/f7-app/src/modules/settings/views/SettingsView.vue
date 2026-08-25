@@ -49,9 +49,6 @@
       <F7ListItem :title="t('settings.testSheet')" link="#" @click="testSheet">
         <template #media><F7Icon f7="rectangle_stack_fill" color="teal" /></template>
       </F7ListItem>
-      <F7ListItem :title="t('settings.openMetrics')" panel-open="right" link="#">
-        <template #media><F7Icon f7="chart_bar_alt_fill" color="blue" /></template>
-      </F7ListItem>
     </F7List>
 
     <F7BlockTitle>{{ t("settings.about") }}</F7BlockTitle>

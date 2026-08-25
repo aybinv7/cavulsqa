@@ -145,6 +145,8 @@ export function Framework7VueResolver(): ComponentResolver {
 export function getFramework7AutoImports() {
   return {
     "framework7/lite": ["utils", "getDevice", "createStore", "Dom7", "request"],
-    "framework7-vue": ["f7ready", "f7", "theme", "f7route", "f7router"],
+    // Only what framework7-vue actually exports. `f7route` and `f7router` are passed to a
+    // route component as props - see FeatureDetailView - and importing them fails at runtime.
+    "framework7-vue": ["f7ready", "f7", "theme"],
   };
 }
