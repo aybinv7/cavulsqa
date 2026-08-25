@@ -41,8 +41,15 @@ no `ref`, no lifecycle, no Framework7. `shared` is for things two modules genuin
 
 ## Hard rules
 
-Detailed rules live in `.claude/rules/`. Read the one that matches what you are touching. The short
-version, each earned by a real bug:
+Detailed rules live in `.claude/rules/`, and `.claude/skills/` holds the workflows:
+
+| Skill                 | Reach for it when                                                      |
+| --------------------- | ---------------------------------------------------------------------- |
+| `f7-design`           | Building or changing any screen, component or layout                   |
+| `reactive-data`       | Any query, mutation, repository, migration, or a screen not refreshing |
+| `module-architecture` | Adding a feature, or deciding where a file belongs                     |
+
+The short version of the rules, each earned by a real bug:
 
 - **Never import an `f7-*` component.** `Framework7VueResolver` imports it where it is used. A
   manual import is a merge conflict with the resolver and a sign you did not read
