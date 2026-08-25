@@ -17,3 +17,7 @@ declare module "*.vue" {
 
 /** Icon font, imported for its side effect only. */
 declare module "framework7-icons";
+
+/** Injected by vite `define`; see vite.config.ts. */
+declare const __APP_NAME__: string;
+declare const __APP_VERSION__: string;

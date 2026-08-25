@@ -1,6 +1,6 @@
 <template>
-  <f7-block-title>{{ t("demo.pipelining") }}</f7-block-title>
-  <f7-block strong inset class="rounded-2xl!">
+  <F7BlockTitle>{{ t("demo.pipelining") }}</F7BlockTitle>
+  <F7Block strong inset class="rounded-2xl!">
     <p class="mt-0 text-sm opacity-70">
       {{
         isNative
@@ -9,9 +9,9 @@
       }}
     </p>
 
-    <f7-button fill :disabled="measuring" @click="$emit('measure')">
+    <F7Button fill :disabled="measuring" @click="$emit('measure')">
       {{ measuring ? t("demo.measuring") : t("demo.measure") }}
-    </f7-button>
+    </F7Button>
 
     <div v-if="result" class="mt-3">
       <div class="grid grid-cols-3 gap-2 text-center">
@@ -33,7 +33,7 @@
         {{ isNative ? t("demo.ratioNative") : t("demo.ratioWeb", { platform }) }}
       </p>
     </div>
-  </f7-block>
+  </F7Block>
 </template>
 
 <script setup lang="ts">

@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { fileURLToPath, URL } from "node:url";
 import VueI18nPlugin from "@intlify/unplugin-vue-i18n/vite";
 import tailwindcss from "@tailwindcss/vite";
@@ -14,7 +15,18 @@ import {
 
 const SRC = fileURLToPath(new URL("./src", import.meta.url));
 
+// Read once so Settings can show the real name and version without importing the manifest
+// into the bundle.
+const pkg = JSON.parse(
+  readFileSync(fileURLToPath(new URL("./package.json", import.meta.url)), "utf-8"),
+) as { name: string; version: string };
+
 export default defineConfig({
+  define: {
+    __APP_NAME__: JSON.stringify("App"),
+    __APP_VERSION__: JSON.stringify(pkg.version),
+  },
+
   plugins: [
     vue({
       template: {

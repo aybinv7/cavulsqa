@@ -6,10 +6,17 @@
   },
   "home": {
     "title": "Aperçu",
-    "intro": "Une application Vue 3 + Framework7 + Capacitor avec une base SQLite locale que les écrans lisent de façon réactive. Chaque élément ci-dessous fonctionne déjà.",
-    "included": "Ce qui est inclus",
+    "intro": "est un modèle pour applications mobiles hors-ligne : Vue 3, Framework7 et Capacitor sur une base SQLite locale lue de façon réactive.",
+    "included": "Fonctionnalités",
     "next": "Voir le fonctionnement",
-    "openDemo": "Ouvrir la démo réactive"
+    "openDemo": "Démo SQLite réactive",
+    "welcome": "Bienvenue",
+    "demos": "Démos interactives",
+    "openDemoSubtitle": "Écritures, bus de changements, parallélisme",
+    "openMetrics": "Métriques de requêtes",
+    "openMetricsSubtitle": "Durées, cache, écouteurs",
+    "tryIt": "Essayer",
+    "startBuilding": "Commencez en ajoutant un module dans src/modules/."
   },
   "demo": {
     "title": "Réactif",
@@ -43,7 +50,15 @@
     "avgQueryTime": "Durée moyenne",
     "cacheHitRate": "Taux de cache",
     "activeListeners": "Écouteurs actifs",
-    "refetches": "Rechargements : {table}"
+    "refetches": "Rechargements : {table}",
+    "title": "Métriques",
+    "summary": "Résumé",
+    "refetchesTitle": "Rechargements par table",
+    "noRefetches": "Aucun rechargement.",
+    "slowest": "Requêtes les plus lentes",
+    "noQueries": "Aucune requête enregistrée.",
+    "calls": "{count} appels",
+    "reset": "Réinitialiser"
   },
   "settings": {
     "title": "Réglages",
@@ -51,10 +66,73 @@
     "queryMetrics": "Métriques de requêtes",
     "slowest": "Requêtes les plus lentes",
     "noQueries": "Aucune requête enregistrée.",
-    "resetMetrics": "Réinitialiser"
+    "resetMetrics": "Réinitialiser",
+    "appearance": "Apparence",
+    "theme": "Thème",
+    "themeAuto": "Auto (appareil)",
+    "darkMode": "Mode sombre",
+    "language": "Langue",
+    "tryIt": "À essayer",
+    "testToast": "Afficher un toast",
+    "testDialog": "Afficher un dialogue",
+    "testSheet": "Ouvrir une feuille",
+    "openMetrics": "Ouvrir les métriques",
+    "about": "À propos",
+    "appName": "Nom",
+    "version": "Version",
+    "platform": "Plateforme",
+    "aboutUs": "Qui sommes-nous",
+    "toastText": "Ceci est un toast Framework7.",
+    "dialogTitle": "Dialogue",
+    "dialogText": "Dialogues, feuilles et toasts viennent de Framework7 - sans dépendance supplémentaire.",
+    "sheetText": "Une feuille modale. Le bouton retour Android la ferme avant de naviguer.",
+    "aboutText": "Construit sur {'@'}cavulsqa/mobile-db, reactive-db et reactive-vue. Remplacez ce texte par le vôtre.",
+    "footer": "Modifiez ces écrans dans src/modules/settings/."
   },
   "errors": {
     "notFoundTitle": "Introuvable",
     "notFound": "Cet écran n'existe pas."
+  },
+  "features": {
+    "tabs": {
+      "title": "Shell à onglets",
+      "subtitle": "Onglets déclarés en données",
+      "text": "Chaque onglet a sa propre vue et son historique, chargé à la demande."
+    },
+    "f7": {
+      "title": "Framework7",
+      "subtitle": "iOS et Material natifs",
+      "text": "Les deux thèmes sont fournis ; les réglages en fixent un ou suivent l'appareil."
+    },
+    "sqlite": {
+      "title": "SQLite",
+      "subtitle": "Kysely, hors-ligne d'abord",
+      "text": "Les écritures se relaient sur la connexion native, les lectures restent parallèles."
+    },
+    "reactive": {
+      "title": "Requêtes réactives",
+      "subtitle": "Sans invalidation manuelle",
+      "text": "Une écriture annonce ses tables et chaque requête concernée se relance."
+    },
+    "back": {
+      "title": "Bouton retour Android",
+      "subtitle": "Ferme la couche du dessus",
+      "text": "Actions, dialogue, feuille, popover, popup, panneau - puis l'historique."
+    },
+    "keyboard": {
+      "title": "Gestion du clavier",
+      "subtitle": "Le champ reste visible",
+      "text": "Défilement à chaque phase de la transition, barre d'onglets escamotée."
+    },
+    "metrics": {
+      "title": "Métriques",
+      "subtitle": "Intégrées",
+      "text": "Durées, cache et rechargements par table, dans le panneau de droite."
+    },
+    "dx": {
+      "title": "Zéro boilerplate",
+      "subtitle": "Auto-imports et resolvers",
+      "text": "API de composition, i18n, composants et icônes sans ligne d'import."
+    }
   }
 }

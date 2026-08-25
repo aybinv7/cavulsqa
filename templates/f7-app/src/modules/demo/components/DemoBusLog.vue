@@ -1,6 +1,6 @@
 <template>
-  <f7-block-title>{{ t("demo.bus") }}</f7-block-title>
-  <f7-block strong inset class="rounded-2xl!">
+  <F7BlockTitle>{{ t("demo.bus") }}</F7BlockTitle>
+  <F7Block strong inset class="rounded-2xl!">
     <p class="mt-0 text-sm opacity-70">{{ t("demo.busHint") }}</p>
 
     <ul v-if="entries.length" class="m-0 list-none p-0 font-mono text-xs">
@@ -10,7 +10,7 @@
       </li>
     </ul>
     <p v-else class="text-sm opacity-60">{{ t("demo.busEmpty") }}</p>
-  </f7-block>
+  </F7Block>
 </template>
 
 <script setup lang="ts">

@@ -1,15 +1,17 @@
 import { Capacitor } from "@capacitor/core";
 import type { Framework7Parameters } from "framework7/types";
 import routes from "@/router";
+import type { AppTheme } from "@/shared/composables/theme/useAppTheme";
 
-export function framework7Parameters(): Framework7Parameters {
+export function framework7Parameters(theme: AppTheme, darkMode: boolean): Framework7Parameters {
   return {
     name: "App",
-    theme: "auto",
-    darkMode: "auto",
+    // "auto" lets Framework7 pick iOS or Material from the device; Settings can pin either.
+    theme,
+    darkMode,
     routes,
 
-    // Long-press is a real gesture on a touch device; without preventClicks it also fires a tap.
+    // Long-press is a real gesture on touch; without preventClicks it also fires a tap.
     touch: {
       tapHold: true,
       tapHoldDelay: 500,

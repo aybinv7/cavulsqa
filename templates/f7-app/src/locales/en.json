@@ -6,10 +6,17 @@
   },
   "home": {
     "title": "Overview",
-    "intro": "A Vue 3 + Framework7 + Capacitor app with a local SQLite database that screens read reactively. Every item below is wired and working, not scaffolding to fill in.",
-    "included": "What is included",
+    "intro": "is a starter for offline-first mobile apps: Vue 3, Framework7 and Capacitor over a local SQLite database that screens read reactively.",
+    "included": "Core features",
     "next": "See it work",
-    "openDemo": "Open the reactive demo"
+    "openDemo": "Reactive SQLite demo",
+    "welcome": "Welcome",
+    "demos": "Interactive demos",
+    "openDemoSubtitle": "Writes, the change bus, and pipelining",
+    "openMetrics": "Query metrics",
+    "openMetricsSubtitle": "Durations, cache hits, listeners",
+    "tryIt": "Try it",
+    "startBuilding": "Start building by adding a module in src/modules/."
   },
   "demo": {
     "title": "Reactive",
@@ -43,7 +50,15 @@
     "avgQueryTime": "Average duration",
     "cacheHitRate": "Cache hit rate",
     "activeListeners": "Active listeners",
-    "refetches": "Refetches: {table}"
+    "refetches": "Refetches: {table}",
+    "title": "Metrics",
+    "summary": "Summary",
+    "refetchesTitle": "Refetches per table",
+    "noRefetches": "No refetches yet.",
+    "slowest": "Slowest queries",
+    "noQueries": "No queries recorded yet.",
+    "calls": "{count} calls",
+    "reset": "Reset metrics"
   },
   "settings": {
     "title": "Settings",
@@ -51,10 +66,73 @@
     "queryMetrics": "Query metrics",
     "slowest": "Slowest queries",
     "noQueries": "No queries recorded yet.",
-    "resetMetrics": "Reset metrics"
+    "resetMetrics": "Reset metrics",
+    "appearance": "Appearance",
+    "theme": "Theme",
+    "themeAuto": "Auto (device)",
+    "darkMode": "Dark mode",
+    "language": "Language",
+    "tryIt": "Try it out",
+    "testToast": "Show a toast",
+    "testDialog": "Show a dialog",
+    "testSheet": "Open a sheet",
+    "openMetrics": "Open query metrics",
+    "about": "About",
+    "appName": "Name",
+    "version": "Version",
+    "platform": "Platform",
+    "aboutUs": "About us",
+    "toastText": "This is a Framework7 toast.",
+    "dialogTitle": "Dialog",
+    "dialogText": "Dialogs, sheets and toasts all come from Framework7 - no extra dependency.",
+    "sheetText": "A sheet modal. The Android back button closes this before it navigates.",
+    "aboutText": "Built on {'@'}cavulsqa/mobile-db, reactive-db and reactive-vue. Replace this text with your own.",
+    "footer": "Change these screens in src/modules/settings/."
   },
   "errors": {
     "notFoundTitle": "Not found",
     "notFound": "That screen does not exist."
+  },
+  "features": {
+    "tabs": {
+      "title": "Tabbed shell",
+      "subtitle": "Tabs as data",
+      "text": "Each tab is its own view with its own history, lazily loaded. Add a section by adding one entry."
+    },
+    "f7": {
+      "title": "Framework7",
+      "subtitle": "Native iOS and Material",
+      "text": "Both themes ship; Settings pins either one or follows the device."
+    },
+    "sqlite": {
+      "title": "SQLite",
+      "subtitle": "Kysely, offline-first",
+      "text": "Writes take turns on the one native connection while reads run in parallel."
+    },
+    "reactive": {
+      "title": "Reactive queries",
+      "subtitle": "No manual invalidation",
+      "text": "A write announces its tables and every query watching one refetches, debounced."
+    },
+    "back": {
+      "title": "Android back button",
+      "subtitle": "Closes the top layer first",
+      "text": "Actions, dialog, sheet, popover, popup, panel - then history, then minimise."
+    },
+    "keyboard": {
+      "title": "Keyboard handling",
+      "subtitle": "Field stays visible",
+      "text": "Scroll-into-view on every phase of the transition, tab bar out of the way."
+    },
+    "metrics": {
+      "title": "Query metrics",
+      "subtitle": "Built in",
+      "text": "Durations, cache hits and refetches per table, in the right-hand panel."
+    },
+    "dx": {
+      "title": "Zero-boilerplate DX",
+      "subtitle": "Auto-imports and resolvers",
+      "text": "Composition API, i18n, Framework7 components and icons resolve without import lines."
+    }
   }
 }

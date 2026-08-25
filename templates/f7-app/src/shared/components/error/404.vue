@@ -1,10 +1,10 @@
 <template>
-  <f7-page>
-    <f7-navbar :title="t('errors.notFoundTitle')" />
-    <f7-block strong class="text-center">
+  <F7Page>
+    <F7Navbar :title="t('errors.notFoundTitle')" />
+    <F7Block strong class="text-center">
       <p class="m-0">{{ t("errors.notFound") }}</p>
-    </f7-block>
-  </f7-page>
+    </F7Block>
+  </F7Page>
 </template>
 
 <script setup lang="ts">
