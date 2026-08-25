@@ -30,5 +30,12 @@ export function framework7Parameters(theme: AppTheme, darkMode: boolean): Framew
     },
 
     panel: { swipe: true },
+
+    /**
+     * Framework7 derives the whole theme palette from this - tints, shades, ripples and the dark
+     * variants - so it is set here rather than by overriding `--f7-theme-color` in CSS, which would
+     * change the accent but leave everything derived from it still blue.
+     */
+    colors: { primary: "#c96442" },
   };
 }
