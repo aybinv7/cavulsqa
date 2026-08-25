@@ -55,7 +55,7 @@
       Buttons open upward: the app's tab bar sits at the bottom of the shell, so a downward or
       morphed menu disappears behind it.
     -->
-    <F7Fab slot="fixed" position="right-bottom" class="demo-fab">
+    <F7Fab slot="fixed" position="right-bottom">
       <F7Icon f7="plus" />
       <F7Icon f7="xmark" />
       <F7FabButtons position="top">
@@ -124,12 +124,3 @@ async function onSaveOrder(payload: Parameters<typeof save>[0]): Promise<void> {
   createOpen.value = false;
 }
 </script>
-
-<style scoped>
-/*
- * The shell's tab bar is outside this page, so Framework7 does not know to lift the FAB above it.
- */
-.demo-fab {
-  bottom: calc(var(--f7-tabbar-height, 56px) + 16px);
-}
-</style>

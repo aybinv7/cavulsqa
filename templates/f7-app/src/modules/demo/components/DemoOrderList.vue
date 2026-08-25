@@ -1,5 +1,9 @@
 <template>
-  <F7List strong inset dividers class="rounded-2xl!">
+  <!--
+    `swiper-no-swiping` keeps the swipeable tabs out of this list: without it a horizontal drag
+    revealed the swipeout actions and moved the tab pane at the same time.
+  -->
+  <F7List strong inset dividers class="rounded-2xl! swiper-no-swiping">
     <!--
       Swipe is the fast path and the tap opens the full action sheet, so a status change costs one
       gesture instead of a trip through a menu.
