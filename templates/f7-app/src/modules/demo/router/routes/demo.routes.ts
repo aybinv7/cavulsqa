@@ -11,6 +11,15 @@ const demoRoutes: Router.RouteParameters[] = [
       });
     },
   },
+  {
+    name: "demo-search",
+    path: "/demo/search/",
+    async({ resolve }) {
+      void import("@/modules/demo/views/OrderSearchView.vue").then((view) => {
+        resolve({ component: view.default });
+      });
+    },
+  },
 ];
 
 export default demoRoutes;

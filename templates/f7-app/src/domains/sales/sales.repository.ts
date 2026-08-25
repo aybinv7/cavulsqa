@@ -6,7 +6,12 @@ export interface DashboardStats {
   customers: number;
   products: number;
   orders: number;
+  draft: number;
+  confirmed: number;
+  delivered: number;
   revenueCents: number;
+  /** Only confirmed and delivered orders count as money you will actually see. */
+  committedCents: number;
 }
 
 export interface OrderRow {
@@ -50,13 +55,40 @@ export function loadDashboardStats(db: Kysely<Database>): Promise<DashboardStats
         .selectFrom("order_line")
         .select(sql<number>`coalesce(sum(quantity * unit_price_cents), 0)`.as("n"))
         .as("revenue"),
+      eb
+        .selectFrom("sales_order")
+        .select((e) => e.fn.countAll<number>().as("n"))
+        .where("status", "=", "draft")
+        .as("draft"),
+      eb
+        .selectFrom("sales_order")
+        .select((e) => e.fn.countAll<number>().as("n"))
+        .where("status", "=", "confirmed")
+        .as("confirmed"),
+      eb
+        .selectFrom("sales_order")
+        .select((e) => e.fn.countAll<number>().as("n"))
+        .where("status", "=", "delivered")
+        .as("delivered"),
+      eb
+        .selectFrom("order_line")
+        .innerJoin("sales_order", "sales_order.id", "order_line.order_id")
+        .select(
+          sql<number>`coalesce(sum(order_line.quantity * order_line.unit_price_cents), 0)`.as("n"),
+        )
+        .where("sales_order.status", "in", ["confirmed", "delivered"])
+        .as("committed"),
     ])
     .executeTakeFirstOrThrow()
     .then((row) => ({
       customers: Number(row.customers ?? 0),
       products: Number(row.products ?? 0),
       orders: Number(row.orders ?? 0),
+      draft: Number(row.draft ?? 0),
+      confirmed: Number(row.confirmed ?? 0),
+      delivered: Number(row.delivered ?? 0),
       revenueCents: Number(row.revenue ?? 0),
+      committedCents: Number(row.committed ?? 0),
     }));
 }
 
@@ -199,4 +231,78 @@ export async function clearAll(db: Kysely<Database>): Promise<void> {
   await db.deleteFrom("customer_tag").execute();
   await db.deleteFrom("product").execute();
   await db.deleteFrom("tag").execute();
+}
+
+export interface ProductRow {
+  id: number;
+  name: string;
+  price_cents: number;
+}
+
+export function listProducts(db: Kysely<Database>): Promise<ProductRow[]> {
+  return db.selectFrom("product").select(["id", "name", "price_cents"]).orderBy("name").execute();
+}
+
+/**
+ * Sequential rather than random, because a reference a person reads should count up. Derived from
+ * the highest existing number so it survives deletions without reusing a reference.
+ */
+export async function nextOrderReference(db: Kysely<Database>): Promise<string> {
+  const row = await db
+    .selectFrom("sales_order")
+    .select(sql<number>`coalesce(max(cast(substr(reference, 4) as integer)), 0)`.as("highest"))
+    .executeTakeFirst();
+
+  return `SO-${String(Number(row?.highest ?? 0) + 1).padStart(4, "0")}`;
+}
+
+export interface DraftLine {
+  productId: number;
+  quantity: number;
+  unitPriceCents: number;
+}
+
+/** The whole order in one transaction: a half-written order is worse than no order. */
+export async function saveOrder(
+  db: Kysely<Database>,
+  input: { customerId: number; reference: string; lines: DraftLine[] },
+): Promise<void> {
+  await db.transaction().execute(async (trx) => {
+    const order = await trx
+      .insertInto("sales_order")
+      .values({
+        created_at: nowISO(),
+        customer_id: input.customerId,
+        reference: input.reference,
+        status: "draft",
+      })
+      .returning("id")
+      .executeTakeFirstOrThrow();
+
+    for (const line of input.lines) {
+      await trx
+        .insertInto("order_line")
+        .values({
+          order_id: order.id,
+          product_id: line.productId,
+          quantity: line.quantity,
+          unit_price_cents: line.unitPriceCents,
+        })
+        .execute();
+    }
+  });
+}
+
+export async function deleteOrder(db: Kysely<Database>, orderId: number): Promise<void> {
+  // The cascade only fires with foreign keys on, which the plugin does not guarantee per connection.
+  await db.deleteFrom("order_line").where("order_id", "=", orderId).execute();
+  await db.deleteFrom("sales_order").where("id", "=", orderId).execute();
+}
+
+export async function setOrderStatus(
+  db: Kysely<Database>,
+  orderId: number,
+  status: "draft" | "confirmed" | "delivered",
+): Promise<void> {
+  await db.updateTable("sales_order").set({ status }).where("id", "=", orderId).execute();
 }

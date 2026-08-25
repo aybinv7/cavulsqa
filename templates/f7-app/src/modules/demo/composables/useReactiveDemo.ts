@@ -3,12 +3,14 @@ import type { TableChangeEvent } from "@cavulsqa/reactive-db";
 import {
   advanceOrderStatus,
   clearAll,
-  createOrder,
-  listCustomers,
+  deleteOrder,
   loadDashboardStats,
+  saveOrder,
   searchOrders,
   seedSampleData,
+  setOrderStatus,
   type DashboardStats,
+  type DraftLine,
   type OrderRow,
 } from "@/domains/sales/sales.repository";
 import { changeBus, getDatabase, rdb } from "@/shared/database/database";
@@ -28,7 +30,16 @@ export interface PipelineResult {
 
 const EVENT_LOG_LIMIT = 20;
 const READS_PER_RUN = 5;
-const EMPTY_STATS: DashboardStats = { customers: 0, products: 0, orders: 0, revenueCents: 0 };
+const EMPTY_STATS: DashboardStats = {
+  customers: 0,
+  products: 0,
+  orders: 0,
+  draft: 0,
+  confirmed: 0,
+  delivered: 0,
+  revenueCents: 0,
+  committedCents: 0,
+};
 
 /**
  * Everything the Reactive screen shows, so the view stays presentational.
@@ -38,7 +49,6 @@ const EMPTY_STATS: DashboardStats = { customers: 0, products: 0, orders: 0, reve
  * revenue tile, the order count and the list at the same time.
  */
 export function useReactiveDemo() {
-  const search = ref("");
   const busy = ref(false);
   const busLog = ref<BusEntry[]>([]);
   const pipeline = ref<PipelineResult | null>(null);
@@ -51,15 +61,10 @@ export function useReactiveDemo() {
     debounce: 250,
   });
 
-  const ordersQuery = useReactiveQuery(() => searchOrders(getDatabase().db, search.value), {
+  const ordersQuery = useReactiveQuery(() => searchOrders(getDatabase().db, ""), {
     tables: ["sales_order", "order_line", "customer"],
     queryKey: uniqueQueryKey("demo:orders"),
     debounce: 250,
-  });
-
-  // Typing re-runs the query rather than filtering in memory, so the search is real SQL.
-  watch(search, () => {
-    void ordersQuery.refetch();
   });
 
   const stopWatching = changeBus.on(["*"], (event: TableChangeEvent) => {
@@ -84,22 +89,15 @@ export function useReactiveDemo() {
 
   const seed = () => withBusy(() => seedSampleData(rdb));
 
-  const addOrder = () =>
-    withBusy(async () => {
-      const customers = await listCustomers(getDatabase().db);
-      const picked = customers[Math.floor(Math.random() * customers.length)];
-      if (!picked) return;
-
-      const products = await getDatabase()
-        .db.selectFrom("product")
-        .select(["id", "price_cents"])
-        .limit(3)
-        .execute();
-
-      await createOrder(rdb, picked.id, products);
-    });
-
   const advance = (orderId: number) => withBusy(() => advanceOrderStatus(rdb, orderId));
+
+  const setStatus = (orderId: number, status: "draft" | "confirmed" | "delivered") =>
+    withBusy(() => setOrderStatus(rdb, orderId, status));
+
+  const remove = (orderId: number) => withBusy(() => deleteOrder(rdb, orderId));
+
+  const save = (input: { customerId: number; reference: string; lines: DraftLine[] }) =>
+    withBusy(() => saveOrder(rdb, input));
   const clear = () => withBusy(() => clearAll(rdb));
 
   /**
@@ -136,7 +134,6 @@ export function useReactiveDemo() {
   }
 
   return {
-    search,
     stats,
     orders,
     loading: ordersQuery.loading,
@@ -148,8 +145,10 @@ export function useReactiveDemo() {
     isNative: Capacitor.isNativePlatform(),
     platform: Capacitor.getPlatform(),
     seed,
-    addOrder,
     advance,
+    setStatus,
+    remove,
+    save,
     clear,
     measurePipelining,
   };

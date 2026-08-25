@@ -1,14 +1,18 @@
 <template>
-  <div class="grid grid-cols-2 gap-3 px-4">
-    <F7Card v-for="tile in tiles" :key="tile.labelKey" class="m-0! rounded-2xl!" outline>
-      <F7CardContent class="py-3!">
-        <div class="flex items-center gap-2">
-          <F7Icon :f7="tile.icon" :color="tile.color" size="20" />
-          <span class="text-xs uppercase tracking-wide opacity-60">{{ t(tile.labelKey) }}</span>
-        </div>
-        <div class="mt-1 text-2xl font-semibold tabular-nums">{{ tile.value }}</div>
-      </F7CardContent>
-    </F7Card>
+  <div class="grid grid-cols-2 gap-2 px-3">
+    <div
+      v-for="tile in tiles"
+      :key="tile.labelKey"
+      class="rounded-2xl px-3 py-2.5"
+      :style="{ background: 'var(--f7-list-bg-color, rgb(128 128 128 / 10%))' }"
+    >
+      <div class="flex items-center gap-1.5">
+        <F7Icon :f7="tile.icon" :color="tile.color" size="16" />
+        <span class="text-[11px] uppercase tracking-wide opacity-55">{{ t(tile.labelKey) }}</span>
+      </div>
+      <div class="mt-0.5 text-xl font-semibold tabular-nums leading-tight">{{ tile.value }}</div>
+      <div v-if="tile.hint" class="text-[11px] opacity-45">{{ tile.hint }}</div>
+    </div>
   </div>
 </template>
 
@@ -18,37 +22,42 @@ import type { DashboardStats } from "@/domains/sales/sales.repository";
 const props = defineProps<{ stats: DashboardStats }>();
 const { t } = useI18n();
 
-/** Cents formatted once here rather than in four places in the template. */
-const money = computed(() =>
-  new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(
-    props.stats.revenueCents / 100,
-  ),
-);
+const formatter = new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 });
+const money = (cents: number) => formatter.format(cents / 100);
 
+/**
+ * Status counts rather than plain totals, because they are what actually moves when you use the
+ * screen: confirm one order and three of these four change at once, without anything telling them
+ * to. That is the whole point being demonstrated.
+ */
 const tiles = computed(() => [
   {
-    labelKey: "demo.tiles.customers",
-    icon: "person_2_fill",
-    color: "blue",
-    value: String(props.stats.customers),
+    labelKey: "demo.tiles.draft",
+    icon: "doc_plaintext",
+    color: "gray",
+    value: String(props.stats.draft),
+    hint: t("demo.tiles.ofOrders", { count: props.stats.orders }),
   },
   {
-    labelKey: "demo.tiles.products",
-    icon: "cube_box_fill",
-    color: "purple",
-    value: String(props.stats.products),
+    labelKey: "demo.tiles.confirmed",
+    icon: "shippingbox_fill",
+    color: "orange",
+    value: String(props.stats.confirmed),
+    hint: "",
   },
   {
-    labelKey: "demo.tiles.orders",
-    icon: "doc_text_fill",
-    color: "teal",
-    value: String(props.stats.orders),
-  },
-  {
-    labelKey: "demo.tiles.revenue",
-    icon: "money_dollar_circle_fill",
+    labelKey: "demo.tiles.delivered",
+    icon: "checkmark_seal_fill",
     color: "green",
-    value: money.value,
+    value: String(props.stats.delivered),
+    hint: "",
+  },
+  {
+    labelKey: "demo.tiles.committed",
+    icon: "money_dollar_circle_fill",
+    color: "teal",
+    value: money(props.stats.committedCents),
+    hint: t("demo.tiles.ofTotal", { total: money(props.stats.revenueCents) }),
   },
 ]);
 </script>
