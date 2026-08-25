@@ -1,14 +1,23 @@
 import { Capacitor } from "@capacitor/core";
 import type { TableChangeEvent } from "@cavulsqa/reactive-db";
+import {
+  advanceOrderStatus,
+  clearAll,
+  createOrder,
+  listCustomers,
+  loadDashboardStats,
+  searchOrders,
+  seedSampleData,
+  type DashboardStats,
+  type OrderRow,
+} from "@/domains/sales/sales.repository";
 import { changeBus, getDatabase, rdb } from "@/shared/database/database";
-import { uniqueQueryKey, useQueryMetrics, useReactiveQuery } from "@/shared/database/queries";
-import { createNote, deleteAllNotes, listNotes, type Note } from "@/domains/note/note.repository";
+import { uniqueQueryKey, useReactiveQuery } from "@/shared/database/queries";
 
 export interface BusEntry {
   at: number;
   table: string;
   type: string;
-  rows?: number;
 }
 
 export interface PipelineResult {
@@ -17,91 +26,95 @@ export interface PipelineResult {
   ratio: number;
 }
 
-const EVENT_LOG_LIMIT = 12;
+const EVENT_LOG_LIMIT = 20;
 const READS_PER_RUN = 5;
+const EMPTY_STATS: DashboardStats = { customers: 0, products: 0, orders: 0, revenueCents: 0 };
 
 /**
- * Everything the demo screen shows, in one place, so the view stays presentational.
+ * Everything the Reactive screen shows, so the view stays presentational.
  *
- * The point being demonstrated: nothing here tells the list to refresh. `createNote` writes through
- * `rdb`, which announces the table, and the query below is watching that table.
+ * Nothing here tells a query to refresh. Writes go through `rdb`, which announces the tables they
+ * touched, and both queries below watch those tables - which is why creating one order moves the
+ * revenue tile, the order count and the list at the same time.
  */
 export function useReactiveDemo() {
-  const notes: Ref<Note[]> = ref([]);
+  const search = ref("");
+  const busy = ref(false);
   const busLog = ref<BusEntry[]>([]);
   const pipeline = ref<PipelineResult | null>(null);
   const measuring = ref(false);
-  const writing = ref(false);
 
-  const query = useReactiveQuery(listNotes, {
-    tables: ["note"],
-    queryKey: uniqueQueryKey("demo:note-list"),
-    // Long enough to make a burst of writes collapse into one refetch, and to see it happen.
-    debounce: 300,
-    onSuccess: (rows) => {
-      notes.value = rows;
-    },
+  const statsQuery = useReactiveQuery(() => loadDashboardStats(getDatabase().db), {
+    // Four tables, because the tiles aggregate across all of them.
+    tables: ["customer", "product", "sales_order", "order_line"],
+    queryKey: uniqueQueryKey("demo:stats"),
+    debounce: 250,
   });
 
-  // Watching the bus directly is only for the demo - a screen would let the query do it.
+  const ordersQuery = useReactiveQuery(() => searchOrders(getDatabase().db, search.value), {
+    tables: ["sales_order", "order_line", "customer"],
+    queryKey: uniqueQueryKey("demo:orders"),
+    debounce: 250,
+  });
+
+  // Typing re-runs the query rather than filtering in memory, so the search is real SQL.
+  watch(search, () => {
+    void ordersQuery.refetch();
+  });
+
   const stopWatching = changeBus.on(["*"], (event: TableChangeEvent) => {
     busLog.value = [
-      { at: Date.now(), table: event.table, type: event.type, rows: event.affectedRows },
+      { at: Date.now(), table: event.table, type: event.type },
       ...busLog.value,
     ].slice(0, EVENT_LOG_LIMIT);
   });
-
   onUnmounted(stopWatching);
 
-  const metrics = useQueryMetrics();
+  const stats = computed<DashboardStats>(() => statsQuery.data.value ?? EMPTY_STATS);
+  const orders = computed<OrderRow[]>(() => ordersQuery.data.value ?? []);
 
-  async function addOne() {
-    writing.value = true;
+  async function withBusy(work: () => Promise<void>): Promise<void> {
+    busy.value = true;
     try {
-      await createNote(rdb, { title: `Note ${String(Date.now() % 100000)}`, body: "one write" });
+      await work();
     } finally {
-      writing.value = false;
+      busy.value = false;
     }
   }
 
-  /** A burst: many writes, but the debounce means the list refetches once. */
-  async function addMany(count = 20) {
-    writing.value = true;
-    try {
-      for (let index = 0; index < count; index++) {
-        await createNote(rdb, { title: `Burst ${String(index + 1)}`, body: "part of a burst" });
-      }
-    } finally {
-      writing.value = false;
-    }
-  }
+  const seed = () => withBusy(() => seedSampleData(rdb));
 
-  async function clearAll() {
-    writing.value = true;
-    try {
-      await deleteAllNotes(rdb);
-    } finally {
-      writing.value = false;
-    }
-  }
+  const addOrder = () =>
+    withBusy(async () => {
+      const customers = await listCustomers(getDatabase().db);
+      const picked = customers[Math.floor(Math.random() * customers.length)];
+      if (!picked) return;
+
+      const products = await getDatabase()
+        .db.selectFrom("product")
+        .select(["id", "price_cents"])
+        .limit(3)
+        .execute();
+
+      await createOrder(rdb, picked.id, products);
+    });
+
+  const advance = (orderId: number) => withBusy(() => advanceOrderStatus(rdb, orderId));
+  const clear = () => withBusy(() => clearAll(rdb));
 
   /**
    * Reads issued together against reads awaited one by one.
    *
-   * On a device the ratio is the point: the native bridge pipelines concurrent calls, and the
-   * dialect keeps reads out of the write lock, so a screen loading with `Promise.all` pays once
-   * rather than N times - measured around 5x.
-   *
-   * In a browser it will sit near 1x, or below it. The web path is sql.js in memory with no bridge
-   * to pipeline, so concurrency buys nothing and `Promise.all` only adds overhead. That is not a
-   * regression, and the screen says so rather than reporting a number that looks like one.
+   * On a device the ratio is the point: the native bridge pipelines concurrent calls and the dialect
+   * keeps reads out of the write lock, so a screen loading with `Promise.all` pays once rather than
+   * N times. In a browser it sits near 1x because sql.js in memory has no bridge to pipeline, and
+   * the screen says so rather than reporting a number that reads as a regression.
    */
-  async function measurePipelining() {
+  async function measurePipelining(): Promise<void> {
     measuring.value = true;
     try {
       const db = getDatabase().db;
-      const read = () => db.selectFrom("note").select("id").limit(5).execute();
-
+      const read = () => db.selectFrom("sales_order").select("id").limit(5).execute();
       await read();
 
       const parallelStart = performance.now();
@@ -122,26 +135,22 @@ export function useReactiveDemo() {
     }
   }
 
-  const noteCount: ComputedRef<number> = computed(() => notes.value.length);
-
   return {
-    notes,
-    noteCount,
-    loading: query.loading,
-    isStale: query.isStale,
-    error: query.error,
-    refetch: query.refetch,
-    writing,
+    search,
+    stats,
+    orders,
+    loading: ordersQuery.loading,
+    busy,
     busLog,
     pipeline,
     measuring,
-    metrics,
-    addOne,
-    addMany,
-    clearAll,
-    measurePipelining,
     readsPerRun: READS_PER_RUN,
     isNative: Capacitor.isNativePlatform(),
     platform: Capacitor.getPlatform(),
+    seed,
+    addOrder,
+    advance,
+    clear,
+    measurePipelining,
   };
 }

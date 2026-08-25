@@ -39,6 +39,7 @@
     "@intlify/unplugin-vue-i18n": "catalog:",
     "@types/node": "catalog:",
     "@vitejs/plugin-vue": "^6.0.3",
+    "sql.js": "catalog:",
     "typescript": "^5.9.3",
     "unplugin-auto-import": "catalog:",
     "unplugin-icons": "catalog:",
