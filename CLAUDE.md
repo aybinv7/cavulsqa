@@ -64,6 +64,13 @@ private Odoo-facing monorepo so unrelated apps can share them.
 - **Watch the tarball.** tsdown externalizes `dependencies` and `peerDependencies` but bundles
   `devDependencies`. A test-only dependency belongs in `peerDependencies` with
   `peerDependenciesMeta.optional`, or it ends up inlined in the published output.
+- **The dialect owns its own concurrency.** `SharedConnectionSQLiteAdapter` reports
+  `supportsMultipleConnections: true` so kysely's connection mutex stays off. That is not a claim
+  about SQLite; it keeps the finer-grained lock here, where writes and transactions serialise and
+  reads stay parallel. Reverting it queues reads behind writes.
+- **Concurrency tests use explicit gates, never microtask counting.** `await Promise.resolve()`
+  twice happened to create an overlap window under kysely 0.28; 0.29 added an await and the window
+  closed, so the tests passed while asserting nothing.
 - **A peer range is a promise you have tested.** The workspace pins one version, so a wide range
   like `>=0.28` ships untested majors to consumers - that is how `mobile-db@0.1.0` reached npm
   broken against kysely 0.29, which moved `Migrator` to a subpath. Widen a range only after

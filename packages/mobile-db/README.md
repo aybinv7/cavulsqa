@@ -18,11 +18,17 @@ Capacitor SQLite persistence for [Kysely](https://kysely.dev).
 
 There is no sync contract here: no `_ruid`, no `_sync_status`, no push/pull queue.
 
-## kysely 0.28 only
+## kysely 0.29
 
-`Migrator` lives at the root of kysely 0.28 and moved to a `kysely/migration` subpath in 0.29, and
-0.28 has no such subpath - so one import cannot serve both. The peer range is `^0.28` deliberately;
-`>=0.28` let npm install 0.29 and the package failed at import time.
+`Migrator` and the `Migration` type live at `kysely/migration` from 0.29 onwards; 0.28 had them at
+the root and has no such subpath, so one import cannot serve both. This package targets **0.29+**.
+Use `@cavulsqa/mobile-db@0.1.1` if you are pinned to kysely 0.28.
+
+0.29 also serialises every connection acquisition when the adapter reports
+`supportsMultipleConnections === false`, which `SqliteAdapter` does. This dialect reports `true`
+instead and keeps its own finer-grained lock: writes and transactions serialise, reads do not.
+Letting kysely's mutex take over would queue reads behind writes and cost several times the latency
+on a screen that loads with `Promise.all`.
 
 ## Install
 

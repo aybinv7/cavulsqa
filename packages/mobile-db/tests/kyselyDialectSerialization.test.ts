@@ -3,6 +3,35 @@ import { Kysely } from "kysely";
 import { SharedConnectionSQLiteDialect } from "../src/kyselyDialect.js";
 
 /**
+ * Overlap is forced with explicit gates rather than by counting microtasks. An earlier version of
+ * these stubs held the connection across two `await Promise.resolve()` and relied on two queries
+ * interleaving inside that window; kysely 0.29 added an await to the query path, the window closed,
+ * and the tests passed while testing nothing. A gate the test opens by hand does not care how many
+ * ticks kysely takes internally.
+ */
+function gate() {
+  let open!: () => void;
+  const held = new Promise<void>((resolve) => {
+    open = resolve;
+  });
+  return { held, open };
+}
+
+/** Yields until `predicate` holds, so a test can wait for "both started" without counting ticks. */
+async function waitFor(predicate: () => boolean, description: string): Promise<void> {
+  for (let attempt = 0; attempt < 100; attempt++) {
+    if (predicate()) return;
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+  throw new Error(`timed out waiting for ${description}`);
+}
+
+/** Kysely binds values as parameters, so the row name arrives there, not in the SQL. */
+function label(params: unknown[]): string {
+  return params.length ? String(params[0]) : "?";
+}
+
+/**
  * Stands in for the shared connection the way a device behaves: a write that has to open
  * its own transaction fails while one is already open, and the driver's own bookkeeping
  * rolls back whatever transaction it finds. That is how a stray write silently discards
@@ -11,7 +40,15 @@ import { SharedConnectionSQLiteDialect } from "../src/kyselyDialect.js";
  */
 function stubConnection() {
   const events: string[] = [];
+  const gates = new Map<string, Promise<void>>();
   let transactionOpen = false;
+
+  /** Make the named statement block inside the connection until the returned function is called. */
+  function hold(name: string): () => void {
+    const { held, open } = gate();
+    gates.set(name, held);
+    return open;
+  }
 
   const database = {
     isTransactionActive: async () => ({ result: transactionOpen }),
@@ -29,7 +66,8 @@ function stubConnection() {
       transactionOpen = false;
       events.push("rollback");
     },
-    run: async (sql: string, params: unknown[]) => {
+    run: async (_sql: string, params: unknown[]) => {
+      const name = label(params);
       // The implicit-transaction path: open one, write, close it.
       if (transactionOpen) {
         transactionOpen = false;
@@ -37,15 +75,18 @@ function stubConnection() {
         throw new Error("Already in transaction");
       }
       transactionOpen = true;
-      await Promise.resolve();
-      events.push(`run:${label(params)}`);
+      events.push(`run-start:${name}`);
+      await (gates.get(name) ?? Promise.resolve());
+      events.push(`run:${name}`);
       transactionOpen = false;
       return { changes: { changes: 1, lastId: 1, values: [] } };
     },
     query: async (sql: string, params: unknown[]) => {
       if (/^\s*SELECT changes\(\)/i.test(sql)) return { values: [{ changes: 1 }] };
-      await Promise.resolve();
-      events.push(`query:${label(params)}`);
+      const name = label(params);
+      events.push(`query-start:${name}`);
+      await (gates.get(name) ?? Promise.resolve());
+      events.push(`query:${name}`);
       return { values: [] };
     },
   };
@@ -64,24 +105,36 @@ function stubConnection() {
     });
   }
 
-  return { build, events };
+  return { build, events, hold };
 }
 
-/** Kysely binds values as parameters, so the row name arrives there, not in the SQL. */
-function label(params: unknown[]): string {
-  return params.length ? String(params[0]) : "?";
-}
-
-test("without serializeAccess, concurrent writes collide on the shared connection", async () => {
-  const { build } = stubConnection();
+test("without serializeAccess, a second write lands inside the first one's transaction", async () => {
+  const { build, events, hold } = stubConnection();
   const db = build(false);
+  const releaseA = hold("a");
 
-  const results = await Promise.allSettled([
-    db.insertInto("sale_order").values({ name: "a" }).execute(),
-    db.insertInto("sale_order").values({ name: "b" }).execute(),
-  ]);
+  const first = db.insertInto("sale_order").values({ name: "a" }).execute();
+  await waitFor(() => events.includes("run-start:a"), "the first write to reach the connection");
 
-  expect(results.some((result) => result.status === "rejected")).toBe(true);
+  // Nothing serialises access, so this one reaches the connection while "a" holds it. The
+  // connection sees a transaction already open and runs the statement inside it rather than
+  // opening its own - so the write is not isolated, and a rollback of "a" would take it too.
+  //
+  // Under kysely 0.28 the same race surfaced as an outright rejection, because the second write
+  // observed no transaction yet and tried to open one. 0.29 added an await to the query path, so
+  // it now observes the open transaction and joins it silently. Quieter, and worse.
+  await db.insertInto("sale_order").values({ name: "b" }).execute();
+
+  const strayStart = events.indexOf("query-start:b");
+  const holderStart = events.indexOf("run-start:a");
+  const holderEnd = events.indexOf("run:a");
+
+  expect(holderEnd).toBe(-1);
+  expect(strayStart).toBeGreaterThan(holderStart);
+
+  releaseA();
+  await first;
+  expect(events.indexOf("query:b")).toBeLessThan(events.indexOf("run:a"));
 });
 
 test("serializeAccess runs concurrently issued writes one at a time", async () => {
@@ -94,7 +147,26 @@ test("serializeAccess runs concurrently issued writes one at a time", async () =
     db.insertInto("sale_order").values({ name: "c" }).execute(),
   ]);
 
-  expect(events).toEqual(["run:a", "run:b", "run:c"]);
+  expect(events.filter((event) => event.startsWith("run:"))).toEqual(["run:a", "run:b", "run:c"]);
+  expect(events).not.toContain("stray-write-rolled-back-someone-elses-transaction");
+});
+
+test("serializeAccess holds the connection for a whole write, not just its start", async () => {
+  const { build, events, hold } = stubConnection();
+  const db = build(true);
+  const releaseA = hold("a");
+
+  const first = db.insertInto("sale_order").values({ name: "a" }).execute();
+  await waitFor(() => events.includes("run-start:a"), "the first write to reach the connection");
+
+  const second = db.insertInto("sale_order").values({ name: "b" }).execute();
+  // "b" must not even reach the connection while "a" is mid-flight.
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  expect(events).not.toContain("run-start:b");
+
+  releaseA();
+  await Promise.all([first, second]);
+  expect(events.filter((event) => event.startsWith("run:"))).toEqual(["run:a", "run:b"]);
 });
 
 test("serializeAccess keeps a transaction whole while another write waits", async () => {
@@ -110,90 +182,60 @@ test("serializeAccess keeps a transaction whole while another write waits", asyn
 
   // The transaction holds the connection from begin to commit, so the standalone write
   // cannot land in the middle of it and roll it back.
-  expect(events).toEqual(["begin", "query:inside", "commit", "run:outside"]);
+  expect(events.filter((event) => !event.includes("-start:"))).toEqual([
+    "begin",
+    "query:inside",
+    "commit",
+    "run:outside",
+  ]);
   expect(events).not.toContain("stray-write-rolled-back-someone-elses-transaction");
 });
 
 /**
  * Reads are deliberately outside the lock: the native bridge pipelines concurrent calls,
  * so serializing them would cost several times the latency on any screen that loads with
- * `Promise.all`. This stub records starts and ends separately so overlap is visible.
+ * `Promise.all`.
  */
-function readStub() {
-  const events: string[] = [];
-
-  const database = {
-    isTransactionActive: async () => ({ result: false }),
-    beginTransaction: async () => {
-      events.push("begin");
-    },
-    commitTransaction: async () => {
-      events.push("commit");
-    },
-    rollbackTransaction: async () => undefined,
-    run: async (_sql: string, params: unknown[]) => {
-      events.push(`write-start:${String(params[0])}`);
-      await Promise.resolve();
-      await Promise.resolve();
-      events.push(`write-end:${String(params[0])}`);
-      return { changes: { changes: 1, lastId: 1, values: [] } };
-    },
-    query: async (sql: string, params: unknown[]) => {
-      if (/^\s*SELECT changes\(\)/i.test(sql)) return { values: [{ changes: 1 }] };
-      const label = params.length ? String(params[0]) : "?";
-      events.push(`read-start:${label}`);
-      await Promise.resolve();
-      await Promise.resolve();
-      events.push(`read-end:${label}`);
-      return { values: [] };
-    },
-  };
-
-  const db = new Kysely<any>({
-    dialect: new SharedConnectionSQLiteDialect({
-      database: database as never,
-      sqlite: { saveToStore: async () => undefined, initWebStore: async () => undefined } as never,
-      name: "test",
-      serializeAccess: true,
-    }),
-  });
-
-  return { db, events };
-}
-
 test("serializeAccess leaves concurrent reads free to overlap", async () => {
-  const { db, events } = readStub();
+  const { build, events, hold } = stubConnection();
+  const db = build(true);
+  const releaseA = hold("a");
+  const releaseB = hold("b");
 
-  await Promise.all([
+  const reads = Promise.all([
     db.selectFrom("sale_order").select("name").where("name", "=", "a").execute(),
     db.selectFrom("sale_order").select("name").where("name", "=", "b").execute(),
   ]);
 
-  // Both reads start before either finishes — that is the pipelining we want to keep.
-  expect(events).toEqual(["read-start:a", "read-start:b", "read-end:a", "read-end:b"]);
-});
+  // Both reads are inside the connection at once — that is the pipelining we want to keep.
+  await waitFor(
+    () => events.includes("query-start:a") && events.includes("query-start:b"),
+    "both reads to start before either finishes",
+  );
+  expect(events).not.toContain("query:a");
 
-test("serializeAccess still keeps concurrent writes apart", async () => {
-  const { db, events } = readStub();
-
-  await Promise.all([
-    db.insertInto("sale_order").values({ name: "a" }).execute(),
-    db.insertInto("sale_order").values({ name: "b" }).execute(),
-  ]);
-
-  expect(events).toEqual(["write-start:a", "write-end:a", "write-start:b", "write-end:b"]);
+  releaseA();
+  releaseB();
+  await reads;
 });
 
 test("a read may run while a transaction is open, without waiting for it", async () => {
-  const { db, events } = readStub();
+  const { build, events, hold } = stubConnection();
+  const db = build(true);
+  const releaseInside = hold("inside");
 
-  await Promise.all([
-    db.transaction().execute(async (trx) => {
-      await trx.insertInto("sale_order").values({ name: "tx" }).execute();
-    }),
-    db.selectFrom("sale_order").select("name").where("name", "=", "reader").execute(),
-  ]);
+  const transaction = db.transaction().execute(async (trx) => {
+    await trx.insertInto("sale_order").values({ name: "inside" }).execute();
+  });
+  await waitFor(() => events.includes("query-start:inside"), "the transaction to be underway");
 
-  // The reader is not blocked behind the transaction's commit.
-  expect(events.indexOf("read-start:reader")).toBeLessThan(events.indexOf("commit"));
+  const read = db.selectFrom("sale_order").select("name").where("name", "=", "reader").execute();
+  await waitFor(() => events.includes("query-start:reader"), "the reader to reach the connection");
+
+  // The reader got in before the transaction committed.
+  expect(events).not.toContain("commit");
+
+  releaseInside();
+  await Promise.all([transaction, read]);
+  expect(events).toContain("commit");
 });

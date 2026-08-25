@@ -234,6 +234,23 @@ class SharedSQLiteDriver implements Driver {
   async destroy(): Promise<void> {}
 }
 
+/**
+ * kysely 0.29 serialises every connection acquisition behind a mutex when the adapter reports
+ * `supportsMultipleConnections === false`, which `SqliteAdapter` does. That is the right default
+ * for a driver that owns one handle and nothing else - but this dialect already serialises at a
+ * finer grain: writes and transactions take the lock, reads deliberately do not, because the
+ * native bridge pipelines concurrent calls and queueing reads costs several times the latency on
+ * any screen that loads with `Promise.all`.
+ *
+ * Reporting `true` keeps that distinction ours. It does not claim the database supports multiple
+ * connections; it claims this dialect handles its own concurrency.
+ */
+class SharedConnectionSQLiteAdapter extends SqliteAdapter {
+  override get supportsMultipleConnections(): boolean {
+    return true;
+  }
+}
+
 export class SharedConnectionSQLiteDialect implements Dialect {
   readonly #options: SharedConnectionDialectOptions;
 
@@ -250,7 +267,7 @@ export class SharedConnectionSQLiteDialect implements Dialect {
   }
 
   createAdapter(): DialectAdapter {
-    return new SqliteAdapter();
+    return new SharedConnectionSQLiteAdapter();
   }
 
   createIntrospector(db: Kysely<unknown>): DatabaseIntrospector {

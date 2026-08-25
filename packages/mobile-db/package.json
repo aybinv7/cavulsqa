@@ -1,6 +1,6 @@
 {
   "name": "@cavulsqa/mobile-db",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Capacitor SQLite persistence for Kysely: a shared connection dialect, migrations, and column helpers.",
   "keywords": [
     "capacitor",
@@ -43,7 +43,7 @@
     "@types/node": "^26.1.1",
     "bumpp": "^11.1.0",
     "capacitor-sqlite-kysely": "^1.0.2",
-    "kysely": "^0.28.9",
+    "kysely": "^0.29.5",
     "sql.js": "1.13.0",
     "typescript": "^7.0.2",
     "vite": "catalog:",
@@ -53,7 +53,7 @@
     "@capacitor-community/sqlite": ">=7",
     "@capacitor/core": ">=8",
     "capacitor-sqlite-kysely": ">=1",
-    "kysely": "^0.28",
+    "kysely": "^0.29",
     "sql.js": ">=1.13"
   },
   "peerDependenciesMeta": {

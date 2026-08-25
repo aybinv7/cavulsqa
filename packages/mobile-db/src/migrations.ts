@@ -1,4 +1,4 @@
-import type { Migration } from "kysely";
+import type { Migration } from "kysely/migration";
 
 export type MigrationSet = Record<string, Migration>;
 

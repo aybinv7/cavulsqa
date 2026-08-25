@@ -1,4 +1,5 @@
-import { Kysely, Migrator, sql } from "kysely";
+import { Kysely, sql } from "kysely";
+import { Migrator } from "kysely/migration";
 import { SharedConnectionSQLiteDialect } from "./kyselyDialect.js";
 import {
   CapacitorSQLite,
