@@ -1,10 +1,50 @@
 {
-  "tabs": { "home": "Home", "settings": "Settings" },
+  "tabs": { "home": "Overview", "demo": "Reactive", "settings": "Settings" },
   "home": {
-    "title": "Home",
-    "empty": "No notes yet",
-    "add": "Add note",
-    "sample": "A note written locally"
+    "title": "Overview",
+    "intro": "A Vue 3 + Framework7 + Capacitor app with a local SQLite database that screens read reactively. Every item below is wired and working, not scaffolding to fill in.",
+    "included": "What is included",
+    "next": "See it work",
+    "openDemo": "Open the reactive demo"
   },
-  "settings": { "title": "Settings", "queries": "Queries run", "avgTime": "Average query time" }
+  "demo": {
+    "title": "Reactive",
+    "intro": "Nothing on this screen tells the list to refresh. Writes announce the table they touched, and the query watching that table refetches on its own.",
+    "writes": "Write to the database",
+    "writesHint": "A burst of writes collapses into one refetch, because the query debounces what the bus tells it.",
+    "addOne": "Add one",
+    "addMany": "Add 20",
+    "clear": "Clear",
+    "list": "Notes ({count})",
+    "refetching": "refetching…",
+    "stale": "stale",
+    "empty": "No rows yet — write one and watch this list follow.",
+    "bus": "Change bus",
+    "busHint": "Every event a write published. The list is subscribed to the same stream.",
+    "busEmpty": "No events yet.",
+    "pipelining": "Read pipelining",
+    "pipeliningHint": "{count} reads issued together, then the same {count} awaited one at a time. Reads stay outside the write lock, so the first should be several times faster.",
+    "measure": "Measure",
+    "measuring": "Measuring…",
+    "parallel": "Together",
+    "sequential": "One by one",
+    "ratio": "Faster by",
+    "metrics": "Live metrics"
+  },
+  "metrics": {
+    "totalQueries": "Queries run",
+    "avgQueryTime": "Average duration",
+    "cacheHitRate": "Cache hit rate",
+    "activeListeners": "Active listeners",
+    "refetches": "Refetches: {table}"
+  },
+  "settings": {
+    "title": "Settings",
+    "locale": "Language",
+    "queryMetrics": "Query metrics",
+    "slowest": "Slowest queries",
+    "noQueries": "No queries recorded yet.",
+    "resetMetrics": "Reset metrics"
+  },
+  "errors": { "notFoundTitle": "Not found", "notFound": "That screen does not exist." }
 }

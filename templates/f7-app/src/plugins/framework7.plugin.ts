@@ -1,6 +1,6 @@
 import { Capacitor } from "@capacitor/core";
 import type { Framework7Parameters } from "framework7/types";
-import { routes } from "@/app/routes";
+import routes from "@/router";
 
 export function framework7Parameters(): Framework7Parameters {
   return {

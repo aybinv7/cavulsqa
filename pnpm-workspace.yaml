@@ -14,6 +14,8 @@ catalog:
   vite: npm:@voidzero-dev/vite-plus-core@0.3.0
   vite-plus: 0.3.0
   vue: ^3.5.41
+  "@tailwindcss/vite": ^4.3.3
+  tailwindcss: ^4.3.3
 overrides:
   vite: "catalog:"
 peerDependencyRules:

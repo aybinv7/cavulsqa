@@ -1,10 +1,50 @@
 {
-  "tabs": { "home": "Accueil", "settings": "Réglages" },
+  "tabs": { "home": "Aperçu", "demo": "Réactif", "settings": "Réglages" },
   "home": {
-    "title": "Accueil",
-    "empty": "Aucune note",
-    "add": "Ajouter une note",
-    "sample": "Une note enregistrée localement"
+    "title": "Aperçu",
+    "intro": "Une application Vue 3 + Framework7 + Capacitor avec une base SQLite locale que les écrans lisent de façon réactive. Chaque élément ci-dessous fonctionne déjà.",
+    "included": "Ce qui est inclus",
+    "next": "Voir le fonctionnement",
+    "openDemo": "Ouvrir la démo réactive"
   },
-  "settings": { "title": "Réglages", "queries": "Requêtes exécutées", "avgTime": "Temps moyen" }
+  "demo": {
+    "title": "Réactif",
+    "intro": "Rien sur cet écran ne demande à la liste de se rafraîchir. Une écriture annonce la table modifiée, et la requête qui l'observe se relance seule.",
+    "writes": "Écrire dans la base",
+    "writesHint": "Une rafale d'écritures ne déclenche qu'un seul rechargement, grâce au debounce de la requête.",
+    "addOne": "Ajouter une",
+    "addMany": "Ajouter 20",
+    "clear": "Vider",
+    "list": "Notes ({count})",
+    "refetching": "rechargement…",
+    "stale": "obsolète",
+    "empty": "Aucune ligne — écrivez-en une et regardez la liste suivre.",
+    "bus": "Bus de changements",
+    "busHint": "Chaque événement publié par une écriture. La liste écoute le même flux.",
+    "busEmpty": "Aucun événement.",
+    "pipelining": "Lectures en parallèle",
+    "pipeliningHint": "{count} lectures lancées ensemble, puis les mêmes {count} une par une. Les lectures restent hors du verrou d'écriture.",
+    "measure": "Mesurer",
+    "measuring": "Mesure…",
+    "parallel": "Ensemble",
+    "sequential": "Une par une",
+    "ratio": "Plus rapide de",
+    "metrics": "Métriques en direct"
+  },
+  "metrics": {
+    "totalQueries": "Requêtes exécutées",
+    "avgQueryTime": "Durée moyenne",
+    "cacheHitRate": "Taux de cache",
+    "activeListeners": "Écouteurs actifs",
+    "refetches": "Rechargements : {table}"
+  },
+  "settings": {
+    "title": "Réglages",
+    "locale": "Langue",
+    "queryMetrics": "Métriques de requêtes",
+    "slowest": "Requêtes les plus lentes",
+    "noQueries": "Aucune requête enregistrée.",
+    "resetMetrics": "Réinitialiser"
+  },
+  "errors": { "notFoundTitle": "Introuvable", "notFound": "Cet écran n'existe pas." }
 }

@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 :root {
   --f7-theme-color: #1f6df5;
   --f7-safe-area-top: env(safe-area-inset-top);
