@@ -51,7 +51,7 @@ Then, for each package on npmjs.com: **Settings > Trusted publisher**, GitHub Ac
 
 ## Provenance
 
-The release workflow's `provenance` input defaults to **false** because npm can only attest a build
-from a **public** repository. Once this repository is public, flip that default to `true` - under
-trusted publishing npm attaches provenance by default anyway, and on a private repository the
-publish fails unless it is explicitly disabled.
+The repository is public, so the release workflow's `provenance` input defaults to **true**: every
+published version carries a signed attestation linking it to the commit and workflow run that built
+it. Under trusted publishing npm attaches provenance by default anyway - the input exists so a run
+can turn it off, which is only needed if the repository ever goes private again.
