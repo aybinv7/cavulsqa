@@ -38,15 +38,16 @@
     </F7Block>
 
     <F7BlockTitle>{{ t("metrics.slowest") }}</F7BlockTitle>
-    <F7List v-if="slowestQueries.length" strong inset dividers class="rounded-2xl!">
+    <!-- media-list, because a query key is long and the panel is narrow. -->
+    <F7List v-if="slowestQueries.length" media-list strong inset dividers class="rounded-2xl!">
       <F7ListItem
         v-for="entry in slowestQueries"
         :key="entry.key"
-        :title="entry.key"
-        :after="`${entry.avgTime.toFixed(1)} ms`"
+        :title="`${entry.avgTime.toFixed(1)} ms`"
+        :subtitle="t('metrics.calls', { count: entry.count })"
       >
         <template #media><F7Icon f7="speedometer" color="red" /></template>
-        <template #footer>{{ t("metrics.calls", { count: entry.count }) }}</template>
+        <template #text>{{ entry.key }}</template>
       </F7ListItem>
     </F7List>
     <F7Block v-else strong inset class="rounded-2xl!">

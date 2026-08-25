@@ -28,18 +28,23 @@
     </F7Block>
 
     <F7BlockTitle>{{ t("detail.thisScreen") }}</F7BlockTitle>
-    <F7List strong inset dividers class="rounded-2xl!">
-      <F7ListItem :title="t('detail.transition')" :after="feature.transition">
-        <template #media><F7Icon f7="arrow_left_arrow_right" color="blue" /></template>
-        <template #footer>{{ t("detail.transitionNote") }}</template>
+    <!--
+      media-list, not a plain list: `item-footer` is sized for a few words and long text in it
+      overlaps the title, while a long `after` value squeezes the same text into a one-word column.
+      Here the value is the subtitle and the explanation is the text, so neither competes for width.
+    -->
+    <F7List media-list strong inset dividers class="rounded-2xl!">
+      <F7ListItem :title="t('detail.transition')" :subtitle="feature.transition">
+        <template #media><F7Icon f7="arrow_right_circle_fill" color="blue" /></template>
+        <template #text>{{ t("detail.transitionNote") }}</template>
       </F7ListItem>
-      <F7ListItem :title="t('detail.navbar')" :after="navbarSummary">
+      <F7ListItem :title="t('detail.navbar')" :subtitle="navbarSummary">
         <template #media><F7Icon f7="rectangle_grid_1x2_fill" color="purple" /></template>
-        <template #footer>{{ t("detail.navbarNote") }}</template>
+        <template #text>{{ t("detail.navbarNote") }}</template>
       </F7ListItem>
-      <F7ListItem :title="t('detail.nesting')" :after="t('detail.nestingAfter')">
+      <F7ListItem :title="t('detail.nesting')" :subtitle="t('detail.nestingAfter')">
         <template #media><F7Icon f7="square_stack_3d_down_right_fill" color="green" /></template>
-        <template #footer>{{ t("detail.nestingNote") }}</template>
+        <template #text>{{ t("detail.nestingNote") }}</template>
       </F7ListItem>
     </F7List>
 
