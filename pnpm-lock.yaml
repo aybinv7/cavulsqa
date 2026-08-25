@@ -205,6 +205,9 @@ settings:
 
 catalogs:
   default:
+    '@capacitor/android':
+      specifier: ^8.5.0
+      version: 8.5.0
     '@intlify/unplugin-vue-i18n':
       specifier: ^11.2.5
       version: 11.2.5
@@ -345,6 +348,9 @@ importers:
       '@capacitor-community/sqlite':
         specifier: ^7.0.2
         version: 7.0.3(@capacitor/core@8.5.0)
+      '@capacitor/android':
+        specifier: 'catalog:'
+        version: 8.5.0(@capacitor/core@8.5.0)
       '@capacitor/app':
         specifier: ^8.0.0
         version: 8.1.1(@capacitor/core@8.5.0)
@@ -478,6 +484,11 @@ packages:
     engines: {node: '>=16.0.0'}
     peerDependencies:
       '@capacitor/core': '>=7.0.0'
+
+  '@capacitor/android@8.5.0':
+    resolution: {integrity: sha512-Rb3prJeQiTp0pQhSSOReJuG9VgibOGMG4ECs+UhMwr6TCCHZ3NCZO811bDA0HxD0xrT/gCrJAsY5yfEATu84JQ==}
+    peerDependencies:
+      '@capacitor/core': ^8.5.0
 
   '@capacitor/app@8.1.1':
     resolution: {integrity: sha512-xM2ZTX5jK60tFtmjsmJv+Cdj1Qsb6NcavkqmdEnCPQBeya9oKhamZJxYOnQNj1ZvcJM7sWfG6BEtSLx42pisbA==}
@@ -3196,6 +3207,10 @@ snapshots:
     dependencies:
       '@capacitor/core': 8.5.0
       jeep-sqlite: 2.8.0
+
+  '@capacitor/android@8.5.0(@capacitor/core@8.5.0)':
+    dependencies:
+      '@capacitor/core': 8.5.0
 
   '@capacitor/app@8.1.1(@capacitor/core@8.5.0)':
     dependencies:
