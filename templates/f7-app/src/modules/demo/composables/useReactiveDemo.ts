@@ -4,6 +4,7 @@ import {
   advanceOrderStatus,
   clearAll,
   deleteOrder,
+  ensureReferenceData,
   loadDashboardStats,
   saveOrder,
   searchOrders,
@@ -102,7 +103,15 @@ export function useReactiveDemo() {
 
   const save = (input: { customerId: number; reference: string; lines: DraftLine[] }) =>
     withBusy(() => saveOrder(rdb, input));
-  const clear = () => withBusy(() => clearAll(rdb));
+  /**
+   * Wipe the demo data, then put the catalogue back. Deleting the products and customers too would
+   * leave the app in a state where no order can be written and the only way out is a restart.
+   */
+  const clear = () =>
+    withBusy(async () => {
+      await clearAll(rdb);
+      await ensureReferenceData(rdb);
+    });
 
   /**
    * Reads issued together against reads awaited one by one.

@@ -65,6 +65,9 @@ The short version of the rules, each earned by a real bug:
 - **Every write goes through `rdb`**, never `getDatabase().db`. `rdb` announces the tables it
   touched; a raw write is invisible to every query watching them.
 - **`queryKey` is an identity, not a label.** Default to `uniqueQueryKey()`.
+- **An inserted id comes from `insertId`, never `.returning(...)`.** Inside a transaction the
+  SQLite plugin executes the statement and drops its RETURNING rows, so the insert succeeds and
+  kysely reports `no result`. See `.claude/rules/database.md`.
 - **Money is integer cents.** A float total is a rounding bug waiting to happen.
 - **`f7route` and `f7router` are props**, not imports: `defineProps<{ f7route: Router.Route }>()`.
 - **In locale files, `@` and `|` are message syntax.** `@` starts a linked message and `|` a plural

@@ -8,6 +8,7 @@ import "./assets/css/app.css";
 
 import App from "./App.vue";
 import { i18n } from "./plugins/i18n.plugin";
+import { seedPlugin } from "./plugins/seed.plugin";
 import { sqlitePlugin } from "./plugins/sqlite.plugin";
 
 Framework7.use(Framework7Vue);
@@ -34,6 +35,7 @@ function reportFatal(error: unknown): void {
 async function bootstrap(): Promise<void> {
   try {
     await sqlitePlugin();
+    await seedPlugin();
   } catch (error) {
     reportFatal(error);
     return;

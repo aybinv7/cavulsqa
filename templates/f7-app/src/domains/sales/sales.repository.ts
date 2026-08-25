@@ -140,13 +140,18 @@ export function listCustomers(
   return db.selectFrom("customer").select(["id", "name", "city"]).orderBy("name").execute();
 }
 
-/** Every write goes through `rdb`, so each announces the tables it touched. */
-export async function seedSampleData(db: Kysely<Database>, customers = 6): Promise<void> {
+const REFERENCE_CUSTOMERS = 6;
+
+/**
+ * The catalogue and a few customers - what the app needs before anyone can write an order at all.
+ * Run at startup, because a first launch that makes you press "seed" before the New order sheet has
+ * anything to pick is not a first launch anyone should have.
+ *
+ * Idempotent by table rather than by row: these are fixtures, so if they are there this has run.
+ */
+export async function ensureReferenceData(db: Kysely<Database>): Promise<void> {
   const at = nowISO();
 
-  // Seed is a button people press more than once, so it adds to the data rather than assuming an
-  // empty database. The catalogue is fixed: insert a product only when it is missing, or a second
-  // press doubles every one of them.
   const existing = await db.selectFrom("product").select("name").execute();
   const known = new Set(existing.map((product) => product.name));
 
@@ -155,7 +160,7 @@ export async function seedSampleData(db: Kysely<Database>, customers = 6): Promi
     await db.insertInto("product").values({ created_at: at, name, price_cents: price }).execute();
   }
 
-  // `tag.label` is unique, and a plain insert threw "UNIQUE constraint failed" on the second seed.
+  // `tag.label` is unique, and a plain insert threw "UNIQUE constraint failed" on the second run.
   for (const label of TAGS) {
     await db
       .insertInto("tag")
@@ -164,33 +169,75 @@ export async function seedSampleData(db: Kysely<Database>, customers = 6): Promi
       .execute();
   }
 
+  const customers = await db.selectFrom("customer").select("id").execute();
+  if (customers.length) return;
+
+  const tags = await db.selectFrom("tag").select("id").execute();
+
+  for (let index = 0; index < REFERENCE_CUSTOMERS; index++) {
+    const customerId = await insertCustomer(db, at);
+    const tag = tags[index % tags.length];
+    if (tag) {
+      await db
+        .insertInto("customer_tag")
+        .values({ customer_id: customerId, tag_id: tag.id })
+        .execute();
+    }
+  }
+}
+
+/**
+ * The name is numbered from how many customers exist right now, so it stays unique across seeds -
+ * counted per insert rather than once per batch, because adding a loop index to a count that the
+ * loop is itself growing produces collisions.
+ *
+ * `insertId` rather than `.returning("id")` for the same reason as `saveOrder`: it is the one way
+ * that works on both sides of a transaction boundary.
+ */
+async function insertCustomer(db: Kysely<Database>, at: string): Promise<number> {
+  const existing = (await db.selectFrom("customer").select("id").execute()).length;
+
+  const inserted = await db
+    .insertInto("customer")
+    .values({
+      created_at: at,
+      name: `Customer ${String(existing + 1)}`,
+      city: CITIES[existing % CITIES.length] ?? "Algiers",
+    })
+    .executeTakeFirstOrThrow();
+
+  const id = Number(inserted.insertId ?? 0);
+  if (!id) throw new Error("the customer was written but the database reported no id for it");
+  return id;
+}
+
+/**
+ * Demo orders on top of the reference data. Every write goes through `rdb`, so each announces the
+ * tables it touched.
+ *
+ * This is a button people press more than once, so it adds to the data rather than assuming an
+ * empty database.
+ */
+export async function seedSampleData(db: Kysely<Database>, customers = 3): Promise<void> {
+  await ensureReferenceData(db);
+
+  const at = nowISO();
   const products = await db.selectFrom("product").select(["id", "price_cents"]).execute();
   const tags = await db.selectFrom("tag").select("id").execute();
 
-  // Numbering continues from whatever is already there, so names stay unique across seeds.
-  const offset = (await db.selectFrom("customer").select("id").execute()).length;
-
   for (let index = 0; index < customers; index++) {
-    const inserted = await db
-      .insertInto("customer")
-      .values({
-        created_at: at,
-        name: `Customer ${String(offset + index + 1)}`,
-        city: CITIES[index % CITIES.length] ?? "Algiers",
-      })
-      .returning("id")
-      .executeTakeFirstOrThrow();
+    const customerId = await insertCustomer(db, at);
 
     const tag = tags[index % tags.length];
     if (tag) {
       await db
         .insertInto("customer_tag")
-        .values({ customer_id: inserted.id, tag_id: tag.id })
+        .values({ customer_id: customerId, tag_id: tag.id })
         .execute();
     }
 
     for (let orderIndex = 0; orderIndex < 2; orderIndex++) {
-      await createOrder(db, inserted.id, products.slice(0, 2 + ((index + orderIndex) % 3)));
+      await createOrder(db, customerId, products.slice(0, 2 + ((index + orderIndex) % 3)));
     }
   }
 }
@@ -203,17 +250,19 @@ export async function createOrder(
   const at = nowISO();
   const reference = `SO-${String(Date.now() % 1000000).padStart(6, "0")}`;
 
-  const order = await db
+  const inserted = await db
     .insertInto("sales_order")
     .values({ created_at: at, customer_id: customerId, reference, status: "draft" })
-    .returning("id")
     .executeTakeFirstOrThrow();
+
+  const orderId = Number(inserted.insertId ?? 0);
+  if (!orderId) throw new Error("the order was written but the database reported no id for it");
 
   for (const [index, line] of lines.entries()) {
     await db
       .insertInto("order_line")
       .values({
-        order_id: order.id,
+        order_id: orderId,
         product_id: line.id,
         quantity: index + 1,
         unit_price_cents: line.price_cents,
@@ -283,7 +332,12 @@ export async function saveOrder(
   input: { customerId: number; reference: string; lines: DraftLine[] },
 ): Promise<void> {
   await db.transaction().execute(async (trx) => {
-    const order = await trx
+    /**
+     * `insertId`, not `.returning("id")`: the SQLite plugin runs a statement issued inside an open
+     * transaction through `query()`, which executes it but drops its RETURNING rows - so the insert
+     * succeeded and kysely still threw "no result". `insertId` comes from `last_insert_rowid()`.
+     */
+    const inserted = await trx
       .insertInto("sales_order")
       .values({
         created_at: nowISO(),
@@ -291,14 +345,16 @@ export async function saveOrder(
         reference: input.reference,
         status: "draft",
       })
-      .returning("id")
       .executeTakeFirstOrThrow();
+
+    const orderId = Number(inserted.insertId ?? 0);
+    if (!orderId) throw new Error("the order was written but the database reported no id for it");
 
     for (const line of input.lines) {
       await trx
         .insertInto("order_line")
         .values({
-          order_id: order.id,
+          order_id: orderId,
           product_id: line.productId,
           quantity: line.quantity,
           unit_price_cents: line.unitPriceCents,

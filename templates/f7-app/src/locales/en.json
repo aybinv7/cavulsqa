@@ -15,7 +15,7 @@
   "demo": {
     "title": "Reactive",
     "intro": "A small relational schema — customers, products, orders, order lines and tags — read through joins and aggregates. Nothing on this screen asks a query to refresh.",
-    "clear": "Delete everything",
+    "clear": "Reset data",
     "refetching": "refetching…",
     "empty": "No orders yet. Use the button, bottom right.",
     "pipelining": "Read pipelining",

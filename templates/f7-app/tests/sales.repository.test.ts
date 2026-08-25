@@ -6,6 +6,7 @@ import {
   advanceOrderStatus,
   clearAll,
   createOrder,
+  ensureReferenceData,
   listCustomers,
   loadDashboardStats,
   searchOrders,
@@ -59,13 +60,33 @@ test("an empty database reports zeroes rather than nulls", async () => {
   });
 });
 
-test("seeding produces customers, products, orders and revenue", async () => {
+/**
+ * The app seeds this at startup, so it runs on every launch. Running twice has to leave the same
+ * database it left the first time, or a second launch doubles the catalogue.
+ */
+test("reference data gives the app a catalogue and customers, and is idempotent", async () => {
+  await ensureReferenceData(db);
+  const first = await loadDashboardStats(db);
+
+  expect(first.products).toBeGreaterThan(0);
+  expect(first.customers).toBeGreaterThan(0);
+  // Reference data is what you need to write an order, not orders themselves.
+  expect(first.orders).toBe(0);
+
+  await ensureReferenceData(db);
+  expect(await loadDashboardStats(db)).toEqual(first);
+});
+
+test("seeding adds demo orders on top of the reference data", async () => {
+  await ensureReferenceData(db);
+  const before = await loadDashboardStats(db);
+
   await seedSampleData(db, 4);
   const stats = await loadDashboardStats(db);
 
-  expect(stats.customers).toBe(4);
-  expect(stats.products).toBeGreaterThan(0);
-  // Two orders per customer.
+  expect(stats.customers).toBe(before.customers + 4);
+  expect(stats.products).toBe(before.products);
+  // Two orders per customer the seed adds.
   expect(stats.orders).toBe(8);
   expect(stats.revenueCents).toBeGreaterThan(0);
 });
@@ -86,9 +107,12 @@ test("search filters on the customer name and the reference together", async () 
   await seedSampleData(db, 3);
   const all = await searchOrders(db, "");
 
-  const byCustomer = await searchOrders(db, "Customer 2");
+  // Taken from the data rather than hard-coded: the reference customers are numbered first, so the
+  // ones the seed adds do not start at 1.
+  const name = all[0]?.customerName ?? "";
+  const byCustomer = await searchOrders(db, name);
   expect(byCustomer.length).toBeGreaterThan(0);
-  expect(byCustomer.every((order) => order.customerName === "Customer 2")).toBe(true);
+  expect(byCustomer.every((order) => order.customerName === name)).toBe(true);
 
   const reference = all[0]?.reference ?? "";
   const byReference = await searchOrders(db, reference);

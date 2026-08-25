@@ -15,7 +15,7 @@
   "demo": {
     "title": "Réactif",
     "intro": "Un petit schéma relationnel — clients, produits, commandes, lignes et étiquettes — lu par jointures et agrégats. Rien sur cet écran ne demande de rafraîchir.",
-    "clear": "Tout supprimer",
+    "clear": "Réinitialiser les données",
     "refetching": "rechargement…",
     "empty": "Aucune commande. Utilisez le bouton en bas à droite.",
     "pipelining": "Lectures en parallèle",

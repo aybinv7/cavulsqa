@@ -69,3 +69,21 @@ In order:
 
 Name the tables the SQL touches and confirm `tables` matches. Say whether a test covers it. Never
 claim a data path works on the strength of a type-check.
+
+## Inserting a parent and its children
+
+The parent and its children go in one transaction, and the parent's id comes from `insertId`:
+
+```ts
+await db.transaction().execute(async (trx) => {
+  const inserted = await trx.insertInto("sales_order").values({ ... }).executeTakeFirstOrThrow();
+  const orderId = Number(inserted.insertId ?? 0);
+  if (!orderId) throw new Error("the order was written but the database reported no id for it");
+  ...
+});
+```
+
+`.returning("id")` looks like the obvious way and is the wrong one: inside an open transaction the
+plugin runs the statement through `query()` and discards its RETURNING rows, so kysely throws
+`no result` from a write that succeeded. `insertId` comes from `last_insert_rowid()` and works on
+both sides of the boundary. Full note in [database.md](../../rules/database.md).

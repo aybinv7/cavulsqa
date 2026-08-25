@@ -26,6 +26,23 @@ together, always: a field in one and not the other is a runtime error the compil
 - A price copied onto an order line is copied deliberately, so a later catalogue change does not
   rewrite history.
 
+## Getting an inserted id
+
+Use `insertId`, never `.returning(...)`:
+
+```ts
+const inserted = await trx.insertInto("sales_order").values({ ... }).executeTakeFirstOrThrow();
+const orderId = Number(inserted.insertId ?? 0);
+if (!orderId) throw new Error("the order was written but the database reported no id for it");
+```
+
+The SQLite plugin runs a statement issued inside an open transaction through `query()`, which
+executes it and drops its RETURNING rows. `.returning("id").executeTakeFirstOrThrow()` therefore
+threw `no result` from an insert that had in fact succeeded — a message that sends you hunting for a
+failed write. `@cavulsqa/mobile-db` now throws a message that says so, and fills `insertId` from
+`last_insert_rowid()` on both sides of a transaction boundary. The sql.js test dialect reports it
+too, so a repository written this way behaves the same in tests as on a device.
+
 ## The web path is not the device path
 
 On a device the database is a real file behind the Capacitor plugin. In a browser it is sql.js in
