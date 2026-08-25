@@ -48,7 +48,7 @@ const navbar = (
 export const features: HomeFeature[] = [
   {
     id: "tabs",
-    icon: "square_grid_2x2_fill",
+    icon: "square_grid2x2_fill",
     color: "blue",
     titleKey: "features.tabs.title",
     subtitleKey: "features.tabs.subtitle",
@@ -68,7 +68,7 @@ export const features: HomeFeature[] = [
   },
   {
     id: "sqlite",
-    icon: "cylinder_split_1x2_fill",
+    icon: "archivebox_fill",
     color: "green",
     titleKey: "features.sqlite.title",
     subtitleKey: "features.sqlite.subtitle",
@@ -78,7 +78,7 @@ export const features: HomeFeature[] = [
   },
   {
     id: "reactive",
-    icon: "arrow_2_circlepath",
+    icon: "arrow2_circlepath",
     color: "teal",
     titleKey: "features.reactive.title",
     subtitleKey: "features.reactive.subtitle",

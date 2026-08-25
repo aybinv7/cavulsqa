@@ -58,7 +58,16 @@
     "backToDraft": "Remettre en brouillon",
     "delete": "Supprimer",
     "searchHint": "Tapez pour chercher par référence ou client.",
-    "noMatches": "Aucun résultat."
+    "noMatches": "Aucun résultat.",
+    "order": "Commande",
+    "orderGone": "Cette commande n'existe plus.",
+    "lineItems": "Lignes",
+    "searchTitle": "Rechercher",
+    "statusDraft": "Brouillon",
+    "statusConfirmed": "Confirmée",
+    "statusDelivered": "Livrée",
+    "deleteConfirm": "Supprimer cette commande et ses lignes ?",
+    "tapHint": "Touchez une commande pour l'ouvrir."
   },
   "metrics": {
     "totalQueries": "Requêtes exécutées",

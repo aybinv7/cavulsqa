@@ -4,7 +4,7 @@
     <p class="mt-0 text-sm opacity-70">{{ t("demo.busHint") }}</p>
 
     <ul v-if="entries.length" class="m-0 list-none p-0 font-mono text-xs">
-      <li v-for="entry in entries" :key="entry.at" class="flex justify-between py-0.5">
+      <li v-for="entry in entries" :key="entry.id" class="flex justify-between py-0.5">
         <span>{{ entry.table }}.{{ entry.type }}</span>
         <span class="opacity-60">{{ formatTime(entry.at) }}</span>
       </li>

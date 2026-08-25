@@ -2,7 +2,7 @@
   <F7Page :page-content="false">
     <F7Navbar :title="t('demo.title')" :sliding="true">
       <F7NavRight>
-        <F7Link icon-f7="magnifyingglass" href="/demo/search/" />
+        <F7Link icon-f7="search" href="/demo/search/" />
         <F7Link icon-f7="chart_bar_alt_fill" panel-open="right" />
       </F7NavRight>
     </F7Navbar>
@@ -25,7 +25,7 @@
         <DemoOrderList
           v-if="orders.length"
           :orders="orders"
-          @open="openActions"
+          @open="openOrder"
           @advance="advance"
           @remove="remove"
         />
@@ -34,7 +34,7 @@
         </F7Block>
 
         <F7Block class="text-center">
-          <p class="m-0 text-xs opacity-45">{{ t("demo.swipeHint") }}</p>
+          <p class="m-0 text-xs opacity-45">{{ t("demo.swipeHint") }} {{ t("demo.tapHint") }}</p>
         </F7Block>
       </F7Tab>
 
@@ -60,7 +60,7 @@
       <F7Icon f7="xmark" />
       <F7FabButtons position="top">
         <F7FabButton fab-close :label="t('demo.newOrder')" @click="createOpen = true">
-          <F7Icon f7="doc_badge_plus" size="20" />
+          <F7Icon f7="square_pencil_fill" size="20" />
         </F7FabButton>
         <F7FabButton fab-close :label="t('demo.seed')" @click="run(seed)">
           <F7Icon f7="wand_stars" size="20" />
@@ -84,7 +84,10 @@ import DemoPipelineBenchmark from "@/modules/demo/components/DemoPipelineBenchma
 import DemoStatCards from "@/modules/demo/components/DemoStatCards.vue";
 import { useReactiveDemo } from "@/modules/demo/composables/useReactiveDemo";
 
+import type { Router } from "framework7/types";
+
 const { t } = useI18n();
+const props = defineProps<{ f7router: Router.Router }>();
 const createOpen = ref(false);
 
 const {
@@ -100,7 +103,6 @@ const {
   platform,
   seed,
   advance,
-  setStatus,
   remove,
   save,
   clear,
@@ -112,36 +114,9 @@ async function run(action: () => Promise<void>): Promise<void> {
   await action();
 }
 
-/** Tapping a row opens the full set; swiping it is the shortcut for the common one. */
-function openActions(order: OrderRow) {
-  f7.actions
-    .create({
-      buttons: [
-        [
-          // `label: true` renders the entry as a heading rather than a button.
-          { text: `${order.reference} · ${order.customerName}`, label: true },
-          {
-            text: t("demo.confirm"),
-            onClick: () => void setStatus(order.id, "confirmed"),
-          },
-          {
-            text: t("demo.deliver"),
-            onClick: () => void setStatus(order.id, "delivered"),
-          },
-          {
-            text: t("demo.backToDraft"),
-            onClick: () => void setStatus(order.id, "draft"),
-          },
-          {
-            text: t("demo.delete"),
-            color: "red",
-            onClick: () => void remove(order.id),
-          },
-        ],
-        [{ text: t("demo.cancel"), strong: true, close: true }],
-      ],
-    })
-    .open();
+/** Tapping a row opens the order; the actions live there, in a bar fixed to the bottom. */
+function openOrder(order: OrderRow) {
+  props.f7router.navigate(`/demo/order/${String(order.id)}/`);
 }
 
 async function onSaveOrder(payload: Parameters<typeof save>[0]): Promise<void> {

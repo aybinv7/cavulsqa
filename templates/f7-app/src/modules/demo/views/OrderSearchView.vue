@@ -1,25 +1,21 @@
 <template>
   <F7Page>
     <!--
-      A search page rather than a searchbar bolted onto the dashboard: it opens focused, shows only
-      matches, and carries none of the surrounding furniture.
+      Framework7's documented shape for a search screen: the searchbar lives in a subnavbar with
+      `:inner="false"`, which is what keeps it on screen instead of collapsing with the title. The
+      previous version put it inside the navbar with `expandable`, so it rendered nothing.
     -->
-    <F7Navbar no-shadow>
-      <F7NavLeft>
-        <F7Link back icon-f7="chevron_left" />
-      </F7NavLeft>
-      <F7Searchbar
-        ref="searchbar"
-        :placeholder="t('demo.searchPlaceholder')"
-        :value="term"
-        :clear-button="true"
-        :disable-button="false"
-        :custom-search="true"
-        inline
-        expandable
-        @input="onInput"
-        @searchbar:clear="term = ''"
-      />
+    <F7Navbar :title="t('demo.searchTitle')" back-link>
+      <F7Subnavbar :inner="false">
+        <F7Searchbar
+          :placeholder="t('demo.searchPlaceholder')"
+          :clear-button="true"
+          :disable-button="false"
+          :custom-search="true"
+          @input="onInput"
+          @searchbar:clear="term = ''"
+        />
+      </F7Subnavbar>
     </F7Navbar>
 
     <F7List v-if="results.length" media-list strong inset dividers class="rounded-2xl! mt-2!">
@@ -28,10 +24,13 @@
         :key="order.id"
         :title="order.reference"
         :after="money(order.totalCents)"
-        :subtitle="`${order.customerName} · ${order.city}`"
+        :link="`/demo/order/${String(order.id)}/`"
       >
         <template #media>
           <F7Icon :f7="statusIcon(order.status)" :color="statusColor(order.status)" size="22" />
+        </template>
+        <template #subtitle>
+          <span class="text-[13px] opacity-60">{{ order.customerName }} · {{ order.city }}</span>
         </template>
       </F7ListItem>
     </F7List>
@@ -78,7 +77,7 @@ const statusIcon = (status: string) =>
       ? "shippingbox_fill"
       : "doc_plaintext";
 
-// Focus on arrival, so the keyboard is already up when the page settles.
+// Focused on arrival, so the keyboard is already up once the page settles.
 onMounted(() => {
   requestAnimationFrame(() => {
     document.querySelector<HTMLInputElement>(".page-current .searchbar input")?.focus();

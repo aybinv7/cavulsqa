@@ -14,6 +14,7 @@ import {
   nextOrderReference,
   saveOrder,
   setOrderStatus,
+  loadOrderDetail,
 } from "../src/domains/sales/sales.repository.js";
 import { migrations } from "../src/shared/database/migrations.js";
 import type { Database } from "../src/shared/database/schema.js";
@@ -258,4 +259,47 @@ test("deleting an order takes its lines with it", async () => {
     .where("order_id", "=", id)
     .execute();
   expect(orphans).toEqual([]);
+});
+
+test("seeding twice adds customers without duplicating the catalogue or throwing", async () => {
+  await seedSampleData(db, 2);
+  const first = await loadDashboardStats(db);
+
+  // This threw "UNIQUE constraint failed: tag.label" before the seed became additive.
+  await seedSampleData(db, 2);
+  const second = await loadDashboardStats(db);
+
+  expect(second.customers).toBe(first.customers + 2);
+  expect(second.orders).toBe(first.orders + 4);
+  // The catalogue is fixed, so a second press must not double it.
+  expect(second.products).toBe(first.products);
+
+  const tags = await db.selectFrom("tag").select("label").execute();
+  expect(new Set(tags.map((tag) => tag.label)).size).toBe(tags.length);
+
+  const names = (await listCustomers(db)).map((customer) => customer.name);
+  expect(new Set(names).size).toBe(names.length);
+});
+
+test("the order detail reads its lines, product names and customer tags", async () => {
+  await seedSampleData(db, 1);
+  const [row] = await searchOrders(db, "");
+  const detail = await loadOrderDetail(db, row?.id ?? 0);
+
+  expect(detail?.reference).toBe(row?.reference);
+  expect(detail?.customerName).toBe(row?.customerName);
+  expect(detail?.lines.length).toBe(row?.lines);
+  expect(detail?.lines.every((line) => line.productName.length > 0)).toBe(true);
+  expect(detail?.totalCents).toBe(row?.totalCents);
+  // Seeding attaches one tag per customer.
+  expect(detail?.tags.length).toBeGreaterThan(0);
+
+  // Each line total is quantity times unit price.
+  for (const line of detail?.lines ?? []) {
+    expect(line.lineTotalCents).toBe(line.quantity * line.unitPriceCents);
+  }
+});
+
+test("the order detail is null for an id that does not exist", async () => {
+  expect(await loadOrderDetail(db, 4242)).toBeNull();
 });

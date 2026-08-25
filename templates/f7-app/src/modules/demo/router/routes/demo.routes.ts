@@ -20,6 +20,15 @@ const demoRoutes: Router.RouteParameters[] = [
       });
     },
   },
+  {
+    name: "demo-order",
+    path: "/demo/order/:id/",
+    async({ resolve }) {
+      void import("@/modules/demo/views/OrderDetailView.vue").then((view) => {
+        resolve({ component: view.default });
+      });
+    },
+  },
 ];
 
 export default demoRoutes;

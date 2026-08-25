@@ -39,11 +39,11 @@
         <template #text>{{ t("detail.transitionNote") }}</template>
       </F7ListItem>
       <F7ListItem :title="t('detail.navbar')" :subtitle="navbarSummary">
-        <template #media><F7Icon f7="rectangle_grid_1x2_fill" color="purple" /></template>
+        <template #media><F7Icon f7="rectangle3_offgrid_fill" color="purple" /></template>
         <template #text>{{ t("detail.navbarNote") }}</template>
       </F7ListItem>
       <F7ListItem :title="t('detail.nesting')" :subtitle="t('detail.nestingAfter')">
-        <template #media><F7Icon f7="square_stack_3d_down_right_fill" color="green" /></template>
+        <template #media><F7Icon f7="square_stack3d_down_right_fill" color="green" /></template>
         <template #text>{{ t("detail.nestingNote") }}</template>
       </F7ListItem>
     </F7List>

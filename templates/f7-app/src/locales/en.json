@@ -58,7 +58,16 @@
     "backToDraft": "Back to draft",
     "delete": "Delete",
     "searchHint": "Type to search orders by reference or customer.",
-    "noMatches": "Nothing matches that search."
+    "noMatches": "Nothing matches that search.",
+    "order": "Order",
+    "orderGone": "That order no longer exists.",
+    "lineItems": "Line items",
+    "searchTitle": "Search orders",
+    "statusDraft": "Draft",
+    "statusConfirmed": "Confirmed",
+    "statusDelivered": "Delivered",
+    "deleteConfirm": "Delete this order and its lines?",
+    "tapHint": "Tap an order to open it."
   },
   "metrics": {
     "totalQueries": "Queries run",

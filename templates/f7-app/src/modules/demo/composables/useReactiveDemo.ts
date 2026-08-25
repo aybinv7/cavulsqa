@@ -17,6 +17,8 @@ import { changeBus, getDatabase, rdb } from "@/shared/database/database";
 import { uniqueQueryKey, useReactiveQuery } from "@/shared/database/queries";
 
 export interface BusEntry {
+  /** Monotonic, because a millisecond timestamp is not unique - several events share one. */
+  id: number;
   at: number;
   table: string;
   type: string;
@@ -67,9 +69,11 @@ export function useReactiveDemo() {
     debounce: 250,
   });
 
+  let busSequence = 0;
   const stopWatching = changeBus.on(["*"], (event: TableChangeEvent) => {
+    busSequence += 1;
     busLog.value = [
-      { at: Date.now(), table: event.table, type: event.type },
+      { id: busSequence, at: Date.now(), table: event.table, type: event.type },
       ...busLog.value,
     ].slice(0, EVENT_LOG_LIMIT);
   });

@@ -144,23 +144,38 @@ export function listCustomers(
 export async function seedSampleData(db: Kysely<Database>, customers = 6): Promise<void> {
   const at = nowISO();
 
+  // Seed is a button people press more than once, so it adds to the data rather than assuming an
+  // empty database. The catalogue is fixed: insert a product only when it is missing, or a second
+  // press doubles every one of them.
+  const existing = await db.selectFrom("product").select("name").execute();
+  const known = new Set(existing.map((product) => product.name));
+
   for (const [name, price] of PRODUCTS) {
+    if (known.has(name)) continue;
     await db.insertInto("product").values({ created_at: at, name, price_cents: price }).execute();
   }
 
+  // `tag.label` is unique, and a plain insert threw "UNIQUE constraint failed" on the second seed.
   for (const label of TAGS) {
-    await db.insertInto("tag").values({ label }).execute();
+    await db
+      .insertInto("tag")
+      .values({ label })
+      .onConflict((oc) => oc.column("label").doNothing())
+      .execute();
   }
 
   const products = await db.selectFrom("product").select(["id", "price_cents"]).execute();
   const tags = await db.selectFrom("tag").select("id").execute();
+
+  // Numbering continues from whatever is already there, so names stay unique across seeds.
+  const offset = (await db.selectFrom("customer").select("id").execute()).length;
 
   for (let index = 0; index < customers; index++) {
     const inserted = await db
       .insertInto("customer")
       .values({
         created_at: at,
-        name: `Customer ${String(index + 1)}`,
+        name: `Customer ${String(offset + index + 1)}`,
         city: CITIES[index % CITIES.length] ?? "Algiers",
       })
       .returning("id")
@@ -305,4 +320,83 @@ export async function setOrderStatus(
   status: "draft" | "confirmed" | "delivered",
 ): Promise<void> {
   await db.updateTable("sales_order").set({ status }).where("id", "=", orderId).execute();
+}
+
+export interface OrderLineRow {
+  id: number;
+  productName: string;
+  quantity: number;
+  unitPriceCents: number;
+  lineTotalCents: number;
+}
+
+export interface OrderDetail {
+  id: number;
+  reference: string;
+  status: "draft" | "confirmed" | "delivered";
+  createdAt: string;
+  customerName: string;
+  city: string;
+  tags: string[];
+  lines: OrderLineRow[];
+  totalCents: number;
+}
+
+/**
+ * The detail read touches five of the six tables - order, customer, line, product and the tag
+ * junction - which is what makes it a fair demonstration: any write in that set refreshes it.
+ */
+export async function loadOrderDetail(
+  db: Kysely<Database>,
+  orderId: number,
+): Promise<OrderDetail | null> {
+  const header = await db
+    .selectFrom("sales_order")
+    .innerJoin("customer", "customer.id", "sales_order.customer_id")
+    .select([
+      "sales_order.id as id",
+      "sales_order.reference as reference",
+      "sales_order.status as status",
+      "sales_order.created_at as createdAt",
+      "customer.id as customerId",
+      "customer.name as customerName",
+      "customer.city as city",
+    ])
+    .where("sales_order.id", "=", orderId)
+    .executeTakeFirst();
+
+  if (!header) return null;
+
+  const [lines, tags] = await Promise.all([
+    db
+      .selectFrom("order_line")
+      .innerJoin("product", "product.id", "order_line.product_id")
+      .select([
+        "order_line.id as id",
+        "product.name as productName",
+        "order_line.quantity as quantity",
+        "order_line.unit_price_cents as unitPriceCents",
+        sql<number>`order_line.quantity * order_line.unit_price_cents`.as("lineTotalCents"),
+      ])
+      .where("order_line.order_id", "=", orderId)
+      .execute(),
+    db
+      .selectFrom("customer_tag")
+      .innerJoin("tag", "tag.id", "customer_tag.tag_id")
+      .select("tag.label as label")
+      .where("customer_tag.customer_id", "=", header.customerId)
+      .execute(),
+  ]);
+
+  return {
+    id: header.id,
+    reference: header.reference,
+    status: header.status,
+    createdAt: header.createdAt,
+    customerName: header.customerName,
+    city: header.city,
+    tags: tags.map((row) => row.label),
+    lines: lines.map((line) => ({ ...line, lineTotalCents: Number(line.lineTotalCents) })),
+    totalCents: lines.reduce((sum, line) => sum + Number(line.lineTotalCents), 0),
+  };
 }
