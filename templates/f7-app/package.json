@@ -25,7 +25,6 @@
     "@cavulsqa/reactive-vue": "workspace:*",
     "@tailwindcss/vite": "catalog:",
     "@vueuse/core": "catalog:",
-    "capacitor-sqlite-kysely": "^1.0.2",
     "framework7": "^9.0.2",
     "framework7-icons": "^5.0.5",
     "framework7-vue": "^8.3.4",
