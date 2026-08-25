@@ -1,0 +1,10 @@
+{
+  "tabs": { "home": "Home", "settings": "Settings" },
+  "home": {
+    "title": "Home",
+    "empty": "No notes yet",
+    "add": "Add note",
+    "sample": "A note written locally"
+  },
+  "settings": { "title": "Settings", "queries": "Queries run", "avgTime": "Average query time" }
+}

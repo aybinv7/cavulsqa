@@ -43,7 +43,7 @@
     "@types/node": "^26.1.1",
     "bumpp": "^11.1.0",
     "capacitor-sqlite-kysely": "^1.0.2",
-    "kysely": "^0.29.5",
+    "kysely": "catalog:",
     "sql.js": "1.13.0",
     "typescript": "^7.0.2",
     "vite": "catalog:",

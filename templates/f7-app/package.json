@@ -1,0 +1,42 @@
+{
+  "name": "@cavulsqa/template-f7-app",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Vue 3 + Framework7 + Capacitor + SQLite starter: tabbed shell, domains/modules/shared layout, native keyboard and back-button handling.",
+  "type": "module",
+  "scripts": {
+    "dev": "vp dev",
+    "build": "vue-tsc --noEmit && vp build",
+    "type-check": "vue-tsc --noEmit",
+    "test": "vp test",
+    "check": "vp check"
+  },
+  "dependencies": {
+    "@capacitor-community/sqlite": "^7.0.2",
+    "@capacitor/app": "^8.0.0",
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/keyboard": "^8.0.0",
+    "@capacitor/preferences": "^8.0.0",
+    "@capacitor/splash-screen": "^8.0.0",
+    "@capacitor/status-bar": "^8.0.0",
+    "@cavulsqa/mobile-db": "workspace:*",
+    "@cavulsqa/reactive-db": "workspace:*",
+    "@cavulsqa/reactive-vue": "workspace:*",
+    "capacitor-sqlite-kysely": "^1.0.2",
+    "framework7": "^9.0.2",
+    "framework7-icons": "^5.0.5",
+    "framework7-vue": "^8.3.4",
+    "kysely": "catalog:",
+    "vue": "^3.5.0",
+    "vue-i18n": "^11.2.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.0.0",
+    "@types/node": "catalog:",
+    "@vitejs/plugin-vue": "^6.0.3",
+    "typescript": "^5.9.3",
+    "vite": "catalog:",
+    "vite-plus": "catalog:",
+    "vue-tsc": "^3.2.4"
+  }
+}

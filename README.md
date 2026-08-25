@@ -43,6 +43,20 @@ vp create vite:library --directory packages/<name>      # a new package
 vp create vite:application --directory apps/<name>      # a new app
 ```
 
+## Templates
+
+`templates/f7-app` is the starter: Vue 3 + Framework7 + Capacitor + SQLite, a tabbed shell, and the
+`domains` / `modules` / `shared` layout. It is a workspace package, so `vp check` type-checks it
+against these packages on every change - a template CI does not build is a template that rots.
+
+What it carries beyond a blank app:
+
+- Android back button that closes the topmost layer in the right order before it navigates
+- Keyboard handling: scroll-into-view across every phase of the transition, tab bar out of the way
+- Status bar overlaying the web view, with the page owning the inset
+- Tabs defined as data in `app/tabs.ts`, each its own Framework7 view with its own history
+- SQLite wired through `@cavulsqa/*` with one change bus shared by writes and reactive queries
+
 ## Planned
 
 - `apps/starter` — a Capacitor + Vue app template that consumes these packages, kept honest by

@@ -1,0 +1,10 @@
+{
+  "tabs": { "home": "Accueil", "settings": "Réglages" },
+  "home": {
+    "title": "Accueil",
+    "empty": "Aucune note",
+    "add": "Ajouter une note",
+    "sample": "Une note enregistrée localement"
+  },
+  "settings": { "title": "Réglages", "queries": "Requêtes exécutées", "avgTime": "Temps moyen" }
+}
