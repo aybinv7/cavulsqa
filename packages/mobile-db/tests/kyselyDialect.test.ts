@@ -20,7 +20,11 @@ function stubConnection(opts: { inTransaction: boolean; changes: number }) {
     },
     query: async (sql: string) => {
       calls.push(`query:${sql}`);
-      if (/^\s*SELECT changes\(\)/i.test(sql)) return { values: [{ changes: opts.changes }] };
+      if (/^\s*SELECT changes\(\)/i.test(sql)) {
+        return { values: [{ changes: opts.changes, insert_id: 7 }] };
+      }
+      // The plugin executes a statement handed to query() but hands back none of its RETURNING
+      // rows. That is the whole reason the dialect has to ask for the id separately.
       return { values: [] };
     },
   };
@@ -72,4 +76,44 @@ test("distinguishes a compare-and-set that matched nothing, inside a transaction
     .executeTakeFirst();
 
   expect(result.numUpdatedRows).toBe(0n);
+});
+
+test("reports the inserted id for an insert inside a transaction", async () => {
+  const { db, calls } = stubConnection({ inTransaction: true, changes: 1 });
+
+  const result = await db
+    .insertInto("sale_order")
+    .values({ reference: "SO-0001" })
+    .executeTakeFirstOrThrow();
+
+  expect(result.insertId).toBe(7n);
+  expect(calls.some((c) => /last_insert_rowid\(\)/i.test(c))).toBe(true);
+});
+
+test("does not report an inserted id for an update inside a transaction", async () => {
+  const { db } = stubConnection({ inTransaction: true, changes: 1 });
+
+  const result = await db
+    .updateTable("sale_order")
+    .set({ reference: "SO-0002" })
+    .where("id", "=", 1)
+    .executeTakeFirst();
+
+  // last_insert_rowid() still holds whatever the last insert on this connection set; reporting it
+  // on an update would name a row this statement never touched.
+  expect(result.numUpdatedRows).toBe(1n);
+});
+
+test("says what happened when RETURNING is dropped inside a transaction", async () => {
+  const { db } = stubConnection({ inTransaction: true, changes: 1 });
+
+  // Before this, the insert succeeded and kysely threw "no result" - a message that sends you
+  // looking for a failed write that never failed.
+  await expect(
+    db
+      .insertInto("sale_order")
+      .values({ reference: "SO-0003" })
+      .returning("id")
+      .executeTakeFirstOrThrow(),
+  ).rejects.toThrow(/insertId/);
 });

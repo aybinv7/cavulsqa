@@ -25,10 +25,25 @@ class SqlJsConnection implements DatabaseConnection {
       while (statement.step()) {
         rows.push(statement.getAsObject() as R);
       }
-      return { rows, numAffectedRows: BigInt(this.#db.getRowsModified()) };
+      return {
+        rows,
+        numAffectedRows: BigInt(this.#db.getRowsModified()),
+        insertId: this.#lastInsertId(compiledQuery.sql),
+      };
     } finally {
       statement.free();
     }
+  }
+
+  /**
+   * The native dialect reports an inserted id even where RETURNING cannot, so a repository written
+   * against `insertId` has to behave the same here or the tests pass on a path the device does not
+   * take.
+   */
+  #lastInsertId(sql: string): bigint | undefined {
+    if (!/^\s*insert\b/i.test(sql)) return undefined;
+    const rowid = this.#db.exec("SELECT last_insert_rowid()")[0]?.values[0]?.[0];
+    return typeof rowid === "number" ? BigInt(rowid) : undefined;
   }
 
   // eslint-disable-next-line require-yield

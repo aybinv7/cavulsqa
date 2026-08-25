@@ -155,19 +155,41 @@ class SharedSQLiteConnection implements DatabaseConnection {
 
   /**
    * `run()` opens its own transaction, so a write issued while one is already open has to go
-   * through `query()` instead. `query()` reports no change count, which leaves
-   * `numAffectedRows` undefined — and a compare-and-set write then cannot tell "matched one
-   * row" from "matched nothing", so it always reads as nothing. Ask SQLite for the count
-   * directly; `changes()` reports the most recent mutation on this connection.
+   * through `query()` instead. `query()` reports neither a change count nor an inserted id,
+   * which leaves `numAffectedRows` undefined — and a compare-and-set write then cannot tell
+   * "matched one row" from "matched nothing", so it always reads as nothing. Ask SQLite for
+   * both directly; `changes()` and `last_insert_rowid()` describe the most recent mutation on
+   * this connection, and one extra query answers them together.
    */
   async #writeInTransaction<R>(compiledQuery: CompiledQuery): Promise<QueryResult<R>> {
     const written = await this.#read<R>(compiledQuery);
-    const { values } = await this.#options.database.query("SELECT changes() AS changes", []);
-    const changes = (values?.[0] as { changes?: number } | undefined)?.changes;
+    const { values } = await this.#options.database.query(
+      "SELECT changes() AS changes, last_insert_rowid() AS insert_id",
+      [],
+    );
+    const meta = values?.[0] as { changes?: number; insert_id?: number } | undefined;
+    const inserting = /^\s*insert\b/i.test(compiledQuery.sql);
+
+    /**
+     * `query()` executes the statement but discards any RETURNING rows, so kysely's
+     * `.returning(...)` silently resolves to nothing inside a transaction — and
+     * `executeTakeFirstOrThrow()` then throws "no result" from a write that in fact succeeded.
+     * Say what actually happened instead, and point at the way that works. This is not a blanket
+     * refusal: if a platform does hand the rows back, they are above and nothing throws.
+     */
+    if (written.rows.length === 0 && /\breturning\b/i.test(compiledQuery.sql)) {
+      throw new Error(
+        "[mobile-db] RETURNING yields no rows inside a transaction on this platform: the SQLite " +
+          "plugin's query() runs the statement but drops them. The write itself succeeded. For an " +
+          "inserted id read `insertId` from the result; for anything else, select the row back.",
+      );
+    }
 
     return {
       ...written,
-      numAffectedRows: changes == null ? undefined : BigInt(changes),
+      numAffectedRows: meta?.changes == null ? undefined : BigInt(meta.changes),
+      // Only an insert moves last_insert_rowid(); on an update it would report a stale row.
+      insertId: inserting && meta?.insert_id != null ? BigInt(meta.insert_id) : undefined,
     };
   }
 }
