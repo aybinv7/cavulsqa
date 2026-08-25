@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["node"],
+    /**
+     * vite-plus bundles its own Vite while the unplugin packages depend on Vite as a peer, so the
+     * plugin array is compared across two copies of the same types and TS gives up with
+     * "excessive stack depth". `vp check` type-checks this file with a single resolution, so the
+     * comparison never happens there - which is why the app project below leaves it out.
+     */
+    "skipLibCheck": true
+  },
+  "include": ["vite.config.ts"]
+}

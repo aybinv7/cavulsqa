@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "f7-app",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@cavulsqa/template-f7-app", "dev"],
+      "port": 5173
+    }
+  ]
+}

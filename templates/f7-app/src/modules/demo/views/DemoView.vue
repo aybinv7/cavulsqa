@@ -36,6 +36,8 @@
       :result="pipeline"
       :measuring="measuring"
       :reads-per-run="readsPerRun"
+      :is-native="isNative"
+      :platform="platform"
       @measure="measurePipelining"
     />
 
@@ -64,8 +66,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
-import { useI18n } from "vue-i18n";
 import DemoWriteControls from "@/modules/demo/components/DemoWriteControls.vue";
 import DemoBusLog from "@/modules/demo/components/DemoBusLog.vue";
 import DemoPipelineBenchmark from "@/modules/demo/components/DemoPipelineBenchmark.vue";
@@ -89,6 +89,8 @@ const {
   clearAll,
   measurePipelining,
   readsPerRun,
+  isNative,
+  platform,
 } = useReactiveDemo();
 
 const refetches = computed(() => Object.entries(metrics.refetchesByTable.value));

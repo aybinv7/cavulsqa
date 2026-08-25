@@ -17,8 +17,6 @@
 </template>
 
 <script setup lang="ts">
-import { f7 } from "framework7-vue";
-import { useI18n } from "vue-i18n";
 import FeatureItem from "@/modules/home/components/FeatureItem.vue";
 import { templateFeatures } from "@/modules/home/composables/useTemplateFeatures";
 

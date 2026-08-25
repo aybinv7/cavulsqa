@@ -1,5 +1,3 @@
-import { computed, ref, type ComputedRef } from "vue";
-
 // Shell-level state: the tab bar is rendered by the shell, but what hides it (a keyboard, a full
 // screen page) happens elsewhere in the tree.
 const keyboardOpen = ref(false);

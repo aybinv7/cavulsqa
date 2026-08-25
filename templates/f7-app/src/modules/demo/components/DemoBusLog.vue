@@ -14,7 +14,6 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
 import type { BusEntry } from "@/modules/demo/composables/useReactiveDemo";
 
 defineProps<{ entries: BusEntry[] }>();

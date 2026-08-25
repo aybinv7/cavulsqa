@@ -16,6 +16,13 @@ catalog:
   vue: ^3.5.41
   "@tailwindcss/vite": ^4.3.3
   tailwindcss: ^4.3.3
+  jeep-sqlite: ^2.8.0
+  sql.js: 1.13.0
+  unplugin-auto-import: ^21.1.0
+  unplugin-vue-components: ^32.1.0
+  unplugin-icons: ^23.0.1
+  "@intlify/unplugin-vue-i18n": ^11.2.5
+  "@vueuse/core": ^14.4.0
 overrides:
   vite: "catalog:"
 peerDependencyRules:
@@ -34,3 +41,5 @@ minimumReleaseAgeExclude:
   - "@voidzero-dev/vite-plus-win32-arm64-msvc@0.3.0"
   - "@voidzero-dev/vite-plus-win32-x64-msvc@0.3.0"
   - vite-plus@0.3.0
+allowBuilds:
+  esbuild: set this to true or false

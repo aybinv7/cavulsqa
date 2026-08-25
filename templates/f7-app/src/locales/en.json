@@ -1,5 +1,9 @@
 {
-  "tabs": { "home": "Overview", "demo": "Reactive", "settings": "Settings" },
+  "tabs": {
+    "home": "Overview",
+    "demo": "Reactive",
+    "settings": "Settings"
+  },
   "home": {
     "title": "Overview",
     "intro": "A Vue 3 + Framework7 + Capacitor app with a local SQLite database that screens read reactively. Every item below is wired and working, not scaffolding to fill in.",
@@ -23,13 +27,16 @@
     "busHint": "Every event a write published. The list is subscribed to the same stream.",
     "busEmpty": "No events yet.",
     "pipelining": "Read pipelining",
-    "pipeliningHint": "{count} reads issued together, then the same {count} awaited one at a time. Reads stay outside the write lock, so the first should be several times faster.",
     "measure": "Measure",
     "measuring": "Measuring…",
     "parallel": "Together",
     "sequential": "One by one",
     "ratio": "Faster by",
-    "metrics": "Live metrics"
+    "metrics": "Live metrics",
+    "pipeliningNative": "{count} reads issued together, then the same {count} awaited one at a time. Reads stay outside the write lock and the native bridge pipelines them, so together should win by several times.",
+    "pipeliningWeb": "{count} reads issued together, then the same {count} awaited one at a time. In a browser this measures nothing useful — see the note under the result.",
+    "ratioNative": "Above 1x means concurrent reads are genuinely overlapping on the native bridge. Near 1x would mean something is serialising them.",
+    "ratioWeb": "Expected on {platform}: the web path is sql.js in memory with no bridge to pipeline, so issuing reads together buys nothing and adds a little overhead. The several-times gain is a device property — measure it there."
   },
   "metrics": {
     "totalQueries": "Queries run",
@@ -46,5 +53,8 @@
     "noQueries": "No queries recorded yet.",
     "resetMetrics": "Reset metrics"
   },
-  "errors": { "notFoundTitle": "Not found", "notFound": "That screen does not exist." }
+  "errors": {
+    "notFoundTitle": "Not found",
+    "notFound": "That screen does not exist."
+  }
 }

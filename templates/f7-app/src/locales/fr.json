@@ -1,5 +1,9 @@
 {
-  "tabs": { "home": "Aperçu", "demo": "Réactif", "settings": "Réglages" },
+  "tabs": {
+    "home": "Aperçu",
+    "demo": "Réactif",
+    "settings": "Réglages"
+  },
   "home": {
     "title": "Aperçu",
     "intro": "Une application Vue 3 + Framework7 + Capacitor avec une base SQLite locale que les écrans lisent de façon réactive. Chaque élément ci-dessous fonctionne déjà.",
@@ -23,13 +27,16 @@
     "busHint": "Chaque événement publié par une écriture. La liste écoute le même flux.",
     "busEmpty": "Aucun événement.",
     "pipelining": "Lectures en parallèle",
-    "pipeliningHint": "{count} lectures lancées ensemble, puis les mêmes {count} une par une. Les lectures restent hors du verrou d'écriture.",
     "measure": "Mesurer",
     "measuring": "Mesure…",
     "parallel": "Ensemble",
     "sequential": "Une par une",
     "ratio": "Plus rapide de",
-    "metrics": "Métriques en direct"
+    "metrics": "Métriques en direct",
+    "pipeliningNative": "{count} lectures lancées ensemble, puis les mêmes {count} une par une. Les lectures restent hors du verrou d'écriture et le pont natif les parallélise : « ensemble » devrait gagner largement.",
+    "pipeliningWeb": "{count} lectures lancées ensemble, puis les mêmes {count} une par une. Dans un navigateur, cette mesure n'a pas de sens — voir la note sous le résultat.",
+    "ratioNative": "Au-dessus de 1x, les lectures se chevauchent réellement sur le pont natif. Proche de 1x signifierait que quelque chose les sérialise.",
+    "ratioWeb": "Attendu sur {platform} : le chemin web est sql.js en mémoire, sans pont à paralléliser — les lancer ensemble n'apporte rien. Le gain se mesure sur un appareil."
   },
   "metrics": {
     "totalQueries": "Requêtes exécutées",
@@ -46,5 +53,8 @@
     "noQueries": "Aucune requête enregistrée.",
     "resetMetrics": "Réinitialiser"
   },
-  "errors": { "notFoundTitle": "Introuvable", "notFound": "Cet écran n'existe pas." }
+  "errors": {
+    "notFoundTitle": "Introuvable",
+    "notFound": "Cet écran n'existe pas."
+  }
 }

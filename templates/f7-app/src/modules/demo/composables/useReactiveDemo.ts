@@ -1,4 +1,4 @@
-import { computed, onUnmounted, ref, type ComputedRef, type Ref } from "vue";
+import { Capacitor } from "@capacitor/core";
 import type { TableChangeEvent } from "@cavulsqa/reactive-db";
 import { changeBus, getDatabase, rdb } from "@/shared/database/database";
 import { uniqueQueryKey, useQueryMetrics, useReactiveQuery } from "@/shared/database/queries";
@@ -86,9 +86,15 @@ export function useReactiveDemo() {
   }
 
   /**
-   * Reads issued together against reads awaited one by one. The ratio is the point: the native
-   * bridge pipelines concurrent calls, and the dialect deliberately keeps reads out of the write
-   * lock so a screen loading with `Promise.all` pays once rather than N times.
+   * Reads issued together against reads awaited one by one.
+   *
+   * On a device the ratio is the point: the native bridge pipelines concurrent calls, and the
+   * dialect keeps reads out of the write lock, so a screen loading with `Promise.all` pays once
+   * rather than N times - measured around 5x.
+   *
+   * In a browser it will sit near 1x, or below it. The web path is sql.js in memory with no bridge
+   * to pipeline, so concurrency buys nothing and `Promise.all` only adds overhead. That is not a
+   * regression, and the screen says so rather than reporting a number that looks like one.
    */
   async function measurePipelining() {
     measuring.value = true;
@@ -135,5 +141,7 @@ export function useReactiveDemo() {
     clearAll,
     measurePipelining,
     readsPerRun: READS_PER_RUN,
+    isNative: Capacitor.isNativePlatform(),
+    platform: Capacitor.getPlatform(),
   };
 }

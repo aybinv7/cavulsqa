@@ -13,8 +13,6 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-
 defineProps<{ writing: boolean }>();
 defineEmits<{ addOne: []; addMany: []; clear: [] }>();
 

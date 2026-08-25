@@ -44,7 +44,6 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
 import { useQueryMetrics } from "@/shared/database/queries";
 
 const { t, locale, availableLocales } = useI18n();

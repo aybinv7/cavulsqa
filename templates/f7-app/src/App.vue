@@ -26,9 +26,6 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from "vue";
-import { f7ready } from "framework7-vue";
-import { useI18n } from "vue-i18n";
 import { tabs } from "@/app/tabs";
 import { framework7Parameters } from "@/plugins/framework7.plugin";
 import { initCapacitor } from "@/plugins/capacitor";
