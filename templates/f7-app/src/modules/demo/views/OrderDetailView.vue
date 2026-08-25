@@ -4,14 +4,21 @@
       :title="order?.reference ?? t('demo.order')"
       :subtitle="order?.customerName"
       back-link
-    />
+    >
+      <F7NavRight>
+        <F7Link v-if="order" icon-f7="trash" @click="confirmDelete" />
+      </F7NavRight>
+    </F7Navbar>
 
     <template v-if="order">
       <F7Block strong inset class="rounded-2xl! mt-3!">
-        <div class="flex items-center justify-between">
+        <div class="flex items-start justify-between">
           <div>
             <F7Chip :text="order.status" :color="statusColor" />
-            <div class="mt-1 text-[13px] opacity-60">{{ order.city }}</div>
+            <div class="mt-1.5 text-[13px] opacity-60">{{ order.city }}</div>
+            <div v-if="order.tags.length" class="mt-2 flex flex-wrap gap-1.5">
+              <F7Chip v-for="tag in order.tags" :key="tag" :text="tag" outline />
+            </div>
           </div>
           <div class="text-right">
             <div class="text-[11px] uppercase tracking-wide opacity-55">{{ t("demo.total") }}</div>
@@ -20,14 +27,14 @@
             </div>
           </div>
         </div>
-
-        <div v-if="order.tags.length" class="mt-3 flex flex-wrap gap-1.5">
-          <F7Chip v-for="tag in order.tags" :key="tag" :text="tag" outline />
-        </div>
       </F7Block>
 
       <F7BlockTitle>{{ t("demo.lineItems") }}</F7BlockTitle>
-      <F7List strong inset dividers class="rounded-2xl!">
+      <!--
+        media-list, not a plain list: Framework7 only renders `subtitle` in a media list, so the
+        quantity and unit price were being dropped silently.
+      -->
+      <F7List media-list strong inset dividers class="rounded-2xl!">
         <F7ListItem
           v-for="line in order.lines"
           :key="line.id"
@@ -35,15 +42,12 @@
           :after="money(line.lineTotalCents)"
         >
           <template #subtitle>
-            <span class="text-[13px] opacity-60">
+            <span class="text-[13px] tabular-nums opacity-60">
               {{ line.quantity }} × {{ money(line.unitPriceCents) }}
             </span>
           </template>
         </F7ListItem>
       </F7List>
-
-      <!-- Room to scroll past the fixed action bar. -->
-      <div class="h-24" />
     </template>
 
     <F7Block v-else strong inset class="rounded-2xl! mt-3!">
@@ -51,31 +55,24 @@
     </F7Block>
 
     <!--
-      Actions live in a fixed bar at the bottom rather than an action sheet: on a detail screen they
-      are the point of the page, so they should be reachable without opening anything.
+      A bottom toolbar rather than a hand-built bar: Framework7 spaces its links evenly and keeps
+      them clear of the safe area, which the previous stacked segmented control did neither of.
+      Delete moved to the navbar - it does not belong next to three statuses you pick between.
     -->
-    <div v-if="order" slot="fixed" class="order-actions">
-      <F7Segmented raised>
-        <F7Button :active="order.status === 'draft'" @click="apply('draft')">
-          {{ t("demo.statusDraft") }}
-        </F7Button>
-        <F7Button :active="order.status === 'confirmed'" @click="apply('confirmed')">
-          {{ t("demo.statusConfirmed") }}
-        </F7Button>
-        <F7Button :active="order.status === 'delivered'" @click="apply('delivered')">
-          {{ t("demo.statusDelivered") }}
-        </F7Button>
-      </F7Segmented>
-
-      <F7Button class="mt-2" color="red" @click="confirmDelete">
-        {{ t("demo.delete") }}
-      </F7Button>
-    </div>
+    <F7Toolbar v-if="order" bottom>
+      <F7Link
+        v-for="option in statuses"
+        :key="option"
+        :class="{ 'text-color-primary font-semibold': order.status === option }"
+        @click="apply(option)"
+      >
+        {{ t(`demo.status${option.charAt(0).toUpperCase()}${option.slice(1)}`) }}
+      </F7Link>
+    </F7Toolbar>
   </F7Page>
 </template>
 
 <script setup lang="ts">
-import { useHiddenTabbar } from "@/shared/composables/useTabbarVisibility";
 import type { Router } from "framework7/types";
 import {
   deleteOrder,
@@ -83,6 +80,7 @@ import {
   setOrderStatus,
   type OrderDetail,
 } from "@/domains/sales/sales.repository";
+import { useHiddenTabbar } from "@/shared/composables/useTabbarVisibility";
 import { getDatabase, rdb } from "@/shared/database/database";
 import { uniqueQueryKey, useReactiveQuery } from "@/shared/database/queries";
 
@@ -90,13 +88,15 @@ const { t } = useI18n();
 
 // A pushed page owns the whole screen; the tab bar belongs to the tab roots.
 useHiddenTabbar();
+
 const props = defineProps<{ f7route: Router.Route; f7router: Router.Router }>();
 
 const orderId = Number(props.f7route.params.id ?? 0);
+const statuses = ["draft", "confirmed", "delivered"] as const;
 
 /**
  * Reads five tables, so any write in that set refreshes this page - including the status changes
- * made from the bar below, which is why nothing here calls refetch by hand.
+ * made from the toolbar below, which is why nothing here calls refetch by hand.
  */
 const query = useReactiveQuery(() => loadOrderDetail(getDatabase().db, orderId), {
   tables: ["sales_order", "order_line", "customer", "product", "customer_tag"],
@@ -116,7 +116,7 @@ const statusColor = computed(() =>
       : "gray",
 );
 
-async function apply(status: "draft" | "confirmed" | "delivered") {
+async function apply(status: (typeof statuses)[number]) {
   if (!order.value || order.value.status === status) return;
   await setOrderStatus(rdb, orderId, status);
 }
@@ -129,15 +129,3 @@ function confirmDelete() {
   });
 }
 </script>
-
-<style scoped>
-.order-actions {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  padding: 12px 16px calc(12px + var(--f7-safe-area-bottom, 0px));
-  background: var(--f7-page-bg-color);
-  box-shadow: 0 -8px 24px rgb(0 0 0 / 12%);
-}
-</style>
