@@ -86,13 +86,13 @@ jobs:
       # Capacitor 8 compiles against Java 21; the runner's default JDK is older and gradle fails
       # with "invalid source release: 21" deep inside capacitor-android.
       - uses: actions/setup-java@v5
-        if: inputs.android != false
+        if: github.event_name == 'push' || inputs.android
         with:
           distribution: temurin
           java-version: "21"
 
       - name: Add the android platform and assemble
-        if: inputs.android != false
+        if: github.event_name == 'push' || inputs.android
         working-directory: ${{ runner.temp }}/smoke
         run: |
           npx cap add android
@@ -100,7 +100,7 @@ jobs:
           cd android && ./gradlew --no-daemon assembleDebug
 
       - name: Keep the APK
-        if: inputs.android != false
+        if: github.event_name == 'push' || inputs.android
         uses: actions/upload-artifact@v4
         with:
           name: smoke-debug-apk
