@@ -1,0 +1,61 @@
+{
+  "name": "@cavulsqa/create",
+  "version": "0.1.0",
+  "description": "Create a Vue + Framework7 + Capacitor + SQLite app from the cavulsqa templates.",
+  "keywords": [
+    "capacitor",
+    "create",
+    "framework7",
+    "scaffold",
+    "sqlite",
+    "template",
+    "vue"
+  ],
+  "homepage": "https://github.com/aybinv7/cavulsqa/tree/main/packages/create#readme",
+  "bugs": {
+    "url": "https://github.com/aybinv7/cavulsqa/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aybinv7/cavulsqa.git",
+    "directory": "packages/create"
+  },
+  "bin": {
+    "create-cavulsqa": "./bin/create.mjs"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "templates"
+  ],
+  "type": "module",
+  "exports": {
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "node scripts/bundleTemplates.mjs",
+    "check": "vp check",
+    "test": "vp test",
+    "prepack": "node scripts/bundleTemplates.mjs"
+  },
+  "devDependencies": {
+    "vite": "catalog:",
+    "vite-plus": "catalog:"
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "createConfig": {
+    "templates": [
+      {
+        "name": "f7-app",
+        "description": "Vue 3 + Framework7 + Capacitor + SQLite, tabbed shell, offline-first data layer",
+        "template": "./templates/f7-app"
+      }
+    ]
+  }
+}

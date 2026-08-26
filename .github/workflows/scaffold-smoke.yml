@@ -16,7 +16,7 @@ on:
     branches: [main]
     paths:
       - "templates/**"
-      - "tools/scaffold.mjs"
+      - "packages/create/**"
       - ".github/workflows/scaffold-smoke.yml"
   workflow_dispatch:
     inputs:
@@ -46,8 +46,13 @@ jobs:
       # Outside the checkout on purpose: inside it, pnpm would treat the generated app as a
       # workspace member and link the packages instead of downloading them, which is the one thing
       # this job exists to avoid.
+      # Through the creator's own bundled templates, which is what a user downloads - not
+      # straight out of templates/, which would skip the step that resolves the protocols.
+      - name: Bundle the templates into the creator
+        run: node packages/create/scripts/bundleTemplates.mjs
+
       - name: Generate
-        run: node tools/scaffold.mjs --name smoke --out "$RUNNER_TEMP/smoke"
+        run: node packages/create/bin/create.mjs --name smoke --dir "$RUNNER_TEMP/smoke" --yes
 
       - name: No workspace protocols survived
         working-directory: ${{ runner.temp }}/smoke

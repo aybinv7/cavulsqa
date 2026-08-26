@@ -31,3 +31,6 @@ dist-ssr
 
 # AI agent worktrees
 .claude/worktrees/
+
+# Bundled by packages/create/scripts/bundleTemplates.mjs at build time.
+packages/create/templates
