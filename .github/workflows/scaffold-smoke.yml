@@ -1,0 +1,95 @@
+name: scaffold-smoke
+
+# Generates an app from the template on a clean runner and builds it there.
+#
+# This is the only honest test of the template. On a development machine the app resolves the
+# packages through the workspace, installs out of a warm store, and type-checks against declaration
+# files a previous dev run happened to leave behind - so it passes for reasons a new user does not
+# have. Here there is no workspace, no store and no leftovers: the generated app is outside the
+# repository and installs `@cavulsqa/*` from the public registry like anybody else would.
+#
+# It runs `npx cap add android` and assembles a debug APK, because "it type-checks" is not the same
+# claim as "it builds for a device", and the second one is what the template promises.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "templates/**"
+      - "tools/scaffold.mjs"
+      - ".github/workflows/scaffold-smoke.yml"
+  workflow_dispatch:
+    inputs:
+      android:
+        description: "Also assemble a debug APK"
+        type: boolean
+        default: true
+
+concurrency:
+  group: scaffold-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  scaffold:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: voidzero-dev/setup-vp@07d0b0e993009eb3b908ea06e49e88e933b728a2 # v1.17.0
+        with:
+          node-version: "24"
+          cache: true
+
+      - name: Provide pnpm
+        run: corepack enable pnpm
+
+      # Outside the checkout on purpose: inside it, pnpm would treat the generated app as a
+      # workspace member and link the packages instead of downloading them, which is the one thing
+      # this job exists to avoid.
+      - name: Generate
+        run: node tools/scaffold.mjs --name smoke --out "$RUNNER_TEMP/smoke"
+
+      - name: No workspace protocols survived
+        working-directory: ${{ runner.temp }}/smoke
+        run: |
+          if grep -nE '"(workspace:|catalog:)' package.json; then
+            echo "::error title=Unresolved protocol::the generated manifest still uses workspace: or catalog:"
+            exit 1
+          fi
+          node -p "JSON.stringify(require('./package.json').dependencies, null, 2)"
+
+      - name: Install from the registry
+        working-directory: ${{ runner.temp }}/smoke
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Which @cavulsqa versions actually resolved
+        working-directory: ${{ runner.temp }}/smoke
+        run: pnpm list --depth 0 @cavulsqa/mobile-db @cavulsqa/reactive-db @cavulsqa/reactive-vue
+
+      - name: Type-check
+        working-directory: ${{ runner.temp }}/smoke
+        run: pnpm type-check
+
+      - name: Test
+        working-directory: ${{ runner.temp }}/smoke
+        run: pnpm test
+
+      - name: Build the web bundle
+        working-directory: ${{ runner.temp }}/smoke
+        run: pnpm build
+
+      - name: Add the android platform and assemble
+        if: inputs.android != false
+        working-directory: ${{ runner.temp }}/smoke
+        run: |
+          npx cap add android
+          npx cap sync android
+          cd android && ./gradlew --no-daemon assembleDebug
+
+      - name: Keep the APK
+        if: inputs.android != false
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-debug-apk
+          path: ${{ runner.temp }}/smoke/android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
