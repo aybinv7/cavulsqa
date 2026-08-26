@@ -58,7 +58,7 @@ function copyTree(from, to, transform) {
  * The template's dependencies are already concrete - `bundleTemplates.mjs` resolved them when the
  * creator was packed - so nothing here has to know about workspaces or catalogs.
  */
-export function scaffold({ templateDir, out, name, appId, appName }) {
+export function scaffold({ templateDir, out, name, appId, appName, engine, pragmas }) {
   if (!existsSync(templateDir)) throw new Error(`no template at ${templateDir}`);
   if (existsSync(out)) throw new Error(`${out} already exists`);
 
@@ -72,6 +72,20 @@ export function scaffold({ templateDir, out, name, appId, appName }) {
     }
     return personalise(entry, text, { name: identity, appName });
   });
+
+  /**
+   * A real `.env` when the generator was told which engine to prefer.
+   *
+   * Written rather than editing `storage.config.ts`, because the config is code someone will read
+   * and change, while the choice of engine for one deployment is configuration. `.env.example` is
+   * copied in by the template and documents every value.
+   */
+  if (engine || pragmas) {
+    const lines = ["# Written by @cavulsqa/create. See .env.example for what these mean.", ""];
+    if (engine) lines.push(`VITE_STORAGE_ENGINE=${engine}`);
+    if (pragmas) lines.push(`VITE_PRAGMA_PROFILE=${pragmas}`);
+    writeFileSync(join(out, ".env"), `${lines.join("\n")}\n`);
+  }
 
   // pnpm will not finish an install while a dependency's build script is neither allowed nor
   // denied, and vite-plus pulls esbuild in. Without this every generated app fails its first

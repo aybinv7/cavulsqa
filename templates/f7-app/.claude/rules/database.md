@@ -63,3 +63,42 @@ A schema change needs a test in `tests/` that runs the migration and the affecte
 sql.js. `tests/sales.repository.test.ts` is the pattern: build a Kysely on `createSqlJsDialect()`,
 migrate, then assert on real rows — including the arithmetic. A total that type-checks can still be
 computed wrong.
+
+## Writing a lot of rows
+
+Measured on a phone, at 100k rows, per row written:
+
+| how                                              | per row        |
+| ------------------------------------------------ | -------------- |
+| one insert per statement, each its own commit    | 8-13 ms        |
+| one insert per statement, inside one transaction | ~0.45 ms       |
+| multi-row insert, ~150 rows per statement        | 0.066-0.115 ms |
+
+Roughly a hundredfold between the worst and best way to write the same row. SQLite caps parameters
+per statement, so 150 rows of five columns is about the practical ceiling for one insert - chunk by
+parameter budget, not by a round number.
+
+## Why a big write freezes the screen, and what to do
+
+The database runs in one worker, and that worker is serial. A read cannot overtake a write already
+in flight; it waits for everything queued ahead of it. So the cost to the UI is not how fast the
+write is, it is **how much work the write committed to before the read arrived**.
+
+Time a screen's read waits when it lands during a 1000-row write:
+
+| write strategy                                 | read waits    |
+| ---------------------------------------------- | ------------- |
+| 1000 single inserts in one transaction         | ~350-690 ms   |
+| 150 rows per statement, one transaction        | ~36-53 ms     |
+| ten transactions of 100, awaited one at a time | **~21-32 ms** |
+
+A naive loop stalls the screen for most of a second. Chunked transactions bring it under the
+threshold anyone notices, and the reason is mechanical: awaiting each chunk means only one chunk is
+ever queued, so an arriving read waits for 100 rows instead of 1000.
+
+**So: write in chunks of about a hundred rows, use multi-row inserts inside each chunk, and await
+each chunk before starting the next.** Do not wrap a thousand rows in one transaction to be fast -
+it is faster in total and far worse for anyone looking at the screen while it runs.
+
+The Diagnostics benchmark measures all three strategies, so this is checkable on any device rather
+than taken on faith.

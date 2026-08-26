@@ -29,9 +29,27 @@ import {
  * There is deliberately no in-memory entry. A chain that silently ends somewhere data is not kept is
  * worse than one that fails and says why, and the error screen names every attempt.
  */
-export const storageChain: StorageCandidate[] = [
+const DEFAULT_ORDER: StorageCandidate[] = [
   opfsSahPool,
   waAccessHandlePool,
   waOriginPrivateFileSystem,
   waIdbBatchAtomic,
 ];
+
+/**
+ * `VITE_STORAGE_ENGINE` promotes one candidate to the front and leaves the rest as fallback, so the
+ * env var reorders the chain rather than replacing it - a device that cannot open the preferred
+ * engine still gets a working app.
+ *
+ * An unknown id is ignored rather than fatal: a typo in a `.env` should not brick the build's
+ * output, and the app reports which candidate actually opened in Settings.
+ */
+function preferredFirst(candidates: StorageCandidate[]): StorageCandidate[] {
+  const preferred = import.meta.env.VITE_STORAGE_ENGINE;
+  if (!preferred) return candidates;
+
+  const match = candidates.find((candidate) => candidate.id === preferred);
+  return match ? [match, ...candidates.filter((candidate) => candidate !== match)] : candidates;
+}
+
+export const storageChain: StorageCandidate[] = preferredFirst(DEFAULT_ORDER);

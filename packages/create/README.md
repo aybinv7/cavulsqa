@@ -23,18 +23,20 @@ nothing, pnpm never sees a package name, and you get a 404 for something like `c
 There is no unscoped `create-cavulsqa`, so `pnpm create cavulsqa` is a 404 as well.
 
 ```bash
-pnpm create @cavulsqa --name caputa --app-id com.sig.caputa --yes
+pnpm create @cavulsqa --name caputa --app-id com.example.caputa --yes
 ```
 
-| flag         | default          |                                                        |
-| ------------ | ---------------- | ------------------------------------------------------ |
-| `--name`     | asked            | package and directory name                             |
-| `--template` | the only one     | which bundled template                                 |
-| `--dir`      | `./<name>`       | where to write it                                      |
-| `--app-name` | `Name`           | launcher name, window title, Settings screen           |
-| `--app-id`   | `com.ayb.<name>` | Android application id                                 |
-| `--from`     | —                | a template directory on disk, instead of a bundled one |
-| `--yes`      | —                | take the defaults, ask nothing                         |
+| flag         | default          |                                                         |
+| ------------ | ---------------- | ------------------------------------------------------- |
+| `--name`     | asked            | package and directory name                              |
+| `--template` | the only one     | which bundled template                                  |
+| `--dir`      | `./<name>`       | where to write it                                       |
+| `--app-name` | `Name`           | launcher name, window title, Settings screen            |
+| `--app-id`   | `com.ayb.<name>` | Android application id                                  |
+| `--engine`   | asked            | which storage engine the app prefers, written to `.env` |
+| `--pragmas`  | `safe`           | `safe` keeps durability, `fast` trades it for speed     |
+| `--from`     | —                | a template directory on disk, instead of a bundled one  |
+| `--yes`      | —                | take the defaults, ask nothing                          |
 
 ## What you get
 
@@ -50,6 +52,22 @@ nothing in a screen asks for a refresh.
 `CLAUDE.md`, `.claude/rules/` and `.claude/skills/` come with it, so an agent opening the generated
 repository knows the architecture, the conventions, and the traps that have already cost someone a
 day.
+
+## Choosing an engine
+
+`--engine` writes a `.env`, it does not edit the config. The chain in `src/app/storage.config.ts`
+stays intact and the chosen engine is simply promoted to the front, so a device that cannot open it
+still falls back rather than failing.
+
+| id                             | when                                                                                          |
+| ------------------------------ | --------------------------------------------------------------------------------------------- |
+| `sqlite-wasm-opfs-sahpool`     | the default. The SQLite team's own build; faster at writes, transactions and seeding          |
+| `wa-sqlite-access-handle-pool` | faster at joins and scans on measured hardware; a single-maintainer project                   |
+| `wa-sqlite-opfs-async`         | wa-sqlite over OPFS without the pool, on the Asyncify build                                   |
+| `wa-sqlite-idb-batch-atomic`   | SQLite pages in IndexedDB. Slowest, and the only one that needs no synchronous access handles |
+
+The ids come from the template itself, so a template that offers a different set is asked about
+correctly rather than validated against a list kept here.
 
 ## Versions
 

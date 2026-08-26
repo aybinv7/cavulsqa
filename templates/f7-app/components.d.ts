@@ -48,6 +48,7 @@ declare module 'vue' {
     F7Tabs: typeof import('framework7-vue')['f7Tabs']
     F7Toggle: typeof import('framework7-vue')['f7Toggle']
     F7Toolbar: typeof import('framework7-vue')['f7Toolbar']
+    F7ToolbarPane: typeof import('framework7-vue')['f7ToolbarPane']
     F7View: typeof import('framework7-vue')['f7View']
     F7Views: typeof import('framework7-vue')['f7Views']
     FeatureDetailView: typeof import('./src/modules/home/views/FeatureDetailView.vue')['default']

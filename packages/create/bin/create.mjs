@@ -42,6 +42,8 @@ Options:
   --dir PATH           where to write it (default: ./<name>)
   --app-name NAME      launcher name and window title (default: Name)
   --app-id ID          android application id (default: com.ayb.<name>)
+  --engine ID          which storage engine the app prefers, written to .env
+  --pragmas PROFILE    safe (default) or fast
   --from PATH          use a template directory on disk instead of the bundled ones
   --yes                take the defaults, ask nothing
   --help               this
@@ -63,6 +65,25 @@ function listTemplates() {
     name,
     description: declared.find((entry) => entry.name === name)?.description ?? "",
   }));
+}
+
+/**
+ * The engine ids a template actually offers, read out of its own candidate list rather than kept in
+ * a second list here - a generator that knows more engines than the template does is a generator
+ * that writes a `.env` the app ignores.
+ */
+function listEngines(templateDir) {
+  try {
+    const source = readFileSync(
+      join(templateDir, "src/shared/database/candidates/types.ts"),
+      "utf8",
+    );
+    const union = /export type StorageId =([\s\S]*?);/.exec(source)?.[1] ?? "";
+    return [...union.matchAll(/"([a-z0-9-]+)"/g)].map((match) => match[1]);
+  } catch {
+    // A template without the candidate module simply has no engine choice to offer.
+    return [];
+  }
 }
 
 /** npm package names: lowercase, no spaces, no leading dot or underscore. */
@@ -112,6 +133,20 @@ async function main() {
     const appId =
       flags.get("app-id") ?? (await ask("Android application id", `com.ayb.${bareName}`));
 
+    const engines = listEngines(join(BUNDLED, template));
+    let engine = flags.get("engine");
+    if (typeof engine !== "string" && engines.length > 1) {
+      engine = await ask(`Storage engine [${engines.join(", ")}]`, engines[0]);
+    }
+    if (typeof engine === "string" && engines.length && !engines.includes(engine)) {
+      throw new Error(`unknown engine "${engine}"; this template offers: ${engines.join(", ")}`);
+    }
+
+    const pragmas = flags.get("pragmas");
+    if (typeof pragmas === "string" && pragmas !== "safe" && pragmas !== "fast") {
+      throw new Error(`--pragmas must be "safe" or "fast", not "${pragmas}"`);
+    }
+
     const dir = flags.get("dir") ?? (await ask("Directory", `./${name}`));
     const out = isAbsolute(dir) ? dir : resolve(process.cwd(), dir);
 
@@ -119,7 +154,15 @@ async function main() {
     const templateDir =
       typeof from === "string" ? resolve(process.cwd(), from) : join(BUNDLED, template);
 
-    scaffold({ templateDir, out, name, appId, appName: String(appName) });
+    scaffold({
+      templateDir,
+      out,
+      name,
+      appId,
+      appName: String(appName),
+      engine: typeof engine === "string" ? engine : undefined,
+      pragmas: typeof pragmas === "string" ? pragmas : undefined,
+    });
 
     console.log(`
 ${appName} created in ${out}

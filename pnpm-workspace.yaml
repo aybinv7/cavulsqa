@@ -26,6 +26,7 @@ catalog:
   "@capacitor/android": ^8.5.0
   "@sqlite.org/sqlite-wasm": 3.53.0-build1
   wa-sqlite: ^1.0.0
+  framework7-vue: ^9.1.2
 overrides:
   vite: "catalog:"
 peerDependencyRules:

@@ -20,7 +20,7 @@ function generate(options = {}) {
     templateDir: TEMPLATE,
     out,
     name: "caputa",
-    appId: "com.sig.caputa",
+    appId: "com.example.caputa",
     appName: "Caputa",
     ...options,
   });
@@ -45,7 +45,7 @@ test("the app is renamed everywhere its identity appears", () => {
   const read = (file) => readFileSync(join(app, file), "utf8");
 
   expect(JSON.parse(read("package.json")).name).toBe("caputa");
-  expect(read("capacitor.config.ts")).toContain('appId: "com.sig.caputa"');
+  expect(read("capacitor.config.ts")).toContain('appId: "com.example.caputa"');
   expect(read("capacitor.config.ts")).toContain('appName: "Caputa"');
   expect(read("vite.config.ts")).toContain('__APP_NAME__: JSON.stringify("Caputa")');
   expect(read("index.html")).toContain("<title>Caputa</title>");
@@ -59,6 +59,26 @@ test("the generated app can install and can be opened by an agent", () => {
   // The declarations vue-tsc needs, and the instructions an agent needs, both have to survive.
   expect(() => readFileSync(join(app, "auto-imports.d.ts"))).not.toThrow();
   expect(readFileSync(join(app, "CLAUDE.md"), "utf8")).toContain("SQLite is the source of truth");
+});
+
+test("an engine choice becomes a .env the app actually reads", () => {
+  const app = generate({ engine: "wa-sqlite-idb-batch-atomic", pragmas: "fast" });
+  const env = readFileSync(join(app, ".env"), "utf8");
+
+  expect(env).toContain("VITE_STORAGE_ENGINE=wa-sqlite-idb-batch-atomic");
+  expect(env).toContain("VITE_PRAGMA_PROFILE=fast");
+
+  // The name has to match what the config looks for, or the file is written and ignored.
+  const config = readFileSync(join(app, "src/app/storage.config.ts"), "utf8");
+  expect(config).toContain("import.meta.env.VITE_STORAGE_ENGINE");
+
+  // And the documented template travels with it.
+  expect(readFileSync(join(app, ".env.example"), "utf8")).toContain("VITE_STORAGE_ENGINE");
+});
+
+test("no .env is written when nothing was chosen", () => {
+  const app = generate();
+  expect(() => readFileSync(join(app, ".env"))).toThrow();
 });
 
 test("it refuses to write over an existing directory", () => {

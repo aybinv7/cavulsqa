@@ -36,11 +36,15 @@ const PROFILES: Record<PragmaProfile, readonly string[]> = {
 };
 
 /**
- * `fast`, because this template is a benchmark harness first. An app built from it that keeps
- * anything a person would miss should switch to `safe` and re-measure - the difference shows up
- * almost entirely in unbatched writes.
+ * From `VITE_PRAGMA_PROFILE`, defaulting to `safe`.
+ *
+ * Safe by default because the cost is small once writes are batched - inside one transaction the
+ * per-row difference is under a millisecond - and the failure it prevents is a corrupt database
+ * rather than a slow one. Set `fast` when measuring, where the point is to compare engines rather
+ * than journal settings.
  */
-export const pragmaProfile: PragmaProfile = "fast";
+export const pragmaProfile: PragmaProfile =
+  import.meta.env.VITE_PRAGMA_PROFILE === "fast" ? "fast" : "safe";
 
 export function pragmasFor(profile: PragmaProfile): readonly string[] {
   return PROFILES[profile];
