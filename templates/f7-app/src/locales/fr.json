@@ -69,7 +69,9 @@
     "deleteConfirm": "Supprimer cette commande et ses lignes ?",
     "tapHint": "Touchez une commande pour l'ouvrir.",
     "allOrders": "Commandes récentes",
-    "matches": "{count} résultats"
+    "matches": "{count} résultats",
+    "engineSwitch": "Un seul moteur partout - aucun pont à paralléliser",
+    "measuredOn": "Mesuré sur {engine}"
   },
   "metrics": {
     "totalQueries": "Requêtes exécutées",
@@ -112,7 +114,12 @@
     "dialogText": "Dialogues, feuilles et toasts viennent de Framework7 - sans dépendance supplémentaire.",
     "sheetText": "Une feuille modale. Le bouton retour Android la ferme avant de naviguer.",
     "aboutText": "Construit sur {'@'}cavulsqa/mobile-db, reactive-db et reactive-vue. Remplacez ce texte par le vôtre.",
-    "footer": "Modifiez ces écrans dans src/modules/settings/."
+    "footer": "Modifiez ces écrans dans src/modules/settings/.",
+    "storage": "Stockage",
+    "engine": "Moteur de base de données",
+    "engineHint": "Chaque requête atteint SQLite compilé en WebAssembly, sur un vrai fichier dans l'Origin Private File System, dans un worker - sans pont natif. Le même moteur dans un navigateur que sur un téléphone.",
+    "webview": "WebView",
+    "notDurable": "Le stockage n'est pas persistant"
   },
   "errors": {
     "notFoundTitle": "Introuvable",
@@ -175,5 +182,33 @@
     "scrollMe": "Défilez pour voir la navbar réagir",
     "row": "Ligne",
     "next": "Ouvrir la suivante"
+  },
+  "bench": {
+    "title": "Benchmark",
+    "intro": "Chaque opération qu'un écran de cette application effectue, exécutée sur les deux tables propres au benchmark : vos données ne sont jamais touchées. Changez de moteur dans Réglages et relancez - la seconde exécution est comparée à la première.",
+    "run": "Lancer le benchmark",
+    "running": "En cours",
+    "against": "vs {engine}",
+    "cases": "Cas",
+    "rows": "Lignes créées",
+    "wall": "Durée totale",
+    "worst": "pire",
+    "faster": "{times}x plus rapide ici",
+    "slower": "{times}x plus lent ici",
+    "copy": "Copier le JSON",
+    "clear": "Effacer les résultats",
+    "copied": "Copié",
+    "copyFailed": "Presse-papiers inaccessible.",
+    "group": {
+      "read": "Lectures",
+      "join": "Jointures",
+      "write": "Écritures",
+      "transaction": "Transactions",
+      "schema": "Schéma",
+      "concurrency": "Concurrence",
+      "sync": "Stratégies de synchro"
+    },
+    "pragmas": "PRAGMA {profile}",
+    "seeded": "Jeu de données construit en {ms} ms - réutilisé ensuite"
   }
 }

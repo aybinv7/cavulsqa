@@ -103,6 +103,7 @@ declare global {
   const refManualReset: typeof import('@vueuse/core').refManualReset
   const refThrottled: typeof import('@vueuse/core').refThrottled
   const refWithControl: typeof import('@vueuse/core').refWithControl
+  const renderBootstrapError: typeof import('./src/plugins/bootstrapError').renderBootstrapError
   const request: typeof import('framework7/lite').request
   const resolveComponent: typeof import('vue').resolveComponent
   const seedPlugin: typeof import('./src/plugins/seed.plugin').seedPlugin
@@ -152,6 +153,7 @@ declare global {
   const useAttrs: typeof import('vue').useAttrs
   const useBase64: typeof import('@vueuse/core').useBase64
   const useBattery: typeof import('@vueuse/core').useBattery
+  const useBenchmark: typeof import('./src/modules/demo/composables/useBenchmark').useBenchmark
   const useBluetooth: typeof import('@vueuse/core').useBluetooth
   const useBreakpoints: typeof import('@vueuse/core').useBreakpoints
   const useBroadcastChannel: typeof import('@vueuse/core').useBroadcastChannel
@@ -336,6 +338,9 @@ declare global {
   export type { TabbarVisibility } from './src/shared/composables/useTabbarVisibility'
   import('./src/shared/composables/useTabbarVisibility')
   // @ts-ignore
+  export type { CaseComparison } from './src/modules/demo/composables/useBenchmark'
+  import('./src/modules/demo/composables/useBenchmark')
+  // @ts-ignore
   export type { BusEntry, PipelineResult } from './src/modules/demo/composables/useReactiveDemo'
   import('./src/modules/demo/composables/useReactiveDemo')
   // @ts-ignore
@@ -443,6 +448,7 @@ declare module 'vue' {
     readonly refManualReset: UnwrapRef<typeof import('@vueuse/core')['refManualReset']>
     readonly refThrottled: UnwrapRef<typeof import('@vueuse/core')['refThrottled']>
     readonly refWithControl: UnwrapRef<typeof import('@vueuse/core')['refWithControl']>
+    readonly renderBootstrapError: UnwrapRef<typeof import('./src/plugins/bootstrapError')['renderBootstrapError']>
     readonly request: UnwrapRef<typeof import('framework7/lite')['request']>
     readonly resolveComponent: UnwrapRef<typeof import('vue')['resolveComponent']>
     readonly seedPlugin: UnwrapRef<typeof import('./src/plugins/seed.plugin')['seedPlugin']>
@@ -492,6 +498,7 @@ declare module 'vue' {
     readonly useAttrs: UnwrapRef<typeof import('vue')['useAttrs']>
     readonly useBase64: UnwrapRef<typeof import('@vueuse/core')['useBase64']>
     readonly useBattery: UnwrapRef<typeof import('@vueuse/core')['useBattery']>
+    readonly useBenchmark: UnwrapRef<typeof import('./src/modules/demo/composables/useBenchmark')['useBenchmark']>
     readonly useBluetooth: UnwrapRef<typeof import('@vueuse/core')['useBluetooth']>
     readonly useBreakpoints: UnwrapRef<typeof import('@vueuse/core')['useBreakpoints']>
     readonly useBroadcastChannel: UnwrapRef<typeof import('@vueuse/core')['useBroadcastChannel']>

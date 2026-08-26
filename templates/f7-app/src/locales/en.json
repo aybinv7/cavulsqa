@@ -69,7 +69,9 @@
     "deleteConfirm": "Delete this order and its lines?",
     "tapHint": "Tap an order to open it.",
     "allOrders": "Recent orders",
-    "matches": "{count} matches"
+    "matches": "{count} matches",
+    "engineSwitch": "One engine everywhere - no bridge to pipeline",
+    "measuredOn": "Measured on {engine}"
   },
   "metrics": {
     "totalQueries": "Queries run",
@@ -112,7 +114,12 @@
     "dialogText": "Dialogs, sheets and toasts all come from Framework7 - no extra dependency.",
     "sheetText": "A sheet modal. The Android back button closes this before it navigates.",
     "aboutText": "Built on {'@'}cavulsqa/mobile-db, reactive-db and reactive-vue. Replace this text with your own.",
-    "footer": "Change these screens in src/modules/settings/."
+    "footer": "Change these screens in src/modules/settings/.",
+    "storage": "Storage",
+    "engine": "Database engine",
+    "engineHint": "Every query reaches SQLite compiled to WebAssembly, against a real file in the Origin Private File System, in a worker - no native bridge. The same engine in a browser as on a phone.",
+    "webview": "WebView",
+    "notDurable": "Storage is not persisted"
   },
   "errors": {
     "notFoundTitle": "Not found",
@@ -175,5 +182,33 @@
     "scrollMe": "Scroll to see the navbar react",
     "row": "Row",
     "next": "Open the next one"
+  },
+  "bench": {
+    "title": "Benchmark",
+    "intro": "Every operation a screen in this app performs, run against the benchmark's own two tables so it never touches your data. Switch engines in Settings and run it again - the second run is compared against the first.",
+    "run": "Run benchmark",
+    "running": "Running",
+    "against": "vs {engine}",
+    "cases": "Cases",
+    "rows": "Rows seeded",
+    "wall": "Wall clock",
+    "worst": "worst",
+    "faster": "{times}x faster here",
+    "slower": "{times}x slower here",
+    "copy": "Copy JSON",
+    "clear": "Clear results",
+    "copied": "Copied",
+    "copyFailed": "Could not reach the clipboard.",
+    "group": {
+      "read": "Reads",
+      "join": "Joins",
+      "write": "Writes",
+      "transaction": "Transactions",
+      "schema": "Schema",
+      "concurrency": "Concurrency",
+      "sync": "Sync strategies"
+    },
+    "pragmas": "PRAGMA {profile}",
+    "seeded": "Dataset built in {ms} ms - later runs reuse it"
   }
 }

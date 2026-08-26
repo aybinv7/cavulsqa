@@ -2,8 +2,9 @@
 
 Reusable Capacitor + Vue + SQLite building blocks, published under the `@cavulsqa` npm scope.
 
-These packages started life inside a private Odoo-facing monorepo and were extracted so that
-unrelated apps can share them. Anything tied to a specific backend stayed behind.
+They exist so unrelated apps can share one offline-first data layer instead of each growing its
+own. Nothing here is tied to a particular backend: these packages know about SQLite, Kysely and
+reactivity, and nothing about where data comes from.
 
 ## Packages
 

@@ -14,8 +14,7 @@ export function Framework7VueResolver(): ComponentResolver {
     "f7-nav-title",
     "f7-nav-title-large",
     "f7-toolbar",
-    // No "f7-toolbar-pane": Framework7 9 ships the CSS class but framework7-vue 8 exports no
-    // such component, and resolving it fails at runtime instead of warning. Use the class.
+    "f7-toolbar-pane",
     "f7-subnavbar",
     "f7-searchbar",
 

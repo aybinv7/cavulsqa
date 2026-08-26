@@ -83,9 +83,14 @@ vp test           # the repository and icon tests
 pnpm type-check   # vue-tsc, the gate for anything touching .vue
 ```
 
-`vue-tsc` and `vp check` disagree by design: `vp check` compiles `vite.config.ts` under a separate
-tsconfig because vite-plus bundles its own Vite while the unplugins take it as a peer. Both must
-pass.
+`vp check` is the type gate for `vite.config.ts`; `vue-tsc` covers `src`. Both must pass.
+
+There is deliberately no `tsconfig.node.json`. A `tsc` project over `vite.config.ts` cannot be
+clean either way: with `skipLibCheck` on, Vite's deeply recursive `PluginOption` union blows the
+comparison depth limit on the plugin array; with it off, vite-plus-core's own declarations fail on
+optional peers it does not ship. Nothing in this repository runs `tsc`, and an editor with no
+project reports the file clean - so the config only ever added a red squiggle and a wrong
+explanation. `vp check` resolves it correctly and is the authority.
 
 **Type-checking is not verification for UI.** A screen that compiles can still render an empty
 box — that is how seven invisible icons and a blank-page bootstrap both shipped. If you changed

@@ -38,6 +38,23 @@
       </F7ListItem>
     </F7List>
 
+    <F7BlockTitle>{{ t("settings.storage") }}</F7BlockTitle>
+    <F7List strong inset dividers class="rounded-2xl!">
+      <F7ListItem :title="t('settings.engine')" :after="storage">
+        <template #media><F7Icon f7="archivebox_fill" color="teal" /></template>
+      </F7ListItem>
+      <F7ListItem v-if="!durable" :title="t('settings.notDurable')">
+        <template #media><F7Icon f7="exclamationmark_triangle_fill" color="red" /></template>
+        <template #footer>{{ tradeoff }}</template>
+      </F7ListItem>
+      <F7ListItem v-for="skip in skipped" :key="skip.id" :title="skip.id" :footer="skip.detail">
+        <template #media><F7Icon f7="arrow_turn_down_right" color="gray" /></template>
+      </F7ListItem>
+    </F7List>
+    <F7Block class="mt-0!">
+      <p class="m-0 text-[13px] opacity-60">{{ t("settings.engineHint") }}</p>
+    </F7Block>
+
     <F7BlockTitle>{{ t("settings.tryIt") }}</F7BlockTitle>
     <F7List strong inset dividers class="rounded-2xl!">
       <F7ListItem :title="t('settings.testToast')" link="#" @click="testToast">
@@ -62,6 +79,9 @@
       <F7ListItem :title="t('settings.platform')" :after="platform">
         <template #media><F7Icon f7="device_phone_portrait" color="purple" /></template>
       </F7ListItem>
+      <F7ListItem :title="t('settings.webview')" :after="webview">
+        <template #media><F7Icon f7="globe" color="teal" /></template>
+      </F7ListItem>
       <F7ListItem :title="t('settings.aboutUs')" link="#" @click="showAbout">
         <template #media><F7Icon f7="info_circle_fill" color="blue" /></template>
       </F7ListItem>
@@ -76,6 +96,8 @@
 <script setup lang="ts">
 import { Capacitor } from "@capacitor/core";
 import { useAppTheme, type AppMode, type AppTheme } from "@/shared/composables/theme/useAppTheme";
+import { activeStorage, activeStorageLabel, storageAttempts } from "@/shared/database/database";
+import { webviewVersion } from "@/shared/database/storage";
 
 const { t, locale, availableLocales } = useI18n();
 const theme = useAppTheme();
@@ -84,6 +106,15 @@ const appTheme = computed(() => theme.value);
 const appName = __APP_NAME__;
 const appVersion = __APP_VERSION__;
 const platform = Capacitor.getPlatform();
+
+const storage = activeStorageLabel();
+const durable = activeStorage().durable;
+const tradeoff = activeStorage().tradeoff;
+// Which candidates the chain passed over, so a fallback is never something you discover later.
+const skipped = storageAttempts().filter((attempt) => attempt.outcome !== "opened");
+// The number that decides whether local storage works at all, and the OS version does not imply it.
+const chromium = webviewVersion();
+const webview = chromium === null ? "unknown" : `Chromium ${String(chromium)}`;
 
 function onThemeChange(event: Event) {
   appTheme.value.setTheme((event.target as HTMLSelectElement).value as AppTheme);

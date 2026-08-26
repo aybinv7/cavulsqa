@@ -28,8 +28,8 @@ release. Add a tool name to select part of the graph. For example, run
 
 # cavulsqa
 
-Reusable Capacitor + Vue + SQLite packages published under the `@cavulsqa` scope. Extracted from a
-private Odoo-facing monorepo so unrelated apps can share them.
+Reusable Capacitor + Vue + SQLite packages published under the `@cavulsqa` scope, so unrelated
+apps can share one offline-first data layer instead of each growing its own.
 
 ## Hard rules
 

@@ -9,3 +9,8 @@
 # identity, so it stays out - the creator skips it too.
 android
 ios
+
+# Real environment files; .env.example is the documented template and is committed.
+.env
+.env.*
+!.env.example

@@ -14,7 +14,7 @@ import {
   type DraftLine,
   type OrderRow,
 } from "@/domains/sales/sales.repository";
-import { changeBus, getDatabase, rdb } from "@/shared/database/database";
+import { activeStorageLabel, changeBus, getDatabase, rdb } from "@/shared/database/database";
 import { uniqueQueryKey, useReactiveQuery } from "@/shared/database/queries";
 
 export interface BusEntry {
@@ -29,6 +29,8 @@ export interface PipelineResult {
   parallelMs: number;
   sequentialMs: number;
   ratio: number;
+  /** Recorded with the numbers, because a measurement without its engine is not comparable. */
+  engine: string;
 }
 
 const EVENT_LOG_LIMIT = 20;
@@ -140,6 +142,7 @@ export function useReactiveDemo() {
         parallelMs: Number(parallelMs.toFixed(1)),
         sequentialMs: Number(sequentialMs.toFixed(1)),
         ratio: Number((sequentialMs / Math.max(parallelMs, 0.01)).toFixed(2)),
+        engine: activeStorageLabel(),
       };
     } finally {
       measuring.value = false;
@@ -156,6 +159,7 @@ export function useReactiveDemo() {
     measuring,
     readsPerRun: READS_PER_RUN,
     isNative: Capacitor.isNativePlatform(),
+    engineName: activeStorageLabel(),
     platform: Capacitor.getPlatform(),
     seed,
     advance,

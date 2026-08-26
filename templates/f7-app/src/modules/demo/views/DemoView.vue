@@ -9,8 +9,10 @@
 
     <!-- Real Framework7 tabs, so the panes swipe rather than switching on a v-if. -->
     <F7Toolbar tabbar top>
-      <F7Link tab-link="#demo-tab-data" tab-link-active>{{ t("demo.data") }}</F7Link>
-      <F7Link tab-link="#demo-tab-diagnostics">{{ t("demo.diagnostics") }}</F7Link>
+      <F7ToolbarPane>
+        <F7Link tab-link="#demo-tab-data" tab-link-active>{{ t("demo.data") }}</F7Link>
+        <F7Link tab-link="#demo-tab-diagnostics">{{ t("demo.diagnostics") }}</F7Link>
+      </F7ToolbarPane>
     </F7Toolbar>
 
     <F7Tabs swipeable>
@@ -46,8 +48,11 @@
           :reads-per-run="readsPerRun"
           :is-native="isNative"
           :platform="platform"
+          :engine-name="engineName"
           @measure="measurePipelining"
         />
+
+        <DemoBenchmark />
       </F7Tab>
     </F7Tabs>
 
@@ -80,6 +85,7 @@ import type { OrderRow } from "@/domains/sales/sales.repository";
 import DemoBusLog from "@/modules/demo/components/DemoBusLog.vue";
 import DemoCreateOrderSheet from "@/modules/demo/components/DemoCreateOrderSheet.vue";
 import DemoOrderList from "@/modules/demo/components/DemoOrderList.vue";
+import DemoBenchmark from "@/modules/demo/components/DemoBenchmark.vue";
 import DemoPipelineBenchmark from "@/modules/demo/components/DemoPipelineBenchmark.vue";
 import DemoStatCards from "@/modules/demo/components/DemoStatCards.vue";
 import { useReactiveDemo } from "@/modules/demo/composables/useReactiveDemo";
@@ -101,6 +107,7 @@ const {
   readsPerRun,
   isNative,
   platform,
+  engineName,
   seed,
   advance,
   remove,

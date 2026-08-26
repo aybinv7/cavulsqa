@@ -12,7 +12,6 @@
     "check": "vp check"
   },
   "dependencies": {
-    "@capacitor-community/sqlite": "^7.0.2",
     "@capacitor/android": "catalog:",
     "@capacitor/app": "^8.0.0",
     "@capacitor/core": "^8.0.0",
@@ -23,16 +22,17 @@
     "@cavulsqa/mobile-db": "workspace:*",
     "@cavulsqa/reactive-db": "workspace:*",
     "@cavulsqa/reactive-vue": "workspace:*",
+    "@sqlite.org/sqlite-wasm": "catalog:",
     "@tailwindcss/vite": "catalog:",
     "@vueuse/core": "catalog:",
     "framework7": "^9.0.2",
     "framework7-icons": "^5.0.5",
-    "framework7-vue": "^8.3.4",
+    "framework7-vue": "catalog:",
     "kysely": "catalog:",
-    "sql.js": "catalog:",
     "tailwindcss": "catalog:",
     "vue": "^3.5.0",
-    "vue-i18n": "^11.2.2"
+    "vue-i18n": "^11.2.2",
+    "wa-sqlite": "catalog:"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.0.0",
@@ -40,7 +40,7 @@
     "@types/node": "catalog:",
     "@vitejs/plugin-vue": "^6.0.3",
     "sql.js": "catalog:",
-    "typescript": "^5.9.3",
+    "typescript": "catalog:",
     "unplugin-auto-import": "catalog:",
     "unplugin-icons": "catalog:",
     "unplugin-vue-components": "catalog:",

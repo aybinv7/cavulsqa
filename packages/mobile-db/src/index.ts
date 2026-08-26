@@ -1,3 +1,4 @@
+export * from "./handle.js";
 export * from "./migrations.js";
 export * from "./write.js";
 export * from "./columns.js";

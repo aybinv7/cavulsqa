@@ -21,3 +21,18 @@ declare module "framework7-icons";
 /** Injected by vite `define`; see vite.config.ts. */
 declare const __APP_NAME__: string;
 declare const __APP_VERSION__: string;
+
+/**
+ * The environment this app reads. Declared, so a typo in a variable name is a type error rather than
+ * a silent `undefined` that falls back to the default and looks like the setting was ignored.
+ *
+ * See `.env.example` for what each value means.
+ */
+interface ImportMetaEnv {
+  readonly VITE_STORAGE_ENGINE?: string;
+  readonly VITE_PRAGMA_PROFILE?: "safe" | "fast";
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}

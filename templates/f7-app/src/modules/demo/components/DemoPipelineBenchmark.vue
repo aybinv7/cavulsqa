@@ -9,6 +9,11 @@
       }}
     </p>
 
+    <div class="mb-3 flex items-center gap-2">
+      <F7Chip :text="engineName" color="teal" outline />
+      <span class="text-[13px] opacity-55">{{ t("demo.engineSwitch") }}</span>
+    </div>
+
     <F7Button fill :disabled="measuring" @click="$emit('measure')">
       {{ measuring ? t("demo.measuring") : t("demo.measure") }}
     </F7Button>
@@ -29,6 +34,10 @@
         </div>
       </div>
 
+      <p class="mb-0 mt-2 text-center text-xs opacity-55">
+        {{ t("demo.measuredOn", { engine: result.engine }) }}
+      </p>
+
       <p class="mb-0 mt-3 text-xs opacity-70">
         {{ isNative ? t("demo.ratioNative") : t("demo.ratioWeb", { platform }) }}
       </p>
@@ -45,6 +54,7 @@ defineProps<{
   readsPerRun: number;
   isNative: boolean;
   platform: string;
+  engineName: string;
 }>();
 defineEmits<{ measure: [] }>();
 
