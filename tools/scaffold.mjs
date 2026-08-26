@@ -176,6 +176,11 @@ writeFileSync(
   ].join("\n"),
 );
 
+// pnpm refuses to finish an install while a dependency's build script is neither allowed nor
+// denied, and vite-plus pulls esbuild in - so without this every generated app fails its very
+// first `pnpm install` with ERR_PNPM_IGNORED_BUILDS.
+writeFileSync(join(out, "pnpm-workspace.yaml"), "allowBuilds:\n  esbuild: true\n");
+
 writeFileSync(
   join(out, "README.md"),
   `# ${appName}
