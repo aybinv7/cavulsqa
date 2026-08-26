@@ -4,7 +4,7 @@ import {
   type SuiteResult,
 } from "@/domains/benchmark/benchmark.suite";
 import { activeStorage, activeStorageLabel, rdb } from "@/shared/database/database";
-import type { StorageTier } from "@/shared/database/storage";
+import type { StorageId } from "@/shared/database/candidates";
 
 const STORAGE_KEY = "app.benchmark.results";
 
@@ -22,16 +22,16 @@ export interface CaseComparison {
  * Results are kept per engine in localStorage, because the comparison is the point and an engine
  * switch needs a restart - so the two halves can never be in memory at the same time.
  */
-function readStored(): Partial<Record<StorageTier, SuiteResult>> {
+function readStored(): Partial<Record<StorageId, SuiteResult>> {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as Partial<Record<StorageTier, SuiteResult>>) : {};
+    return raw ? (JSON.parse(raw) as Partial<Record<StorageId, SuiteResult>>) : {};
   } catch {
     return {};
   }
 }
 
-function writeStored(all: Partial<Record<StorageTier, SuiteResult>>): void {
+function writeStored(all: Partial<Record<StorageId, SuiteResult>>): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
   } catch {
@@ -40,7 +40,7 @@ function writeStored(all: Partial<Record<StorageTier, SuiteResult>>): void {
 }
 
 export function useBenchmark() {
-  const engine = activeStorage();
+  const engine = activeStorage().id;
   const stored = ref(readStored());
   const running = ref(false);
   const progress = ref("");

@@ -1,11 +1,11 @@
 import { Kysely, type Dialect } from "kysely";
 import { Migrator } from "kysely/migration";
 import { runWrite, type MobileDatabase } from "@cavulsqa/mobile-db/core";
-import { OpfsSQLiteDialect } from "@cavulsqa/mobile-db/opfs";
 import { createChangeBus, createReactiveDb } from "@cavulsqa/reactive-db";
+import { storageChain } from "@/app/storage.config";
+import type { StorageAttempt, StorageCandidate } from "./candidates";
 import { migrations } from "./migrations";
-import OpfsWorker from "./opfs.worker?worker";
-import { describeOpenFailure, probeOpfs, storageLabel, type StorageTier } from "./storage";
+import { describeOpenFailure } from "./storage";
 import type { Database } from "./schema";
 
 /**
@@ -18,14 +18,14 @@ export const changeBus = createChangeBus();
 const RETRY_DELAY_MS = 400;
 
 let database: MobileDatabase<Database> | null = null;
-let tier: StorageTier | null = null;
+let chosen: StorageCandidate | null = null;
+let attempts: StorageAttempt[] = [];
 
 /**
  * Wraps a Kysely instance in the shape the app consumes, and runs the migrations.
  *
- * There is no per-platform branching left. The app reaches SQLite one way, and it is the same way in
- * a browser as on a phone - which is the point of the OPFS engine. `pnpm dev` gets a real, durable
- * database instead of an in-memory stand-in that behaved differently from the thing being shipped.
+ * Shared by every candidate: they differ in how bytes reach storage and in nothing above that, which
+ * is what makes the chain swappable at all.
  */
 async function fromDialect(dialect: Dialect): Promise<MobileDatabase<Database>> {
   const db = new Kysely<Database>({ dialect });
@@ -49,46 +49,80 @@ async function fromDialect(dialect: Dialect): Promise<MobileDatabase<Database>> 
   };
 }
 
-/** Which persistence the open database is using, for anything that reports or measures. */
-export function activeStorage(): StorageTier {
-  if (!tier) throw new Error("openDatabase() must be awaited before the storage is known");
-  return tier;
+/** Which candidate the open database is using, for anything that reports or measures. */
+export function activeStorage(): StorageCandidate {
+  if (!chosen) throw new Error("openDatabase() must be awaited before the storage is known");
+  return chosen;
 }
 
 export function activeStorageLabel(): string {
-  return storageLabel(activeStorage());
+  return activeStorage().label;
 }
 
+/** Every step of the walk, including the candidates that were skipped and why. */
+export function storageAttempts(): readonly StorageAttempt[] {
+  return attempts;
+}
+
+/**
+ * Walks the chain in `storage.config.ts` and keeps the first candidate that opens.
+ *
+ * A candidate is skipped when it says the device cannot support it, and dropped when it says so by
+ * throwing. Every step is recorded: which were skipped and why, which failed and with what, and
+ * which won - because a silent fallback to a slower or non-durable engine is the kind of thing that
+ * gets discovered weeks later by someone wondering why the app is slow.
+ */
 export async function openDatabase(): Promise<MobileDatabase<Database>> {
   if (database) return database;
+  if (!storageChain.length) throw new Error("storageChain is empty: nothing can open the database");
 
-  const probe = probeOpfs();
-  if (!probe.supported) throw new Error(probe.reason ?? "OPFS is not available in this WebView");
+  attempts = [];
 
-  const open = () =>
-    fromDialect(new OpfsSQLiteDialect({ worker: new OpfsWorker(), name: "app.sqlite3" }));
+  for (const candidate of storageChain) {
+    const probe = candidate.probe();
+    if (!probe.supported) {
+      attempts.push({ id: candidate.id, outcome: "unsupported", detail: probe.reason });
+      continue;
+    }
 
-  try {
-    database = await open();
-  } catch (first) {
-    /**
-     * One retry, because the SAH pool takes an exclusive lock on its directory and the most common
-     * reason it is held is a process that is on its way out - a crash, or a relaunch racing the old
-     * WebView's teardown. The handles are released when that process dies, so a moment later the
-     * same open succeeds. It is not a fix for a WebView that cannot do this at all, and it is not
-     * allowed to become one: exactly one retry, then the real failure surfaces.
-     */
-    await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
     try {
-      database = await open();
-    } catch {
-      // The first error is the honest one; the retry's is a duplicate of it.
-      throw new Error(describeOpenFailure(first));
+      database = await openCandidate(candidate);
+      chosen = candidate;
+      attempts.push({ id: candidate.id, outcome: "opened" });
+      return database;
+    } catch (error) {
+      attempts.push({ id: candidate.id, outcome: "failed", detail: describeOpenFailure(error) });
     }
   }
-  tier = "opfs";
 
-  return database;
+  // Every candidate's reason, because "the database would not open" on its own helps nobody.
+  const summary = attempts
+    .map(
+      (attempt) =>
+        `${attempt.id}: ${attempt.outcome}${attempt.detail ? ` - ${attempt.detail}` : ""}`,
+    )
+    .join("; ");
+  throw new Error(`No storage engine could open the database. ${summary}`);
+}
+
+/**
+ * One retry per candidate, because the pool VFSes take an exclusive lock on their directory and the
+ * usual reason it is held is a process on its way out - a crash, or a relaunch racing the old
+ * WebView's teardown. Its handles are released when that process dies, so the same open succeeds a
+ * moment later. Exactly one retry: past that, the chain moving on is the better answer.
+ */
+async function openCandidate(candidate: StorageCandidate): Promise<MobileDatabase<Database>> {
+  try {
+    return await fromDialect(await candidate.createDialect());
+  } catch (first) {
+    await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+    try {
+      return await fromDialect(await candidate.createDialect());
+    } catch {
+      // The first error is the honest one; the retry's is a duplicate of it.
+      throw first;
+    }
+  }
 }
 
 export function getDatabase(): MobileDatabase<Database> {
@@ -105,5 +139,6 @@ export const rdb = createReactiveDb<Database>({
 export async function closeDatabase(): Promise<void> {
   await database?.close();
   database = null;
-  tier = null;
+  chosen = null;
+  attempts = [];
 }

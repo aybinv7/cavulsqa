@@ -118,7 +118,8 @@
     "storage": "Storage",
     "engine": "Database engine",
     "engineHint": "Every query reaches SQLite compiled to WebAssembly, against a real file in the Origin Private File System, in a worker - no native bridge. The same engine in a browser as on a phone.",
-    "webview": "WebView"
+    "webview": "WebView",
+    "notDurable": "Storage is not persisted"
   },
   "errors": {
     "notFoundTitle": "Not found",

@@ -1,9 +1,9 @@
 import { afterEach, expect, test } from "vite-plus/test";
+import { storageChain } from "../src/app/storage.config.js";
 import {
   describeOpenFailure,
   MINIMUM_CHROMIUM_FOR_OPFS,
-  probeOpfs,
-  storageLabel,
+  probeOpfsCapable,
   webviewLikelyTooOld,
   webviewVersion,
 } from "../src/shared/database/storage.js";
@@ -30,12 +30,12 @@ test("a WebView that supports OPFS passes even without the worker-only method", 
   expect("createSyncAccessHandle" in (globalThis.FileSystemFileHandle?.prototype ?? {})).toBe(
     false,
   );
-  expect(probeOpfs().supported).toBe(true);
+  expect(probeOpfsCapable().supported).toBe(true);
 });
 
 test("a WebView with no OPFS at all is refused, and told what to do", () => {
   withNavigator({ storage: {} });
-  const probe = probeOpfs();
+  const probe = probeOpfsCapable();
   expect(probe.supported).toBe(false);
   expect(probe.reason).toMatch(/Android System WebView/);
 });
@@ -53,8 +53,26 @@ test("an open failure is translated into something actionable", () => {
   );
 });
 
-test("the storage tier has a label", () => {
-  expect(storageLabel("opfs")).toContain("OPFS");
+/**
+ * The chain is a claim about ordering, so it is checked like one: fastest first, durable before
+ * volatile, and nothing in it without a stated cost.
+ */
+test("the storage chain is ordered and honest about what each entry costs", () => {
+  expect(storageChain.length).toBeGreaterThan(0);
+  expect(storageChain[0]?.id).toBe("sqlite-wasm-opfs-sahpool");
+  expect(storageChain[0]?.evidence).toBe("measured");
+
+  for (const candidate of storageChain) {
+    expect(candidate.tradeoff.length, candidate.id).toBeGreaterThan(20);
+    expect(candidate.label.length, candidate.id).toBeGreaterThan(5);
+  }
+
+  // A volatile engine may only ever be last: reaching it means giving up persistence.
+  const volatile = storageChain.findIndex((candidate) => !candidate.durable);
+  if (volatile !== -1) expect(volatile).toBe(storageChain.length - 1);
+
+  // Ids are unique, or results keyed by id would overwrite each other.
+  expect(new Set(storageChain.map((c) => c.id)).size).toBe(storageChain.length);
 });
 
 /** The floor is reported, never enforced: a vendor build can differ, so it informs and nothing else. */
@@ -66,7 +84,7 @@ test("the WebView version is read from the user agent and judged against the flo
   expect(webviewVersion()).toBe(150);
   expect(webviewLikelyTooOld()).toBe(false);
   // Support is still asserted, because the floor must not become a second gate on a working device.
-  expect(probeOpfs().supported).toBe(true);
+  expect(probeOpfsCapable().supported).toBe(true);
 
   withNavigator({
     storage: { getDirectory: () => Promise.resolve({}) },
