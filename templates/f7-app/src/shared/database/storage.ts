@@ -29,31 +29,47 @@ export interface StorageProbe {
 }
 
 /**
- * Synchronous access handles are the thing the SAH pool needs, and they are Worker-only in
- * Chromium - so the check is for the interface, not for a working handle. An actual failure to open
- * is reported by the open itself, with the engine's own message.
+ * Only what the main thread can honestly observe.
+ *
+ * The tempting check - `"createSyncAccessHandle" in FileSystemFileHandle.prototype` - is wrong here
+ * and rejected a phone on WebView 150 that had been running OPFS happily: synchronous access handles
+ * are Worker-only in Chromium, so the method is absent from the main-thread prototype on *every*
+ * device, new or old. `navigator.storage.getDirectory` is visible from both scopes, so that is the
+ * whole of what can be pre-checked.
+ *
+ * Anything finer belongs to the engine. `describeOpenFailure` turns its error into something a
+ * person can act on, which is what the pre-check was reaching for in the first place.
  */
 export function probeOpfs(): StorageProbe {
   if (typeof navigator === "undefined" || !navigator.storage?.getDirectory) {
     return {
       supported: false,
-      reason: "This WebView has no Origin Private File System, so the database cannot be stored.",
-    };
-  }
-
-  if (
-    typeof FileSystemFileHandle === "undefined" ||
-    !("createSyncAccessHandle" in FileSystemFileHandle.prototype)
-  ) {
-    return {
-      supported: false,
       reason:
-        "This WebView is too old for synchronous file access. Update Android System WebView from " +
-        "the Play Store - it updates separately from Android itself.",
+        "This WebView has no Origin Private File System, so the database cannot be stored. Update " +
+        "Android System WebView from the Play Store - it updates separately from Android itself.",
     };
   }
 
   return { supported: true };
+}
+
+/**
+ * The engine is the authority on whether it can open, so its failure is wrapped rather than
+ * predicted. A missing synchronous access handle surfaces from inside wasm initialisation, where the
+ * message names an internal symbol and not the thing to do about it.
+ */
+export function describeOpenFailure(error: unknown): string {
+  const detail = error instanceof Error ? error.message : String(error);
+
+  if (/SyncAccessHandle|createSyncAccessHandle|sahpool|SAH/i.test(detail)) {
+    return (
+      "SQLite could not take a synchronous file handle. Either this WebView is too old - update " +
+      "Android System WebView from the Play Store, it updates separately from Android - or another " +
+      `copy of the app still holds the database open. (${detail})`
+    );
+  }
+
+  return `The database could not be opened: ${detail}`;
 }
 
 export function storageLabel(tier: StorageTier): string {

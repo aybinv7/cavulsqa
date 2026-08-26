@@ -5,7 +5,7 @@ import { OpfsSQLiteDialect } from "@cavulsqa/mobile-db/opfs";
 import { createChangeBus, createReactiveDb } from "@cavulsqa/reactive-db";
 import { migrations } from "./migrations";
 import OpfsWorker from "./opfs.worker?worker";
-import { probeOpfs, storageLabel, type StorageTier } from "./storage";
+import { describeOpenFailure, probeOpfs, storageLabel, type StorageTier } from "./storage";
 import type { Database } from "./schema";
 
 /**
@@ -60,14 +60,17 @@ export function activeStorageLabel(): string {
 export async function openDatabase(): Promise<MobileDatabase<Database>> {
   if (database) return database;
 
-  // Probed before opening so an unsupported WebView produces a sentence someone can act on,
-  // rather than a failure from inside wasm initialisation.
   const probe = probeOpfs();
   if (!probe.supported) throw new Error(probe.reason ?? "OPFS is not available in this WebView");
 
-  database = await fromDialect(
-    new OpfsSQLiteDialect({ worker: new OpfsWorker(), name: "app.sqlite3" }),
-  );
+  try {
+    database = await fromDialect(
+      new OpfsSQLiteDialect({ worker: new OpfsWorker(), name: "app.sqlite3" }),
+    );
+  } catch (error) {
+    // The engine knows whether it can open; this only makes its answer actionable.
+    throw new Error(describeOpenFailure(error));
+  }
   tier = "opfs";
 
   return database;
