@@ -1,6 +1,6 @@
 {
   "name": "@cavulsqa/mobile-db",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Capacitor SQLite persistence for Kysely: a shared connection dialect, migrations, and column helpers.",
   "keywords": [
     "capacitor",
@@ -27,6 +27,7 @@
     "./core": "./dist/core.mjs",
     "./opfs": "./dist/opfs.mjs",
     "./testing": "./dist/testing.mjs",
+    "./wa": "./dist/wa.mjs",
     "./package.json": "./package.json"
   },
   "publishConfig": {
@@ -50,7 +51,8 @@
     "sql.js": "1.13.0",
     "typescript": "catalog:",
     "vite": "catalog:",
-    "vite-plus": "catalog:"
+    "vite-plus": "catalog:",
+    "wa-sqlite": "catalog:"
   },
   "peerDependencies": {
     "@capacitor-community/sqlite": ">=7",
@@ -58,13 +60,17 @@
     "@sqlite.org/sqlite-wasm": ">=3.50",
     "capacitor-sqlite-kysely": ">=1",
     "kysely": "^0.29",
-    "sql.js": ">=1.13"
+    "sql.js": ">=1.13",
+    "wa-sqlite": ">=1"
   },
   "peerDependenciesMeta": {
     "sql.js": {
       "optional": true
     },
     "@sqlite.org/sqlite-wasm": {
+      "optional": true
+    },
+    "wa-sqlite": {
       "optional": true
     }
   }

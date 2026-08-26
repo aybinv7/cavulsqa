@@ -67,9 +67,12 @@ test("the storage chain is ordered and honest about what each entry costs", () =
     expect(candidate.label.length, candidate.id).toBeGreaterThan(5);
   }
 
-  // A volatile engine may only ever be last: reaching it means giving up persistence.
-  const volatile = storageChain.findIndex((candidate) => !candidate.durable);
-  if (volatile !== -1) expect(volatile).toBe(storageChain.length - 1);
+  // Nothing in the chain may be volatile: a silent stop somewhere data is not kept is worse than
+  // an error that names every attempt.
+  expect(storageChain.filter((candidate) => !candidate.durable)).toEqual([]);
+
+  // Every engine gets a probe of its own; sharing one would hide that IndexedDB needs no OPFS.
+  expect(storageChain.every((candidate) => typeof candidate.probe === "function")).toBe(true);
 
   // Ids are unique, or results keyed by id would overwrite each other.
   expect(new Set(storageChain.map((c) => c.id)).size).toBe(storageChain.length);

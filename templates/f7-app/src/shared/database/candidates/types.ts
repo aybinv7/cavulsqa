@@ -2,10 +2,9 @@ import type { Dialect } from "kysely";
 
 export type StorageId =
   | "sqlite-wasm-opfs-sahpool"
-  | "wa-sqlite-opfs-coop-sync"
   | "wa-sqlite-access-handle-pool"
-  | "wa-sqlite-idb-batch-atomic"
-  | "sql-js-memory";
+  | "wa-sqlite-opfs-async"
+  | "wa-sqlite-idb-batch-atomic";
 
 export interface StorageProbe {
   supported: boolean;

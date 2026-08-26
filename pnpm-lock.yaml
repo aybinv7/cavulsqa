@@ -253,6 +253,9 @@ catalogs:
     vue:
       specifier: ^3.5.41
       version: 3.5.41
+    wa-sqlite:
+      specifier: ^1.0.0
+      version: 1.0.0
 
 overrides:
   vite: npm:@voidzero-dev/vite-plus-core@0.3.0
@@ -315,6 +318,9 @@ importers:
       vite-plus:
         specifier: 'catalog:'
         version: 0.3.0(@types/node@24.13.3)(@voidzero-dev/vite-plus-core@0.3.0(@types/node@24.13.3)(jiti@2.7.0)(typescript@5.9.3)(yaml@2.9.0))(happy-dom@20.11.6)(jiti@2.7.0)(typescript@5.9.3)(yaml@2.9.0)
+      wa-sqlite:
+        specifier: 'catalog:'
+        version: 1.0.0
 
   packages/reactive-db:
     devDependencies:
@@ -426,6 +432,9 @@ importers:
       vue-i18n:
         specifier: ^11.2.2
         version: 11.4.9(vue@3.5.41(typescript@5.9.3))
+      wa-sqlite:
+        specifier: 'catalog:'
+        version: 1.0.0
     devDependencies:
       '@capacitor/cli':
         specifier: ^8.0.0
@@ -2991,6 +3000,9 @@ packages:
       typescript:
         optional: true
 
+  wa-sqlite@1.0.0:
+    resolution: {integrity: sha512-Kyybo5/BaJp76z7gDWGk2J6Hthl4NIPsE+swgraEjy3IY6r5zIR02wAs1OJH4XtJp1y3puj3Onp5eMGS0z7nUA==}
+
   webpack-virtual-modules@0.6.2:
     resolution: {integrity: sha512-66/V2i5hQanC51vBQKPH4aI8NMAcBW59FVBs+rC7eGHupMyfn34q7rZIE+ETlJ+XTevqfUhVVBgSUNSW2flEUQ==}
 
@@ -5329,6 +5341,8 @@ snapshots:
       '@vue/shared': 3.5.41
     optionalDependencies:
       typescript: 5.9.3
+
+  wa-sqlite@1.0.0: {}
 
   webpack-virtual-modules@0.6.2: {}
 

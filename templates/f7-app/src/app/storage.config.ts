@@ -1,26 +1,37 @@
-import { opfsSahPool, sqlJsMemory, type StorageCandidate } from "@/shared/database/candidates";
+import {
+  opfsSahPool,
+  waAccessHandlePool,
+  waIdbBatchAtomic,
+  waOriginPrivateFileSystem,
+  type StorageCandidate,
+} from "@/shared/database/candidates";
 
 /**
  * Which SQLite implementation this app uses, and what it falls back to.
  *
  * This is the knob. The list is walked in order: each candidate is asked whether the device supports
  * it, then asked to open; the first that succeeds wins, and the rest are never imported - so a chain
- * that never reaches wa-sqlite never downloads its wasm.
+ * that stops at the first entry never downloads wa-sqlite's wasm at all.
  *
- * Ordered fastest-first, which is a claim worth being precise about. Only `sqlite-wasm-opfs-sahpool`
- * has been measured on a device; anything below it is placed on the vendors' own descriptions, and
- * each candidate says which it is through `evidence`. Reorder freely - putting a compatible engine
- * first is a legitimate choice, and the app reports which one actually opened either way.
+ * Ordered fastest-first, and that ordering is a claim worth being precise about. Only
+ * `sqlite-wasm-opfs-sahpool` has been measured on a phone; the three below it are placed on the
+ * vendor's own description of them and each says so through `evidence`. The Diagnostics benchmark
+ * exists to replace that guess with numbers.
  *
- * Candidates that exist but are not wired up yet, in the order they belong:
+ * Reorder freely - this is the supported way to trade speed for reach:
  *
- * 1. `wa-sqlite-opfs-coop-sync` - OPFS through wa-sqlite's OPFSCoopSyncVFS, which queues concurrent
- *    access through the Web Locks API instead of failing on an exclusive lock. Expected to lose a
- *    little raw speed to Asyncify and win the case this app measured as its one regression: a read
- *    issued while a write is in flight. The candidate to try for a sync-heavy app.
- * 2. `wa-sqlite-access-handle-pool` - the same shape as the pool above, from the other vendor.
- * 3. `wa-sqlite-idb-batch-atomic` - SQLite over IndexedDB. Slower than any OPFS route and the only
- *    durable option on a WebView between Chromium 86 and 108, which runs this app's bundle fine but
- *    has no stable synchronous access handles.
+ * - Compatibility first: put `waIdbBatchAtomic` at the top. IndexedDB is the only durable route on a
+ *   WebView between Chromium 86 and 108, which runs this bundle but has no synchronous access
+ *   handles. Slowest, works almost everywhere.
+ * - One vendor only: drop `opfsSahPool` and keep the wa-sqlite three, or the reverse. Both engines
+ *   implement the same dialect contract, so nothing above this file changes either way.
+ *
+ * There is deliberately no in-memory entry. A chain that silently ends somewhere data is not kept is
+ * worse than one that fails and says why, and the error screen names every attempt.
  */
-export const storageChain: StorageCandidate[] = [opfsSahPool, sqlJsMemory];
+export const storageChain: StorageCandidate[] = [
+  opfsSahPool,
+  waAccessHandlePool,
+  waOriginPrivateFileSystem,
+  waIdbBatchAtomic,
+];

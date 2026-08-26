@@ -7,6 +7,7 @@ export default defineConfig({
       testing: "src/testing/sqlJsDialect.ts",
       opfs: "src/opfs/index.ts",
       core: "src/core.ts",
+      wa: "src/wa/index.ts",
     },
     dts: {
       /**

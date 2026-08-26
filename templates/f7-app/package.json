@@ -31,7 +31,8 @@
     "kysely": "catalog:",
     "tailwindcss": "catalog:",
     "vue": "^3.5.0",
-    "vue-i18n": "^11.2.2"
+    "vue-i18n": "^11.2.2",
+    "wa-sqlite": "catalog:"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.0.0",

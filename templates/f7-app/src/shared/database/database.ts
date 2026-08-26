@@ -3,6 +3,7 @@ import { Migrator } from "kysely/migration";
 import { runWrite, type MobileDatabase } from "@cavulsqa/mobile-db/core";
 import { createChangeBus, createReactiveDb } from "@cavulsqa/reactive-db";
 import { storageChain } from "@/app/storage.config";
+import type { StorageId } from "./candidates";
 import type { StorageAttempt, StorageCandidate } from "./candidates";
 import { migrations } from "./migrations";
 import { describeOpenFailure } from "./storage";
@@ -72,13 +73,37 @@ export function storageAttempts(): readonly StorageAttempt[] {
  * which won - because a silent fallback to a slower or non-durable engine is the kind of thing that
  * gets discovered weeks later by someone wondering why the app is slow.
  */
+const FORCE_KEY = "app.storage.force";
+
+/**
+ * Pins the chain to one candidate, for benchmarking.
+ *
+ * Set `localStorage.app.storage.force` to a candidate id and only that engine is tried - not moved
+ * to the front, the *only* one - because a benchmark that quietly fell through to a different engine
+ * would report the wrong engine's numbers. An unknown id is ignored rather than bricking the app.
+ */
+function forcedChain(): StorageCandidate[] {
+  let forced: string | null = null;
+  try {
+    forced = localStorage.getItem(FORCE_KEY);
+  } catch {
+    // Storage disabled; the full chain is the right answer anyway.
+  }
+  if (!forced) return storageChain;
+
+  const pinned = storageChain.find((candidate) => candidate.id === (forced as StorageId));
+  return pinned ? [pinned] : storageChain;
+}
+
 export async function openDatabase(): Promise<MobileDatabase<Database>> {
   if (database) return database;
   if (!storageChain.length) throw new Error("storageChain is empty: nothing can open the database");
 
   attempts = [];
 
-  for (const candidate of storageChain) {
+  const chain = forcedChain();
+
+  for (const candidate of chain) {
     const probe = candidate.probe();
     if (!probe.supported) {
       attempts.push({ id: candidate.id, outcome: "unsupported", detail: probe.reason });

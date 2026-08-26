@@ -40,6 +40,16 @@ export function probeOpfsCapable(): StorageProbe {
  * predicted. A missing synchronous access handle surfaces from inside wasm initialisation, where the
  * message names an internal symbol and not the thing to do about it.
  */
+export function probeIndexedDb(): StorageProbe {
+  if (typeof indexedDB === "undefined") {
+    return {
+      supported: false,
+      reason: "This WebView has no IndexedDB, which leaves nowhere to keep the database.",
+    };
+  }
+  return { supported: true };
+}
+
 export function describeOpenFailure(error: unknown): string {
   const detail = error instanceof Error ? error.message : String(error);
 
