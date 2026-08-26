@@ -1,5 +1,5 @@
 import { afterEach, expect, test } from "vite-plus/test";
-import { storageChain } from "../src/app/storage.config.js";
+import { DEFAULT_ORDER, storageChain } from "../src/app/storage.config.js";
 import {
   describeOpenFailure,
   MINIMUM_CHROMIUM_FOR_OPFS,
@@ -59,10 +59,19 @@ test("an open failure is translated into something actionable", () => {
  */
 test("the storage chain is ordered and honest about what each entry costs", () => {
   expect(storageChain.length).toBeGreaterThan(0);
-  expect(storageChain[0]?.id).toBe("sqlite-wasm-opfs-sahpool");
-  expect(storageChain[0]?.evidence).toBe("measured");
 
-  for (const candidate of storageChain) {
+  // The ranking is asserted against the default order, not the live chain: VITE_STORAGE_ENGINE
+  // reorders the chain on purpose, and a generated app that chose another engine is not broken.
+  expect(DEFAULT_ORDER[0]?.id).toBe("sqlite-wasm-opfs-sahpool");
+  expect(DEFAULT_ORDER[0]?.evidence).toBe("measured");
+
+  // Whatever the environment asked for, the chain must still be every candidate exactly once -
+  // promoting one may not drop the others, or the fallback silently disappears.
+  expect([...storageChain].sort((a, b) => (a.id < b.id ? -1 : 1))).toEqual(
+    [...DEFAULT_ORDER].sort((a, b) => (a.id < b.id ? -1 : 1)),
+  );
+
+  for (const candidate of DEFAULT_ORDER) {
     expect(candidate.tradeoff.length, candidate.id).toBeGreaterThan(20);
     expect(candidate.label.length, candidate.id).toBeGreaterThan(5);
   }

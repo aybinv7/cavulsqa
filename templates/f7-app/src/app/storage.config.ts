@@ -29,7 +29,8 @@ import {
  * There is deliberately no in-memory entry. A chain that silently ends somewhere data is not kept is
  * worse than one that fails and says why, and the error screen names every attempt.
  */
-const DEFAULT_ORDER: StorageCandidate[] = [
+/** The ranking, before any environment preference reorders it. */
+export const DEFAULT_ORDER: StorageCandidate[] = [
   opfsSahPool,
   waAccessHandlePool,
   waOriginPrivateFileSystem,
