@@ -74,3 +74,18 @@ pnpm build && npx cap sync android && npx cap run android
 
 Android builds need **JDK 21**. An older one fails with `invalid source release: 21` from inside
 `capacitor-android`, which reads like a Capacitor bug and is not one.
+
+## Changing a template
+
+The templates are bundled when this package is packed, so a template fix reaches nobody until a new
+version of `@cavulsqa/create` is published. Nothing in a template commit hints at that, so it is
+enforced rather than remembered: a test fingerprints `templates/` and fails when the recorded
+fingerprint is stale.
+
+```bash
+pnpm --filter @cavulsqa/create run stamp          # patch
+pnpm --filter @cavulsqa/create run stamp minor    # new capability in a template
+```
+
+That records the fingerprint and bumps the version in one step; publish as usual afterwards. It is
+a no-op when the templates have not moved, so running it out of habit costs nothing.

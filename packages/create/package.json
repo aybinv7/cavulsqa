@@ -1,6 +1,6 @@
 {
   "name": "@cavulsqa/create",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Create a Vue + Framework7 + Capacitor + SQLite app from the cavulsqa templates.",
   "keywords": [
     "capacitor",
@@ -40,7 +40,8 @@
     "build": "node scripts/bundleTemplates.mjs",
     "check": "vp check",
     "test": "vp test",
-    "prepack": "node scripts/bundleTemplates.mjs"
+    "prepack": "node scripts/bundleTemplates.mjs",
+    "stamp": "node scripts/stampTemplates.mjs"
   },
   "devDependencies": {
     "vite": "catalog:",
@@ -57,5 +58,6 @@
         "template": "./templates/f7-app"
       }
     ]
-  }
+  },
+  "templatesFingerprint": "sha256-9UvJjQPc2GrZh0pabyfdyxVS+RhI7x4HMz7ePPH0SWo="
 }
