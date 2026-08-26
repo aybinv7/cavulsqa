@@ -1,12 +1,11 @@
-import { Capacitor } from "@capacitor/core";
 import { Kysely, type Dialect } from "kysely";
 import { Migrator } from "kysely/migration";
-import { createMobileDatabase, runWrite, type MobileDatabase } from "@cavulsqa/mobile-db";
+import { runWrite, type MobileDatabase } from "@cavulsqa/mobile-db/core";
 import { OpfsSQLiteDialect } from "@cavulsqa/mobile-db/opfs";
 import { createChangeBus, createReactiveDb } from "@cavulsqa/reactive-db";
-import OpfsWorker from "./opfs.worker?worker";
-import { selectedEngine, type DatabaseEngine } from "./engine";
 import { migrations } from "./migrations";
+import OpfsWorker from "./opfs.worker?worker";
+import { probeOpfs, storageLabel, type StorageTier } from "./storage";
 import type { Database } from "./schema";
 
 /**
@@ -17,27 +16,16 @@ import type { Database } from "./schema";
 export const changeBus = createChangeBus();
 
 let database: MobileDatabase<Database> | null = null;
+let tier: StorageTier | null = null;
 
-/**
- * On a device the database is a real SQLite file behind the Capacitor plugin.
- *
- * In a browser it is sql.js in memory, via the dialect `@cavulsqa/mobile-db` already ships for its
- * own tests. That is deliberate: the plugin's web mode needs a `jeep-sqlite` element plus a
- * `sql-wasm.wasm` whose build must match the glue jeep-sqlite bundles - a pairing outside this
- * template's control that breaks on any upstream bump. This path has no assets to serve and no
- * version to keep in step; the cost is that browser data does not survive a reload, which for a
- * template running `vp dev` is the honest trade.
- */
 /**
  * Wraps a Kysely instance in the shape the app consumes, and runs the migrations.
  *
- * Shared by the two engines that are plain dialects. The Capacitor engine does not come through
- * here - `createMobileDatabase` builds its own, because it also owns the native connection.
+ * There is no per-platform branching left. The app reaches SQLite one way, and it is the same way in
+ * a browser as on a phone - which is the point of the OPFS engine. `pnpm dev` gets a real, durable
+ * database instead of an in-memory stand-in that behaved differently from the thing being shipped.
  */
-async function fromDialect(
-  dialect: Dialect,
-  onMissingConnection: string,
-): Promise<MobileDatabase<Database>> {
+async function fromDialect(dialect: Dialect): Promise<MobileDatabase<Database>> {
   const db = new Kysely<Database>({ dialect });
 
   await new Migrator({
@@ -53,75 +41,34 @@ async function fromDialect(
         emitTableChange: (table) => changeBus.emit(table, "bulk"),
       }),
     getRawConnection: () => {
-      throw new Error(onMissingConnection);
+      throw new Error("the OPFS engine has no native connection");
     },
     close: () => db.destroy(),
   };
 }
 
-/**
- * sql.js in memory, via the dialect `@cavulsqa/mobile-db` already ships for its own tests.
- *
- * The plugin's own web mode is deliberately unused: it needs a `jeep-sqlite` element plus a
- * `sql-wasm.wasm` whose build must match the glue jeep-sqlite bundles - a pairing outside this
- * template's control that breaks on any upstream bump. The cost is that data does not survive a
- * reload, which for a template running `vp dev` is the honest trade. For durable storage in a
- * WebView, use the `opfs` engine instead.
- */
-async function openSqlJsDatabase(): Promise<MobileDatabase<Database>> {
-  const { createSqlJsDialect } = await import("@cavulsqa/mobile-db/testing");
-  return fromDialect(await createSqlJsDialect(), "sql.js has no native connection");
+/** Which persistence the open database is using, for anything that reports or measures. */
+export function activeStorage(): StorageTier {
+  if (!tier) throw new Error("openDatabase() must be awaited before the storage is known");
+  return tier;
 }
 
-/**
- * SQLite compiled to WebAssembly against a real OPFS file, in a worker.
- *
- * Durable and written page by page like the native engine, but with no bridge in the path - a
- * statement costs a structured clone instead of a JSON round trip through Java. Whether that is
- * actually faster on a given device is what the Reactive screen's benchmark is for.
- */
-function openOpfsDatabase(): Promise<MobileDatabase<Database>> {
-  return fromDialect(
-    new OpfsSQLiteDialect({ worker: new OpfsWorker(), name: "app.sqlite3" }),
-    "the OPFS engine has no native connection",
-  );
-}
-
-function openCapacitorDatabase(): Promise<MobileDatabase<Database>> {
-  return createMobileDatabase<Database>({
-    name: "app",
-    migrations,
-    emitTableChange: (table) => changeBus.emit(table, "bulk"),
-    /**
-     * One native connection cannot serve two writers. This serialises writes and transactions
-     * while leaving reads parallel, because the native bridge pipelines concurrent calls and
-     * queueing reads costs several times the latency on a screen loading with `Promise.all`.
-     */
-    serializeAccess: true,
-  });
-}
-
-let engine: DatabaseEngine | null = null;
-
-/** Which engine the open database is actually running on, for anything that reports or measures. */
-export function activeEngine(): DatabaseEngine {
-  if (!engine) throw new Error("openDatabase() must be awaited before the engine is known");
-  return engine;
+export function activeStorageLabel(): string {
+  return storageLabel(activeStorage());
 }
 
 export async function openDatabase(): Promise<MobileDatabase<Database>> {
   if (database) return database;
 
-  // A browser cannot open the Capacitor engine whatever the stored preference says.
-  const wanted = selectedEngine();
-  engine = wanted === "capacitor" && !Capacitor.isNativePlatform() ? "sqljs" : wanted;
+  // Probed before opening so an unsupported WebView produces a sentence someone can act on,
+  // rather than a failure from inside wasm initialisation.
+  const probe = probeOpfs();
+  if (!probe.supported) throw new Error(probe.reason ?? "OPFS is not available in this WebView");
 
-  database =
-    engine === "capacitor"
-      ? await openCapacitorDatabase()
-      : engine === "opfs"
-        ? await openOpfsDatabase()
-        : await openSqlJsDatabase();
+  database = await fromDialect(
+    new OpfsSQLiteDialect({ worker: new OpfsWorker(), name: "app.sqlite3" }),
+  );
+  tier = "opfs";
 
   return database;
 }
@@ -140,5 +87,5 @@ export const rdb = createReactiveDb<Database>({
 export async function closeDatabase(): Promise<void> {
   await database?.close();
   database = null;
-  engine = null;
+  tier = null;
 }

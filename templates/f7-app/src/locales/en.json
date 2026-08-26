@@ -70,7 +70,7 @@
     "tapHint": "Tap an order to open it.",
     "allOrders": "Recent orders",
     "matches": "{count} matches",
-    "engineSwitch": "Change it in Settings, then restart",
+    "engineSwitch": "One engine everywhere - no bridge to pipeline",
     "measuredOn": "Measured on {engine}"
   },
   "metrics": {
@@ -117,9 +117,7 @@
     "footer": "Change these screens in src/modules/settings/.",
     "storage": "Storage",
     "engine": "Database engine",
-    "engineActive": "Running now",
-    "engineHint": "The engine decides how a query reaches SQLite. Capacitor crosses the native bridge; OPFS runs SQLite as WebAssembly against a real file in a worker, with no bridge. Measure both on the Reactive screen.",
-    "engineRestart": "Restart the app to open the database on the new engine."
+    "engineHint": "Every query reaches SQLite compiled to WebAssembly, against a real file in the Origin Private File System, in a worker - no native bridge. The same engine in a browser as on a phone."
   },
   "errors": {
     "notFoundTitle": "Not found",

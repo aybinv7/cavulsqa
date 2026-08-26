@@ -12,6 +12,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     404: typeof import('./src/shared/components/error/404.vue')['default']
+    DemoBenchmark: typeof import('./src/modules/demo/components/DemoBenchmark.vue')['default']
     DemoBusLog: typeof import('./src/modules/demo/components/DemoBusLog.vue')['default']
     DemoCreateOrderSheet: typeof import('./src/modules/demo/components/DemoCreateOrderSheet.vue')['default']
     DemoOrderList: typeof import('./src/modules/demo/components/DemoOrderList.vue')['default']

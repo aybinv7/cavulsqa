@@ -7,8 +7,9 @@ import {
   type SQLiteDBConnection,
 } from "@capacitor-community/sqlite";
 import { Capacitor } from "@capacitor/core";
+import type { MobileDatabase } from "./handle.js";
 import type { MigrationSet } from "./migrations.js";
-import { runWrite, type WriteContext, type WriteTelemetry } from "./write.js";
+import { runWrite, type WriteTelemetry } from "./write.js";
 
 /**
  * Applied through `query()` rather than `execute()`, and re-applied on every open.
@@ -52,13 +53,6 @@ export interface MobileDatabaseConfig {
    * database handle.
    */
   serializeAccess?: boolean;
-}
-
-export interface MobileDatabase<DB> {
-  db: Kysely<DB>;
-  write<T>(ctx: WriteContext, work: (trx: Kysely<DB>) => Promise<T>): Promise<T>;
-  getRawConnection(): SQLiteDBConnection;
-  close(): Promise<void>;
 }
 
 export async function createMobileDatabase<DB>(

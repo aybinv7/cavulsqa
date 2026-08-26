@@ -1,6 +1,6 @@
 {
   "name": "@cavulsqa/mobile-db",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Capacitor SQLite persistence for Kysely: a shared connection dialect, migrations, and column helpers.",
   "keywords": [
     "capacitor",
@@ -24,6 +24,7 @@
   "type": "module",
   "exports": {
     ".": "./dist/index.mjs",
+    "./core": "./dist/core.mjs",
     "./opfs": "./dist/opfs.mjs",
     "./testing": "./dist/testing.mjs",
     "./package.json": "./package.json"

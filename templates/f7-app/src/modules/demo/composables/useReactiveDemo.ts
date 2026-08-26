@@ -14,8 +14,7 @@ import {
   type DraftLine,
   type OrderRow,
 } from "@/domains/sales/sales.repository";
-import { activeEngine, changeBus, getDatabase, rdb } from "@/shared/database/database";
-import { engineLabel } from "@/shared/database/engine";
+import { activeStorageLabel, changeBus, getDatabase, rdb } from "@/shared/database/database";
 import { uniqueQueryKey, useReactiveQuery } from "@/shared/database/queries";
 
 export interface BusEntry {
@@ -143,7 +142,7 @@ export function useReactiveDemo() {
         parallelMs: Number(parallelMs.toFixed(1)),
         sequentialMs: Number(sequentialMs.toFixed(1)),
         ratio: Number((sequentialMs / Math.max(parallelMs, 0.01)).toFixed(2)),
-        engine: engineLabel(activeEngine()),
+        engine: activeStorageLabel(),
       };
     } finally {
       measuring.value = false;
@@ -160,8 +159,7 @@ export function useReactiveDemo() {
     measuring,
     readsPerRun: READS_PER_RUN,
     isNative: Capacitor.isNativePlatform(),
-    engine: activeEngine(),
-    engineName: engineLabel(activeEngine()),
+    engineName: activeStorageLabel(),
     platform: Capacitor.getPlatform(),
     seed,
     advance,

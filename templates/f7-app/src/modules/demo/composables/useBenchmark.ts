@@ -3,8 +3,8 @@ import {
   type CaseResult,
   type SuiteResult,
 } from "@/domains/benchmark/benchmark.suite";
-import { activeEngine, rdb } from "@/shared/database/database";
-import { engineLabel, type DatabaseEngine } from "@/shared/database/engine";
+import { activeStorage, activeStorageLabel, rdb } from "@/shared/database/database";
+import type { StorageTier } from "@/shared/database/storage";
 
 const STORAGE_KEY = "app.benchmark.results";
 
@@ -22,16 +22,16 @@ export interface CaseComparison {
  * Results are kept per engine in localStorage, because the comparison is the point and an engine
  * switch needs a restart - so the two halves can never be in memory at the same time.
  */
-function readStored(): Partial<Record<DatabaseEngine, SuiteResult>> {
+function readStored(): Partial<Record<StorageTier, SuiteResult>> {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as Partial<Record<DatabaseEngine, SuiteResult>>) : {};
+    return raw ? (JSON.parse(raw) as Partial<Record<StorageTier, SuiteResult>>) : {};
   } catch {
     return {};
   }
 }
 
-function writeStored(all: Partial<Record<DatabaseEngine, SuiteResult>>): void {
+function writeStored(all: Partial<Record<StorageTier, SuiteResult>>): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
   } catch {
@@ -40,7 +40,7 @@ function writeStored(all: Partial<Record<DatabaseEngine, SuiteResult>>): void {
 }
 
 export function useBenchmark() {
-  const engine = activeEngine();
+  const engine = activeStorage();
   const stored = ref(readStored());
   const running = ref(false);
   const progress = ref("");
@@ -96,7 +96,7 @@ export function useBenchmark() {
 
       const next = {
         ...stored.value,
-        [engine]: { ...finished, engine: engineLabel(engine), at: Date.now() },
+        [engine]: { ...finished, engine: activeStorageLabel(), at: Date.now() },
       };
       stored.value = next;
       writeStored(next);
@@ -120,7 +120,7 @@ export function useBenchmark() {
 
   return {
     engine,
-    engineName: engineLabel(engine),
+    engineName: activeStorageLabel(),
     running,
     progress,
     failure,

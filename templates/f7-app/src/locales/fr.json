@@ -70,7 +70,7 @@
     "tapHint": "Touchez une commande pour l'ouvrir.",
     "allOrders": "Commandes récentes",
     "matches": "{count} résultats",
-    "engineSwitch": "Modifiable dans Réglages, puis redémarrer",
+    "engineSwitch": "Un seul moteur partout - aucun pont à paralléliser",
     "measuredOn": "Mesuré sur {engine}"
   },
   "metrics": {
@@ -117,9 +117,7 @@
     "footer": "Modifiez ces écrans dans src/modules/settings/.",
     "storage": "Stockage",
     "engine": "Moteur de base de données",
-    "engineActive": "Actif",
-    "engineHint": "Le moteur détermine comment une requête atteint SQLite. Capacitor traverse le pont natif ; OPFS exécute SQLite en WebAssembly sur un vrai fichier dans un worker, sans pont. Mesurez les deux depuis l'écran Reactive.",
-    "engineRestart": "Redémarrez l'application pour ouvrir la base sur le nouveau moteur."
+    "engineHint": "Chaque requête atteint SQLite compilé en WebAssembly, sur un vrai fichier dans l'Origin Private File System, dans un worker - sans pont natif. Le même moteur dans un navigateur que sur un téléphone."
   },
   "errors": {
     "notFoundTitle": "Introuvable",

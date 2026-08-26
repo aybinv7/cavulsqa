@@ -40,20 +40,8 @@
 
     <F7BlockTitle>{{ t("settings.storage") }}</F7BlockTitle>
     <F7List strong inset dividers class="rounded-2xl!">
-      <F7ListItem
-        :title="t('settings.engine')"
-        smart-select
-        :smart-select-params="{ openIn: 'sheet', closeOnSelect: true }"
-      >
+      <F7ListItem :title="t('settings.engine')" :after="storage">
         <template #media><F7Icon f7="archivebox_fill" color="teal" /></template>
-        <select :value="engine" @change="onEngineChange">
-          <option v-for="option in engines" :key="option" :value="option">
-            {{ engineLabel(option) }}
-          </option>
-        </select>
-      </F7ListItem>
-      <F7ListItem :title="t('settings.engineActive')" :after="engineLabel(running)">
-        <template #media><F7Icon f7="speedometer" color="orange" /></template>
       </F7ListItem>
     </F7List>
     <F7Block class="mt-0!">
@@ -98,14 +86,7 @@
 <script setup lang="ts">
 import { Capacitor } from "@capacitor/core";
 import { useAppTheme, type AppMode, type AppTheme } from "@/shared/composables/theme/useAppTheme";
-import {
-  availableEngines,
-  engineLabel,
-  selectEngine,
-  selectedEngine,
-  type DatabaseEngine,
-} from "@/shared/database/engine";
-import { activeEngine } from "@/shared/database/database";
+import { activeStorageLabel } from "@/shared/database/database";
 
 const { t, locale, availableLocales } = useI18n();
 const theme = useAppTheme();
@@ -115,20 +96,7 @@ const appName = __APP_NAME__;
 const appVersion = __APP_VERSION__;
 const platform = Capacitor.getPlatform();
 
-const engines = availableEngines();
-const engine = ref<DatabaseEngine>(selectedEngine());
-// What is open right now, which differs from the choice until the app is restarted.
-const running = activeEngine();
-
-function onEngineChange(event: Event) {
-  const chosen = (event.target as HTMLSelectElement).value as DatabaseEngine;
-  engine.value = chosen;
-  selectEngine(chosen);
-  if (chosen === running) return;
-
-  // Kysely owns a dialect for its lifetime, so the swap happens on the next launch.
-  f7.dialog.alert(t("settings.engineRestart"), t("settings.engine"));
-}
+const storage = activeStorageLabel();
 
 function onThemeChange(event: Event) {
   appTheme.value.setTheme((event.target as HTMLSelectElement).value as AppTheme);
