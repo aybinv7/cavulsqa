@@ -88,7 +88,12 @@ function copyTree(from, to) {
   }
 }
 
-rmSync(OUT, { recursive: true, force: true });
+// Emptied rather than removed, with retries: on Windows an editor, a watcher or an indexer holding
+// a handle on the directory itself turns `rm -r` into EPERM, while its contents delete fine.
+mkdirSync(OUT, { recursive: true });
+for (const entry of readdirSync(OUT)) {
+  rmSync(join(OUT, entry), { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+}
 
 const bundled = [];
 for (const name of readdirSync(join(ROOT, "templates"))) {
