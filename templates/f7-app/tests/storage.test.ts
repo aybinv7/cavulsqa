@@ -83,5 +83,5 @@ test("the WebView version is read from the user agent and judged against the flo
   // Unknown is not old: an unparseable agent must not lock anybody out.
   expect(webviewLikelyTooOld()).toBe(false);
 
-  expect(MINIMUM_CHROMIUM_FOR_OPFS).toBe(102);
+  expect(MINIMUM_CHROMIUM_FOR_OPFS).toBe(109);
 });

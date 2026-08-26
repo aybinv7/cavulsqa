@@ -90,13 +90,15 @@ export function webviewVersion(): number | null {
 }
 
 /**
- * Synchronous access handles - what the SAH pool needs - landed in Chromium 102. OPFS itself arrived
- * in 86. Below 102 there is no durable storage for this engine at all.
+ * OPFS arrived in Chromium 86, synchronous access handles followed, and the combination is reported
+ * stable in WebView from 109. 109 is used rather than the earlier number because this value only
+ * ever produces advice: too low and a phone in the gap is told its WebView is fine before failing
+ * anyway, while too high only ever suggests an update that does no harm.
  *
- * It is a floor, not a guarantee: a vendor WebView build can differ, which is why the app probes and
- * wraps the real failure instead of trusting this number to decide anything.
+ * A floor, never a gate. A vendor WebView build can differ either way, so the app probes and wraps
+ * the engine's real failure rather than letting this number decide anything.
  */
-export const MINIMUM_CHROMIUM_FOR_OPFS = 102;
+export const MINIMUM_CHROMIUM_FOR_OPFS = 109;
 
 export function webviewLikelyTooOld(): boolean {
   const version = webviewVersion();
