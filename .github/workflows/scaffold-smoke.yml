@@ -11,13 +11,20 @@ name: scaffold-smoke
 # It runs `npx cap add android` and assembles a debug APK, because "it type-checks" is not the same
 # claim as "it builds for a device", and the second one is what the template promises.
 
+# After a release, not on push.
+#
+# This job installs the generated app's `@cavulsqa/*` dependencies from the public registry, and the
+# generator pins them to whatever version the workspace is on. So a commit that bumps a version makes
+# this fail with ERR_PNPM_NO_MATCHING_VERSION until the release publishes it - through no fault of
+# the template. Running after a successful release means the versions it needs always exist, and a
+# red run means something is actually wrong.
+#
+# `ci` still checks and tests the template on every push; what only this job can prove is that the
+# published artifact installs and builds somewhere clean.
 on:
-  push:
-    branches: [main]
-    paths:
-      - "templates/**"
-      - "packages/create/**"
-      - ".github/workflows/scaffold-smoke.yml"
+  workflow_run:
+    workflows: [release]
+    types: [completed]
   workflow_dispatch:
     inputs:
       android:
@@ -31,6 +38,8 @@ concurrency:
 
 jobs:
   scaffold:
+    # A failed release published nothing, so there is nothing new to smoke-test.
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -86,13 +95,13 @@ jobs:
       # Capacitor 8 compiles against Java 21; the runner's default JDK is older and gradle fails
       # with "invalid source release: 21" deep inside capacitor-android.
       - uses: actions/setup-java@v5
-        if: github.event_name == 'push' || inputs.android
+        if: github.event_name != 'workflow_dispatch' || inputs.android
         with:
           distribution: temurin
           java-version: "21"
 
       - name: Add the android platform and assemble
-        if: github.event_name == 'push' || inputs.android
+        if: github.event_name != 'workflow_dispatch' || inputs.android
         working-directory: ${{ runner.temp }}/smoke
         run: |
           npx cap add android
@@ -100,7 +109,7 @@ jobs:
           cd android && ./gradlew --no-daemon assembleDebug
 
       - name: Keep the APK
-        if: github.event_name == 'push' || inputs.android
+        if: github.event_name != 'workflow_dispatch' || inputs.android
         uses: actions/upload-artifact@v4
         with:
           name: smoke-debug-apk
