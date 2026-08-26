@@ -73,7 +73,7 @@ export function runWaWorker(scope: WaWorkerScope = globalThis as unknown as WaWo
       rows,
       numAffectedRows: runtime.changes(db),
       // Only an insert moves last_insert_rowid(); on an update it names a row nothing touched.
-      insertId: inserting ? Number(runtime.last_insert_rowid(db)) : null,
+      insertId: inserting ? await lastInsertRowId(runtime, db) : null,
     };
   }
 
@@ -100,6 +100,21 @@ export function runWaWorker(scope: WaWorkerScope = globalThis as unknown as WaWo
 }
 
 const SQLITE_ROW = 100;
+
+/**
+ * Asked for with SQL, because wa-sqlite's API has no `last_insert_rowid` binding - `changes` is
+ * there, its sibling is not. One extra statement on the same connection is the whole cost, and it
+ * runs only after an insert.
+ */
+async function lastInsertRowId(runtime: WaSqlite, db: number): Promise<number | null> {
+  for await (const statement of runtime.statements(db, "select last_insert_rowid()")) {
+    if ((await runtime.step(statement)) === SQLITE_ROW) {
+      const value = runtime.row(statement)[0];
+      return typeof value === "number" ? value : Number(value);
+    }
+  }
+  return null;
+}
 
 /**
  * The VFS classes live under `src/examples/` in the package, which is where the project keeps them -
@@ -145,7 +160,6 @@ interface WaSqlite {
   row: (statement: number) => unknown[];
   column_names: (statement: number) => string[];
   changes: (db: number) => number;
-  last_insert_rowid: (db: number) => number;
   close: (db: number) => Promise<void>;
 }
 
