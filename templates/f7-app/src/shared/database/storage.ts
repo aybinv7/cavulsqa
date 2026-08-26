@@ -75,3 +75,30 @@ export function describeOpenFailure(error: unknown): string {
 export function storageLabel(tier: StorageTier): string {
   return { opfs: "SQLite WASM over OPFS (worker)" }[tier];
 }
+
+/**
+ * The Chromium version behind this WebView, which is the number that decides whether OPFS works.
+ *
+ * Worth surfacing rather than reasoning about: Android System WebView updates from the Play Store
+ * independently of Android itself, so the OS version says nothing useful. A phone on Android 7 with
+ * a current WebView is fine; a phone on Android 14 that has never reached the Play Store may not be.
+ */
+export function webviewVersion(): number | null {
+  if (typeof navigator === "undefined") return null;
+  const match = /Chrome\/(\d+)/.exec(navigator.userAgent);
+  return match ? Number(match[1]) : null;
+}
+
+/**
+ * Synchronous access handles - what the SAH pool needs - landed in Chromium 102. OPFS itself arrived
+ * in 86. Below 102 there is no durable storage for this engine at all.
+ *
+ * It is a floor, not a guarantee: a vendor WebView build can differ, which is why the app probes and
+ * wraps the real failure instead of trusting this number to decide anything.
+ */
+export const MINIMUM_CHROMIUM_FOR_OPFS = 102;
+
+export function webviewLikelyTooOld(): boolean {
+  const version = webviewVersion();
+  return version !== null && version < MINIMUM_CHROMIUM_FOR_OPFS;
+}

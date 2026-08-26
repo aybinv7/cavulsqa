@@ -72,6 +72,9 @@
       <F7ListItem :title="t('settings.platform')" :after="platform">
         <template #media><F7Icon f7="device_phone_portrait" color="purple" /></template>
       </F7ListItem>
+      <F7ListItem :title="t('settings.webview')" :after="webview">
+        <template #media><F7Icon f7="globe" color="teal" /></template>
+      </F7ListItem>
       <F7ListItem :title="t('settings.aboutUs')" link="#" @click="showAbout">
         <template #media><F7Icon f7="info_circle_fill" color="blue" /></template>
       </F7ListItem>
@@ -87,6 +90,7 @@
 import { Capacitor } from "@capacitor/core";
 import { useAppTheme, type AppMode, type AppTheme } from "@/shared/composables/theme/useAppTheme";
 import { activeStorageLabel } from "@/shared/database/database";
+import { webviewVersion } from "@/shared/database/storage";
 
 const { t, locale, availableLocales } = useI18n();
 const theme = useAppTheme();
@@ -97,6 +101,9 @@ const appVersion = __APP_VERSION__;
 const platform = Capacitor.getPlatform();
 
 const storage = activeStorageLabel();
+// The number that decides whether local storage works at all, and the OS version does not imply it.
+const chromium = webviewVersion();
+const webview = chromium === null ? "unknown" : `Chromium ${String(chromium)}`;
 
 function onThemeChange(event: Event) {
   appTheme.value.setTheme((event.target as HTMLSelectElement).value as AppTheme);

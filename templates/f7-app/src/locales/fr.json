@@ -117,7 +117,8 @@
     "footer": "Modifiez ces écrans dans src/modules/settings/.",
     "storage": "Stockage",
     "engine": "Moteur de base de données",
-    "engineHint": "Chaque requête atteint SQLite compilé en WebAssembly, sur un vrai fichier dans l'Origin Private File System, dans un worker - sans pont natif. Le même moteur dans un navigateur que sur un téléphone."
+    "engineHint": "Chaque requête atteint SQLite compilé en WebAssembly, sur un vrai fichier dans l'Origin Private File System, dans un worker - sans pont natif. Le même moteur dans un navigateur que sur un téléphone.",
+    "webview": "WebView"
   },
   "errors": {
     "notFoundTitle": "Introuvable",

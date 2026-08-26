@@ -15,6 +15,8 @@ import type { Database } from "./schema";
  */
 export const changeBus = createChangeBus();
 
+const RETRY_DELAY_MS = 400;
+
 let database: MobileDatabase<Database> | null = null;
 let tier: StorageTier | null = null;
 
@@ -63,13 +65,26 @@ export async function openDatabase(): Promise<MobileDatabase<Database>> {
   const probe = probeOpfs();
   if (!probe.supported) throw new Error(probe.reason ?? "OPFS is not available in this WebView");
 
+  const open = () =>
+    fromDialect(new OpfsSQLiteDialect({ worker: new OpfsWorker(), name: "app.sqlite3" }));
+
   try {
-    database = await fromDialect(
-      new OpfsSQLiteDialect({ worker: new OpfsWorker(), name: "app.sqlite3" }),
-    );
-  } catch (error) {
-    // The engine knows whether it can open; this only makes its answer actionable.
-    throw new Error(describeOpenFailure(error));
+    database = await open();
+  } catch (first) {
+    /**
+     * One retry, because the SAH pool takes an exclusive lock on its directory and the most common
+     * reason it is held is a process that is on its way out - a crash, or a relaunch racing the old
+     * WebView's teardown. The handles are released when that process dies, so a moment later the
+     * same open succeeds. It is not a fix for a WebView that cannot do this at all, and it is not
+     * allowed to become one: exactly one retry, then the real failure surfaces.
+     */
+    await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+    try {
+      database = await open();
+    } catch {
+      // The first error is the honest one; the retry's is a duplicate of it.
+      throw new Error(describeOpenFailure(first));
+    }
   }
   tier = "opfs";
 

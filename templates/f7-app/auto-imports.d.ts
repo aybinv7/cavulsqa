@@ -103,6 +103,7 @@ declare global {
   const refManualReset: typeof import('@vueuse/core').refManualReset
   const refThrottled: typeof import('@vueuse/core').refThrottled
   const refWithControl: typeof import('@vueuse/core').refWithControl
+  const renderBootstrapError: typeof import('./src/plugins/bootstrapError').renderBootstrapError
   const request: typeof import('framework7/lite').request
   const resolveComponent: typeof import('vue').resolveComponent
   const seedPlugin: typeof import('./src/plugins/seed.plugin').seedPlugin
@@ -447,6 +448,7 @@ declare module 'vue' {
     readonly refManualReset: UnwrapRef<typeof import('@vueuse/core')['refManualReset']>
     readonly refThrottled: UnwrapRef<typeof import('@vueuse/core')['refThrottled']>
     readonly refWithControl: UnwrapRef<typeof import('@vueuse/core')['refWithControl']>
+    readonly renderBootstrapError: UnwrapRef<typeof import('./src/plugins/bootstrapError')['renderBootstrapError']>
     readonly request: UnwrapRef<typeof import('framework7/lite')['request']>
     readonly resolveComponent: UnwrapRef<typeof import('vue')['resolveComponent']>
     readonly seedPlugin: UnwrapRef<typeof import('./src/plugins/seed.plugin')['seedPlugin']>
