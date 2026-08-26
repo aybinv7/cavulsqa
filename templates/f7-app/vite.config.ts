@@ -41,7 +41,9 @@ export default defineConfig({
 
     Icons({ autoInstall: true, compiler: "vue3" }),
 
-    VueI18nPlugin({ include: [fileURLToPath(new URL("./src/locales/**", import.meta.url))] }),
+    VueI18nPlugin({
+      include: [fileURLToPath(new URL("./src/locales/**", import.meta.url))],
+    }),
 
     /**
      * Composition API, i18n, vueuse and the Framework7 helpers are available without an import

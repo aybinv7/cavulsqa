@@ -24,6 +24,7 @@ catalog:
   "@intlify/unplugin-vue-i18n": ^11.2.5
   "@vueuse/core": ^14.4.0
   "@capacitor/android": ^8.5.0
+  "@sqlite.org/sqlite-wasm": 3.53.0-build1
 overrides:
   vite: "catalog:"
 peerDependencyRules:

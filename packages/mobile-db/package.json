@@ -24,6 +24,7 @@
   "type": "module",
   "exports": {
     ".": "./dist/index.mjs",
+    "./opfs": "./dist/opfs.mjs",
     "./testing": "./dist/testing.mjs",
     "./package.json": "./package.json"
   },
@@ -40,6 +41,7 @@
   "devDependencies": {
     "@capacitor-community/sqlite": "^7.0.2",
     "@capacitor/core": "^8.0.0",
+    "@sqlite.org/sqlite-wasm": "catalog:",
     "@types/node": "^26.1.1",
     "bumpp": "^11.1.0",
     "capacitor-sqlite-kysely": "^1.0.2",
@@ -52,12 +54,16 @@
   "peerDependencies": {
     "@capacitor-community/sqlite": ">=7",
     "@capacitor/core": ">=8",
+    "@sqlite.org/sqlite-wasm": ">=3.50",
     "capacitor-sqlite-kysely": ">=1",
     "kysely": "^0.29",
     "sql.js": ">=1.13"
   },
   "peerDependenciesMeta": {
     "sql.js": {
+      "optional": true
+    },
+    "@sqlite.org/sqlite-wasm": {
       "optional": true
     }
   }
