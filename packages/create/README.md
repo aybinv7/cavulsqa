@@ -9,6 +9,19 @@ pnpm create @cavulsqa
 `npm create @cavulsqa`, `bun create @cavulsqa` and `vp create @cavulsqa` all work the same way. With
 a terminal it asks four questions; with `--name` it asks none, which is what CI wants.
 
+**On PowerShell, quote the scope** — or use `npx`:
+
+```powershell
+pnpm create '@cavulsqa'
+npx @cavulsqa/create --name myapp
+```
+
+Unquoted, `@cavulsqa` is PowerShell's splatting operator: it expands an undefined variable to
+nothing, pnpm never sees a package name, and you get a 404 for something like `create---name`. The
+`npx` form has no leading `@` on a bare token, so it is immune.
+
+There is no unscoped `create-cavulsqa`, so `pnpm create cavulsqa` is a 404 as well.
+
 ```bash
 pnpm create @cavulsqa --name caputa --app-id com.sig.caputa --yes
 ```
