@@ -19,6 +19,8 @@ export interface CaseResult {
 
 export interface SuiteResult {
   engine: string;
+  /** The PRAGMAs in force. Two runs under different settings are not comparable. */
+  pragmas?: readonly string[];
   at: number;
   rowsSeeded: number;
   cases: CaseResult[];

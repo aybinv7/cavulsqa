@@ -204,6 +204,7 @@
       "read": "Reads",
       "transaction": "Transactions",
       "concurrency": "Concurrency"
-    }
+    },
+    "pragmas": "PRAGMA {profile}"
   }
 }

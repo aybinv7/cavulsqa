@@ -6,6 +6,7 @@
     <div class="mb-3 flex flex-wrap items-center gap-2">
       <F7Chip :text="engineName" color="teal" outline />
       <F7Chip v-if="baseline" :text="t('bench.against', { engine: baseline.engine })" outline />
+      <F7Chip :text="t('bench.pragmas', { profile })" color="orange" outline />
     </div>
 
     <F7Button fill :disabled="running" @click="run">
@@ -71,11 +72,15 @@
 </template>
 
 <script setup lang="ts">
+import { pragmaProfile } from "@/app/pragmas.config";
 import { useBenchmark, type CaseComparison } from "@/modules/demo/composables/useBenchmark";
 
 const { t } = useI18n();
 const { engineName, running, progress, failure, result, baseline, comparison, run, clear, asJson } =
   useBenchmark();
+
+// Part of the measurement, not a detail: two runs under different PRAGMAs are not comparable.
+const profile = pragmaProfile;
 
 const groups = ["write", "read", "transaction", "concurrency"] as const;
 

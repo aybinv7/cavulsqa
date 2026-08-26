@@ -3,7 +3,7 @@ import {
   type CaseResult,
   type SuiteResult,
 } from "@/domains/benchmark/benchmark.suite";
-import { activeStorage, activeStorageLabel, rdb } from "@/shared/database/database";
+import { activePragmas, activeStorage, activeStorageLabel, rdb } from "@/shared/database/database";
 import type { StorageId } from "@/shared/database/candidates";
 
 const STORAGE_KEY = "app.benchmark.results";
@@ -96,7 +96,12 @@ export function useBenchmark() {
 
       const next = {
         ...stored.value,
-        [engine]: { ...finished, engine: activeStorageLabel(), at: Date.now() },
+        [engine]: {
+          ...finished,
+          engine: activeStorageLabel(),
+          pragmas: activePragmas(),
+          at: Date.now(),
+        },
       };
       stored.value = next;
       writeStored(next);

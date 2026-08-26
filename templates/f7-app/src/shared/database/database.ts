@@ -1,7 +1,8 @@
-import { Kysely, type Dialect } from "kysely";
+import { Kysely, sql, type Dialect } from "kysely";
 import { Migrator } from "kysely/migration";
 import { runWrite, type MobileDatabase } from "@cavulsqa/mobile-db/core";
 import { createChangeBus, createReactiveDb } from "@cavulsqa/reactive-db";
+import { pragmaProfile, pragmasFor } from "@/app/pragmas.config";
 import { storageChain } from "@/app/storage.config";
 import type { StorageId } from "./candidates";
 import type { StorageAttempt, StorageCandidate } from "./candidates";
@@ -21,6 +22,7 @@ const RETRY_DELAY_MS = 400;
 let database: MobileDatabase<Database> | null = null;
 let chosen: StorageCandidate | null = null;
 let attempts: StorageAttempt[] = [];
+let applied: string[] = [];
 
 /**
  * Wraps a Kysely instance in the shape the app consumes, and runs the migrations.
@@ -30,6 +32,22 @@ let attempts: StorageAttempt[] = [];
  */
 async function fromDialect(dialect: Dialect): Promise<MobileDatabase<Database>> {
   const db = new Kysely<Database>({ dialect });
+
+  /**
+   * Before the migrations, and identically for every engine. SQLite's defaults are per-build, so two
+   * engines left on their own are not comparable - a difference in `synchronous` alone can look like
+   * one engine being half as fast as the other.
+   */
+  applied = [];
+  for (const pragma of pragmasFor(pragmaProfile)) {
+    try {
+      await sql.raw(pragma).execute(db);
+      applied.push(pragma);
+    } catch (error) {
+      // A VFS that refuses a journal mode is worth knowing about, not worth failing over.
+      applied.push(`${pragma} -> rejected: ${error instanceof Error ? error.message : "unknown"}`);
+    }
+  }
 
   await new Migrator({
     db,
@@ -58,6 +76,11 @@ export function activeStorage(): StorageCandidate {
 
 export function activeStorageLabel(): string {
   return activeStorage().label;
+}
+
+/** The PRAGMAs that actually took, so a measurement can state its own configuration. */
+export function activePragmas(): readonly string[] {
+  return applied;
 }
 
 /** Every step of the walk, including the candidates that were skipped and why. */
@@ -166,4 +189,5 @@ export async function closeDatabase(): Promise<void> {
   database = null;
   chosen = null;
   attempts = [];
+  applied = [];
 }
