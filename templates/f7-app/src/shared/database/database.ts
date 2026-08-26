@@ -49,10 +49,23 @@ async function fromDialect(dialect: Dialect): Promise<MobileDatabase<Database>> 
     }
   }
 
-  await new Migrator({
+  /**
+   * `migrateToLatest` reports failure in its return value rather than throwing, so an unchecked call
+   * boots an app whose tables were never created - which is exactly what happened: a deleted
+   * migration made kysely refuse the whole set, and the failure only surfaced later as
+   * "no such table" from the first query that needed one.
+   */
+  const migration = await new Migrator({
     db,
     provider: { getMigrations: () => Promise.resolve(migrations) },
   }).migrateToLatest();
+
+  if (migration.error) {
+    const failed = migration.results?.find((result) => result.status === "Error")?.migrationName;
+    const detail =
+      migration.error instanceof Error ? migration.error.message : String(migration.error);
+    throw new Error(`migration failed${failed ? ` at ${failed}` : ""}: ${detail}`);
+  }
 
   return {
     db,

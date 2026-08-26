@@ -80,6 +80,23 @@ export const migrations: MigrationSet = {
   },
 
   /**
+   * A tombstone, and it has to stay.
+   *
+   * This migration created the two-table benchmark that 003 replaced. Deleting the entry rather than
+   * emptying it is what broke the app: kysely records applied migrations by key, finds one recorded
+   * that the provider no longer offers, calls the history corrupted and applies *nothing* - so 003
+   * never ran and the first query failed with "no such table: bench_order_line".
+   *
+   * An applied migration is a fact about databases in the world. It can stop doing anything; it
+   * cannot stop existing.
+   */
+  "002_benchmark": {
+    up: async () => {
+      // Its tables are created and dropped by 003; there is nothing left for this to do.
+    },
+  },
+
+  /**
    * The benchmark's tables, replacing the two-table version outright - this is R&D and nothing
    * depends on the old shape.
    *
