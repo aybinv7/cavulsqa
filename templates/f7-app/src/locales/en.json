@@ -205,7 +205,8 @@
       "write": "Writes",
       "transaction": "Transactions",
       "schema": "Schema",
-      "concurrency": "Concurrency"
+      "concurrency": "Concurrency",
+      "sync": "Sync strategies"
     },
     "pragmas": "PRAGMA {profile}",
     "seeded": "Dataset built in {ms} ms - later runs reuse it"

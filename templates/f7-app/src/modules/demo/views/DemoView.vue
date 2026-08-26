@@ -9,8 +9,10 @@
 
     <!-- Real Framework7 tabs, so the panes swipe rather than switching on a v-if. -->
     <F7Toolbar tabbar top>
-      <F7Link tab-link="#demo-tab-data" tab-link-active>{{ t("demo.data") }}</F7Link>
-      <F7Link tab-link="#demo-tab-diagnostics">{{ t("demo.diagnostics") }}</F7Link>
+      <F7ToolbarPane>
+        <F7Link tab-link="#demo-tab-data" tab-link-active>{{ t("demo.data") }}</F7Link>
+        <F7Link tab-link="#demo-tab-diagnostics">{{ t("demo.diagnostics") }}</F7Link>
+      </F7ToolbarPane>
     </F7Toolbar>
 
     <F7Tabs swipeable>

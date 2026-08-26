@@ -62,8 +62,9 @@ async function fromDialect(dialect: Dialect): Promise<MobileDatabase<Database>> 
 
   if (migration.error) {
     const failed = migration.results?.find((result) => result.status === "Error")?.migrationName;
+    // kysely types the error as unknown, and a non-Error would stringify to [object Object].
     const detail =
-      migration.error instanceof Error ? migration.error.message : String(migration.error);
+      migration.error instanceof Error ? migration.error.message : JSON.stringify(migration.error);
     throw new Error(`migration failed${failed ? ` at ${failed}` : ""}: ${detail}`);
   }
 

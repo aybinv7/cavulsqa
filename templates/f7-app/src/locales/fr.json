@@ -205,7 +205,8 @@
       "write": "Écritures",
       "transaction": "Transactions",
       "schema": "Schéma",
-      "concurrency": "Concurrence"
+      "concurrency": "Concurrence",
+      "sync": "Stratégies de synchro"
     },
     "pragmas": "PRAGMA {profile}",
     "seeded": "Jeu de données construit en {ms} ms - réutilisé ensuite"

@@ -29,7 +29,7 @@ test("the whole suite runs at scale and every case reports a timing", async () =
   const seen: string[] = [];
   const result = await runBenchmark(db, (name) => seen.push(name));
 
-  expect(result.cases.length).toBeGreaterThanOrEqual(24);
+  expect(result.cases.length).toBeGreaterThanOrEqual(27);
   expect(result.seedMs, "the first run builds the dataset").toBeGreaterThan(0);
   expect(result.rowsSeeded).toBeGreaterThanOrEqual(SCALE.orderLines + SCALE.stock);
 
@@ -45,9 +45,18 @@ test("the whole suite runs at scale and every case reports a timing", async () =
     "join",
     "read",
     "schema",
+    "sync",
     "transaction",
     "write",
   ]);
+
+  /**
+   * The sync cases measure how long a read waits, so a zero would mean the read never queued behind
+   * the write and the case proved nothing.
+   */
+  for (const entry of result.cases.filter((c) => c.group === "sync")) {
+    expect(entry.medianMs, entry.name).toBeGreaterThan(0);
+  }
 
   // Read and join cases must actually return rows; a fast case that returns none proves nothing.
   for (const entry of result.cases.filter((c) => c.group === "join")) {

@@ -4,7 +4,7 @@ import type { Database } from "@/shared/database/schema";
 
 export interface CaseResult {
   name: string;
-  group: "write" | "read" | "join" | "transaction" | "concurrency" | "schema";
+  group: "write" | "read" | "join" | "transaction" | "concurrency" | "schema" | "sync";
   /** How many logical operations the case performed. */
   operations: number;
   /** Median of the per-iteration timings, which is what to compare. */
@@ -547,6 +547,100 @@ export async function runBenchmark(
     });
     return summarise("Read while a 1000-row write is in flight", "concurrency", timings, 1, {
       note: "Where a lock that serialises reads behind a sync would show up",
+    });
+  });
+
+  // ---- sync strategies ----------------------------------------------------------------------
+  /**
+   * The number that decides whether a sync freezes the UI: how long a read waits when it arrives
+   * while one is running.
+   *
+   * Every engine here funnels through one serial worker, so a read cannot overtake a write already
+   * in flight - it waits for whatever is queued ahead of it. That makes the question not "how fast is
+   * the write" but "how much work did the write commit to before the read arrived", and the three
+   * strategies below answer it very differently for the same 1000 rows.
+   */
+  const readLatencyDuring = async (write: () => Promise<unknown>): Promise<number> => {
+    const running = write();
+    // Long enough that the write is genuinely in flight rather than merely constructed.
+    await new Promise((resolve) => setTimeout(resolve, 5));
+
+    const started = performance.now();
+    await heavyRead();
+    const waited = performance.now() - started;
+
+    await running;
+    return waited;
+  };
+
+  const syncRow = (run: number, index: number) => ({
+    order_id: (index % SCALE.orders) + 1,
+    amount_cents: 4,
+    method: `bench-sync-${String(run)}`,
+    created_at: EPOCH,
+  });
+
+  await step("Sync 1000 rows, row by row in one transaction", async () => {
+    const timings: number[] = [];
+    for (let run = 0; run < 3; run++) {
+      timings.push(
+        await readLatencyDuring(() =>
+          db.transaction().execute(async (trx) => {
+            for (let i = 0; i < 1000; i++) {
+              await trx.insertInto("bench_payment").values(syncRow(run, i)).execute();
+            }
+          }),
+        ),
+      );
+    }
+    return summarise("Sync 1000 rows, row by row in one transaction", "sync", timings, 1, {
+      note: "The read waits for all 1000 inserts. What a naive sync loop costs the UI",
+    });
+  });
+
+  await step("Sync 1000 rows, 150 per statement", async () => {
+    const timings: number[] = [];
+    for (let run = 0; run < 3; run++) {
+      timings.push(
+        await readLatencyDuring(() =>
+          db.transaction().execute(async (trx) => {
+            for (let offset = 0; offset < 1000; offset += 150) {
+              await trx
+                .insertInto("bench_payment")
+                .values(
+                  Array.from({ length: Math.min(150, 1000 - offset) }, (_, i) =>
+                    syncRow(run + 10, offset + i),
+                  ),
+                )
+                .execute();
+            }
+          }),
+        ),
+      );
+    }
+    return summarise("Sync 1000 rows, 150 per statement", "sync", timings, 1, {
+      note: "Same transaction, seven statements instead of a thousand",
+    });
+  });
+
+  await step("Sync 1000 rows, ten transactions of 100", async () => {
+    const timings: number[] = [];
+    for (let run = 0; run < 3; run++) {
+      timings.push(
+        await readLatencyDuring(async () => {
+          for (let chunk = 0; chunk < 10; chunk++) {
+            await db.transaction().execute(async (trx) => {
+              await trx
+                .insertInto("bench_payment")
+                .values(Array.from({ length: 100 }, (_, i) => syncRow(run + 20, chunk * 100 + i)))
+                .execute();
+            });
+          }
+        }),
+      );
+    }
+    return summarise("Sync 1000 rows, ten transactions of 100", "sync", timings, 1, {
+      note: "Awaited one chunk at a time, so a read queues behind one chunk and not the batch",
     });
   });
 
