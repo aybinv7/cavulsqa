@@ -182,5 +182,28 @@
     "scrollMe": "Scroll to see the navbar react",
     "row": "Row",
     "next": "Open the next one"
+  },
+  "bench": {
+    "title": "Benchmark",
+    "intro": "Every operation a screen in this app performs, run against the benchmark's own two tables so it never touches your data. Switch engines in Settings and run it again - the second run is compared against the first.",
+    "run": "Run benchmark",
+    "running": "Running",
+    "against": "vs {engine}",
+    "cases": "Cases",
+    "rows": "Rows seeded",
+    "wall": "Wall clock",
+    "worst": "worst",
+    "faster": "{times}x faster here",
+    "slower": "{times}x slower here",
+    "copy": "Copy JSON",
+    "clear": "Clear results",
+    "copied": "Copied",
+    "copyFailed": "Could not reach the clipboard.",
+    "group": {
+      "write": "Writes",
+      "read": "Reads",
+      "transaction": "Transactions",
+      "concurrency": "Concurrency"
+    }
   }
 }

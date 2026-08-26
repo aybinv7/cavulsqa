@@ -152,6 +152,7 @@ declare global {
   const useAttrs: typeof import('vue').useAttrs
   const useBase64: typeof import('@vueuse/core').useBase64
   const useBattery: typeof import('@vueuse/core').useBattery
+  const useBenchmark: typeof import('./src/modules/demo/composables/useBenchmark').useBenchmark
   const useBluetooth: typeof import('@vueuse/core').useBluetooth
   const useBreakpoints: typeof import('@vueuse/core').useBreakpoints
   const useBroadcastChannel: typeof import('@vueuse/core').useBroadcastChannel
@@ -336,6 +337,9 @@ declare global {
   export type { TabbarVisibility } from './src/shared/composables/useTabbarVisibility'
   import('./src/shared/composables/useTabbarVisibility')
   // @ts-ignore
+  export type { CaseComparison } from './src/modules/demo/composables/useBenchmark'
+  import('./src/modules/demo/composables/useBenchmark')
+  // @ts-ignore
   export type { BusEntry, PipelineResult } from './src/modules/demo/composables/useReactiveDemo'
   import('./src/modules/demo/composables/useReactiveDemo')
   // @ts-ignore
@@ -492,6 +496,7 @@ declare module 'vue' {
     readonly useAttrs: UnwrapRef<typeof import('vue')['useAttrs']>
     readonly useBase64: UnwrapRef<typeof import('@vueuse/core')['useBase64']>
     readonly useBattery: UnwrapRef<typeof import('@vueuse/core')['useBattery']>
+    readonly useBenchmark: UnwrapRef<typeof import('./src/modules/demo/composables/useBenchmark')['useBenchmark']>
     readonly useBluetooth: UnwrapRef<typeof import('@vueuse/core')['useBluetooth']>
     readonly useBreakpoints: UnwrapRef<typeof import('@vueuse/core')['useBreakpoints']>
     readonly useBroadcastChannel: UnwrapRef<typeof import('@vueuse/core')['useBroadcastChannel']>

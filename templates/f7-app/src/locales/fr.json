@@ -182,5 +182,28 @@
     "scrollMe": "Défilez pour voir la navbar réagir",
     "row": "Ligne",
     "next": "Ouvrir la suivante"
+  },
+  "bench": {
+    "title": "Benchmark",
+    "intro": "Chaque opération qu'un écran de cette application effectue, exécutée sur les deux tables propres au benchmark : vos données ne sont jamais touchées. Changez de moteur dans Réglages et relancez - la seconde exécution est comparée à la première.",
+    "run": "Lancer le benchmark",
+    "running": "En cours",
+    "against": "vs {engine}",
+    "cases": "Cas",
+    "rows": "Lignes créées",
+    "wall": "Durée totale",
+    "worst": "pire",
+    "faster": "{times}x plus rapide ici",
+    "slower": "{times}x plus lent ici",
+    "copy": "Copier le JSON",
+    "clear": "Effacer les résultats",
+    "copied": "Copié",
+    "copyFailed": "Presse-papiers inaccessible.",
+    "group": {
+      "write": "Écritures",
+      "read": "Lectures",
+      "transaction": "Transactions",
+      "concurrency": "Concurrence"
+    }
   }
 }

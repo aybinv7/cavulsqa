@@ -56,4 +56,28 @@ export interface Database {
   order_line: OrderLineTable;
   tag: TagTable;
   customer_tag: CustomerTagTable;
+  bench_parent: BenchParentTable;
+  bench_child: BenchChildTable;
+}
+
+/**
+ * The benchmark's own tables, deliberately separate from the app's.
+ *
+ * Measuring writes against real data would either corrupt it or force a rollback, and a rolled-back
+ * transaction never pays the commit - which on a phone is most of what a write costs. The shape
+ * mirrors sales_order/order_line so the join and aggregate cases are representative.
+ */
+export interface BenchParentTable {
+  id: Generated<number>;
+  created_at: string;
+  label: string;
+  bucket: number;
+  amount_cents: number;
+}
+
+export interface BenchChildTable {
+  id: Generated<number>;
+  parent_id: number;
+  quantity: number;
+  unit_price_cents: number;
 }

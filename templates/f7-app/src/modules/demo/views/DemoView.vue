@@ -49,6 +49,8 @@
           :engine-name="engineName"
           @measure="measurePipelining"
         />
+
+        <DemoBenchmark />
       </F7Tab>
     </F7Tabs>
 
@@ -81,6 +83,7 @@ import type { OrderRow } from "@/domains/sales/sales.repository";
 import DemoBusLog from "@/modules/demo/components/DemoBusLog.vue";
 import DemoCreateOrderSheet from "@/modules/demo/components/DemoCreateOrderSheet.vue";
 import DemoOrderList from "@/modules/demo/components/DemoOrderList.vue";
+import DemoBenchmark from "@/modules/demo/components/DemoBenchmark.vue";
 import DemoPipelineBenchmark from "@/modules/demo/components/DemoPipelineBenchmark.vue";
 import DemoStatCards from "@/modules/demo/components/DemoStatCards.vue";
 import { useReactiveDemo } from "@/modules/demo/composables/useReactiveDemo";
