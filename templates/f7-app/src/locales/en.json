@@ -200,11 +200,14 @@
     "copied": "Copied",
     "copyFailed": "Could not reach the clipboard.",
     "group": {
-      "write": "Writes",
       "read": "Reads",
+      "join": "Joins",
+      "write": "Writes",
       "transaction": "Transactions",
+      "schema": "Schema",
       "concurrency": "Concurrency"
     },
-    "pragmas": "PRAGMA {profile}"
+    "pragmas": "PRAGMA {profile}",
+    "seeded": "Dataset built in {ms} ms - later runs reuse it"
   }
 }

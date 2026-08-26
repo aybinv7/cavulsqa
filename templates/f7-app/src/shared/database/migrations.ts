@@ -80,36 +80,126 @@ export const migrations: MigrationSet = {
   },
 
   /**
-   * The benchmark's tables. Indexed on `bucket` and `parent_id` on purpose, and `label` left
-   * unindexed on purpose - the suite measures an indexed range against a full scan, and needs both.
+   * The benchmark's tables, replacing the two-table version outright - this is R&D and nothing
+   * depends on the old shape.
+   *
+   * Indexed where a screen would index: foreign keys, the columns joins and filters use, and one
+   * composite for the stock lookup. `bench_customer.notes` is deliberately left unindexed so the
+   * LIKE case measures a genuine scan, and `bench_order.total_cents` too, so one case has to sort
+   * without help.
    */
-  "002_benchmark": {
+  "003_benchmark_scale": {
     up: async (db) => {
-      await createTableWithDefaults(db, "bench_parent")
-        .addColumn("label", "text", (col) => col.notNull().unique())
-        .addColumn("bucket", "integer", (col) => col.notNull().defaultTo(0))
-        .addColumn("amount_cents", "integer", (col) => col.notNull().defaultTo(0))
+      await db.schema.dropTable("bench_child").ifExists().execute();
+      await db.schema.dropTable("bench_parent").ifExists().execute();
+
+      await db.schema
+        .createTable("bench_region")
+        .addColumn("id", "integer", (col) => col.primaryKey().autoIncrement())
+        .addColumn("name", "text", (col) => col.notNull())
         .execute();
 
       await db.schema
-        .createTable("bench_child")
+        .createTable("bench_city")
         .addColumn("id", "integer", (col) => col.primaryKey().autoIncrement())
-        .addColumn("parent_id", "integer", (col) =>
-          col.notNull().references("bench_parent.id").onDelete("cascade"),
+        .addColumn("region_id", "integer", (col) => col.notNull().references("bench_region.id"))
+        .addColumn("name", "text", (col) => col.notNull())
+        .execute();
+
+      await db.schema
+        .createTable("bench_customer")
+        .addColumn("id", "integer", (col) => col.primaryKey().autoIncrement())
+        .addColumn("city_id", "integer", (col) => col.notNull().references("bench_city.id"))
+        .addColumn("code", "text", (col) => col.notNull().unique())
+        .addColumn("name", "text", (col) => col.notNull())
+        .addColumn("notes", "text", (col) => col.notNull().defaultTo(""))
+        .addColumn("credit_cents", "integer", (col) => col.notNull().defaultTo(0))
+        .addColumn("created_at", "text", (col) => col.notNull())
+        .execute();
+
+      await db.schema
+        .createTable("bench_category")
+        .addColumn("id", "integer", (col) => col.primaryKey().autoIncrement())
+        .addColumn("name", "text", (col) => col.notNull())
+        .execute();
+
+      await db.schema
+        .createTable("bench_product")
+        .addColumn("id", "integer", (col) => col.primaryKey().autoIncrement())
+        .addColumn("category_id", "integer", (col) => col.notNull().references("bench_category.id"))
+        .addColumn("sku", "text", (col) => col.notNull().unique())
+        .addColumn("name", "text", (col) => col.notNull())
+        .addColumn("price_cents", "integer", (col) => col.notNull().defaultTo(0))
+        .execute();
+
+      await db.schema
+        .createTable("bench_warehouse")
+        .addColumn("id", "integer", (col) => col.primaryKey().autoIncrement())
+        .addColumn("name", "text", (col) => col.notNull())
+        .execute();
+
+      await db.schema
+        .createTable("bench_stock")
+        .addColumn("id", "integer", (col) => col.primaryKey().autoIncrement())
+        .addColumn("warehouse_id", "integer", (col) =>
+          col.notNull().references("bench_warehouse.id"),
         )
+        .addColumn("product_id", "integer", (col) => col.notNull().references("bench_product.id"))
+        .addColumn("quantity", "integer", (col) => col.notNull().defaultTo(0))
+        .execute();
+
+      await db.schema
+        .createTable("bench_order")
+        .addColumn("id", "integer", (col) => col.primaryKey().autoIncrement())
+        .addColumn("customer_id", "integer", (col) =>
+          col.notNull().references("bench_customer.id").onDelete("cascade"),
+        )
+        .addColumn("reference", "text", (col) => col.notNull())
+        .addColumn("status", "text", (col) => col.notNull().defaultTo("draft"))
+        .addColumn("created_at", "text", (col) => col.notNull())
+        .addColumn("total_cents", "integer", (col) => col.notNull().defaultTo(0))
+        .execute();
+
+      await db.schema
+        .createTable("bench_order_line")
+        .addColumn("id", "integer", (col) => col.primaryKey().autoIncrement())
+        .addColumn("order_id", "integer", (col) =>
+          col.notNull().references("bench_order.id").onDelete("cascade"),
+        )
+        .addColumn("product_id", "integer", (col) => col.notNull().references("bench_product.id"))
         .addColumn("quantity", "integer", (col) => col.notNull().defaultTo(1))
         .addColumn("unit_price_cents", "integer", (col) => col.notNull().defaultTo(0))
         .execute();
 
       await db.schema
-        .createIndex("idx_bench_parent_bucket")
-        .on("bench_parent")
-        .column("bucket")
+        .createTable("bench_payment")
+        .addColumn("id", "integer", (col) => col.primaryKey().autoIncrement())
+        .addColumn("order_id", "integer", (col) =>
+          col.notNull().references("bench_order.id").onDelete("cascade"),
+        )
+        .addColumn("amount_cents", "integer", (col) => col.notNull().defaultTo(0))
+        .addColumn("method", "text", (col) => col.notNull())
+        .addColumn("created_at", "text", (col) => col.notNull())
         .execute();
+
+      for (const [name, table, column] of [
+        ["idx_bench_city_region", "bench_city", "region_id"],
+        ["idx_bench_customer_city", "bench_customer", "city_id"],
+        ["idx_bench_product_category", "bench_product", "category_id"],
+        ["idx_bench_order_customer", "bench_order", "customer_id"],
+        ["idx_bench_order_status", "bench_order", "status"],
+        ["idx_bench_line_order", "bench_order_line", "order_id"],
+        ["idx_bench_line_product", "bench_order_line", "product_id"],
+        ["idx_bench_payment_order", "bench_payment", "order_id"],
+      ] as const) {
+        await db.schema.createIndex(name).on(table).column(column).execute();
+      }
+
+      // Composite, because a stock lookup filters on both and neither alone is selective enough.
       await db.schema
-        .createIndex("idx_bench_child_parent")
-        .on("bench_child")
-        .column("parent_id")
+        .createIndex("idx_bench_stock_warehouse_product")
+        .on("bench_stock")
+        .columns(["warehouse_id", "product_id"])
         .execute();
     },
   },

@@ -82,7 +82,7 @@ const { engineName, running, progress, failure, result, baseline, comparison, ru
 // Part of the measurement, not a detail: two runs under different PRAGMAs are not comparable.
 const profile = pragmaProfile;
 
-const groups = ["write", "read", "transaction", "concurrency"] as const;
+const groups = ["read", "join", "write", "transaction", "schema", "concurrency"] as const;
 
 function byGroup(group: CaseComparison["group"]): CaseComparison[] {
   return comparison.value.filter((entry) => entry.group === group);

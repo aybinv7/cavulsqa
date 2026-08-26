@@ -200,11 +200,14 @@
     "copied": "Copié",
     "copyFailed": "Presse-papiers inaccessible.",
     "group": {
-      "write": "Écritures",
       "read": "Lectures",
+      "join": "Jointures",
+      "write": "Écritures",
       "transaction": "Transactions",
+      "schema": "Schéma",
       "concurrency": "Concurrence"
     },
-    "pragmas": "PRAGMA {profile}"
+    "pragmas": "PRAGMA {profile}",
+    "seeded": "Jeu de données construit en {ms} ms - réutilisé ensuite"
   }
 }

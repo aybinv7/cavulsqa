@@ -1,10 +1,10 @@
 import { sql, type Kysely } from "kysely";
-import { nowISO } from "@cavulsqa/mobile-db/core";
+import { datasetRowCount, ensureDataset, SCALE } from "./benchmark.dataset";
 import type { Database } from "@/shared/database/schema";
 
 export interface CaseResult {
   name: string;
-  group: "write" | "read" | "transaction" | "concurrency";
+  group: "write" | "read" | "join" | "transaction" | "concurrency" | "schema";
   /** How many logical operations the case performed. */
   operations: number;
   /** Median of the per-iteration timings, which is what to compare. */
@@ -14,6 +14,8 @@ export interface CaseResult {
   totalMs: number;
   /** Per logical operation, so a bulk case is comparable with a single-row one. */
   msPerOperation: number;
+  /** Rows touched or returned, so a case cannot look fast by doing nothing. */
+  rows?: number;
   note?: string;
 }
 
@@ -23,20 +25,22 @@ export interface SuiteResult {
   pragmas?: readonly string[];
   at: number;
   rowsSeeded: number;
+  /** Present only on the run that had to build the dataset. */
+  seedMs?: number;
   cases: CaseResult[];
   totalMs: number;
 }
 
 /**
- * Median rather than mean: a single GC pause or a WebView hiccup skews a mean badly at these
- * durations, and the question is what a typical operation costs.
+ * Median rather than mean: one GC pause skews a mean badly, and the question is what a typical
+ * operation costs.
  */
 function summarise(
   name: string,
   group: CaseResult["group"],
   timings: number[],
   operationsPerIteration: number,
-  note?: string,
+  extra?: { rows?: number; note?: string },
 ): CaseResult {
   const sorted = [...timings].sort((a, b) => a - b);
   const median = sorted[Math.floor(sorted.length / 2)] ?? 0;
@@ -51,7 +55,8 @@ function summarise(
     worstMs: round(sorted.at(-1) ?? 0),
     totalMs: round(total),
     msPerOperation: round(total / Math.max(operations, 1)),
-    note,
+    rows: extra?.rows,
+    note: extra?.note,
   };
 }
 
@@ -60,68 +65,27 @@ const round = (value: number) => Number(value.toFixed(3));
 async function time(
   iterations: number,
   work: (index: number) => Promise<unknown>,
-): Promise<number[]> {
+): Promise<{ timings: number[]; rows: number }> {
   const timings: number[] = [];
+  let rows = 0;
   for (let index = 0; index < iterations; index++) {
     const started = performance.now();
-    await work(index);
+    const outcome = await work(index);
     timings.push(performance.now() - started);
+    if (Array.isArray(outcome)) rows += outcome.length;
   }
-  return timings;
+  return { timings, rows };
 }
 
 /**
- * The benchmark runs against its own two tables, never the app's.
+ * Every shape a distribution app performs, at a cardinality where the answer is not obvious:
+ * five- and six-table joins over 40k lines, a group-by with HAVING, pagination 30k rows deep, an
+ * unindexed scan, index creation on a full table, a cascading delete, and a 1000-row transaction the
+ * size of a sync batch.
  *
- * Measuring writes against real data would either corrupt it or force a rollback, and a rolled-back
- * transaction never pays the commit - which on a phone is most of what a write costs. `bench_parent`
- * and `bench_child` mirror the order/line shape so the join and aggregate cases are representative.
- */
-const SEED_PARENTS = 400;
-const CHILDREN_PER_PARENT = 5;
-
-async function reset(db: Kysely<Database>): Promise<void> {
-  await sql`DELETE FROM bench_child`.execute(db);
-  await sql`DELETE FROM bench_parent`.execute(db);
-}
-
-async function seed(db: Kysely<Database>): Promise<number> {
-  await reset(db);
-  const at = nowISO();
-
-  await db.transaction().execute(async (trx) => {
-    for (let parent = 0; parent < SEED_PARENTS; parent++) {
-      const inserted = await trx
-        .insertInto("bench_parent")
-        .values({
-          created_at: at,
-          label: `parent-${String(parent)}`,
-          bucket: parent % 20,
-          amount_cents: 1000 + parent * 7,
-        })
-        .executeTakeFirstOrThrow();
-
-      const parentId = Number(inserted.insertId ?? 0);
-      for (let child = 0; child < CHILDREN_PER_PARENT; child++) {
-        await trx
-          .insertInto("bench_child")
-          .values({
-            parent_id: parentId,
-            quantity: 1 + ((parent + child) % 9),
-            unit_price_cents: 250 + child * 40,
-          })
-          .execute();
-      }
-    }
-  });
-
-  return SEED_PARENTS * (1 + CHILDREN_PER_PARENT);
-}
-
-/**
- * Every case a screen in this app actually performs, plus the ones that expose an engine's weak
- * spot: a write outside a transaction, a write inside one, a compare-and-set, a join with an
- * aggregate, an unindexed scan, and the same reads issued together against one at a time.
+ * The dataset is seeded once and left alone. Write cases either target rows they created themselves
+ * or clean up after the run, because a suite that shrinks its own dataset gets faster every time and
+ * the numbers stop meaning anything.
  */
 export async function runBenchmark(
   db: Kysely<Database>,
@@ -134,345 +98,471 @@ export async function runBenchmark(
     cases.push(await run());
   };
 
-  const rowsSeeded = await seed(db);
-  const at = nowISO();
-
-  // ---- writes -------------------------------------------------------------------------------
-  await step("Insert one row", async () =>
-    summarise(
-      "Insert one row",
-      "write",
-      await time(40, (index) =>
-        db
-          .insertInto("bench_parent")
-          .values({
-            created_at: at,
-            label: `single-${String(index)}`,
-            bucket: index % 20,
-            amount_cents: 500,
-          })
-          .execute(),
-      ),
-      1,
-      "One statement, one commit - the worst case per row",
-    ),
-  );
-
-  await step("Insert 200 rows in one transaction", async () =>
-    summarise(
-      "Insert 200 rows in one transaction",
-      "write",
-      await time(3, (run) =>
-        db.transaction().execute(async (trx) => {
-          for (let index = 0; index < 200; index++) {
-            await trx
-              .insertInto("bench_parent")
-              .values({
-                created_at: at,
-                label: `bulk-${String(run)}-${String(index)}`,
-                bucket: index % 20,
-                amount_cents: 900,
-              })
-              .execute();
-          }
-        }),
-      ),
-      200,
-      "One commit for 200 rows - what a sync batch should look like",
-    ),
-  );
-
-  await step("Update by primary key", async () =>
-    summarise(
-      "Update by primary key",
-      "write",
-      await time(40, (index) =>
-        db
-          .updateTable("bench_parent")
-          .set({ amount_cents: 1234 + index })
-          .where("id", "=", index + 1)
-          .execute(),
-      ),
-      1,
-    ),
-  );
-
-  await step("Compare-and-set", async () =>
-    summarise(
-      "Compare-and-set",
-      "write",
-      await time(30, (index) =>
-        db
-          .updateTable("bench_parent")
-          .set({ label: `cas-${String(index)}` })
-          .where("id", "=", index + 1)
-          .where("amount_cents", "=", 1234 + index)
-          .execute(),
-      ),
-      1,
-      "Needs a truthful affected-row count, not just success",
-    ),
-  );
-
-  await step("Delete by primary key", async () =>
-    summarise(
-      "Delete by primary key",
-      "write",
-      await time(30, (index) =>
-        db
-          .deleteFrom("bench_parent")
-          .where("label", "=", `single-${String(index)}`)
-          .execute(),
-      ),
-      1,
-    ),
-  );
-
-  await step("Upsert on conflict", async () =>
-    summarise(
-      "Upsert on conflict",
-      "write",
-      await time(30, (index) =>
-        db
-          .insertInto("bench_parent")
-          .values({
-            created_at: at,
-            label: `upsert-${String(index % 5)}`,
-            bucket: 1,
-            amount_cents: index,
-          })
-          .onConflict((oc) => oc.column("label").doUpdateSet({ amount_cents: index }))
-          .execute(),
-      ),
-      1,
-      "Five labels, thirty writes - so most of them take the update path",
-    ),
-  );
+  const seedStarted = performance.now();
+  const { seeded } = await ensureDataset(db, onProgress);
+  const seedMs = seeded ? round(performance.now() - seedStarted) : undefined;
+  const rowsSeeded = await datasetRowCount(db);
 
   // ---- reads --------------------------------------------------------------------------------
-  await step("Select by primary key", async () =>
-    summarise(
-      "Select by primary key",
-      "read",
-      await time(60, (index) =>
-        db
-          .selectFrom("bench_parent")
-          .selectAll()
-          .where("id", "=", (index % SEED_PARENTS) + 1)
-          .executeTakeFirst(),
-      ),
-      1,
-    ),
-  );
+  await step("Point select by primary key", async () => {
+    const { timings } = await time(60, (i) =>
+      db
+        .selectFrom("bench_order_line")
+        .selectAll()
+        .where("id", "=", ((i * 617) % SCALE.orderLines) + 1)
+        .executeTakeFirst(),
+    );
+    return summarise("Point select by primary key", "read", timings, 1, {
+      note: "One row out of 40k, straight down the index",
+    });
+  });
 
-  await step("Indexed range, 50 rows", async () =>
-    summarise(
-      "Indexed range, 50 rows",
-      "read",
-      await time(30, (index) =>
-        db
-          .selectFrom("bench_parent")
-          .selectAll()
-          .where("bucket", "=", index % 20)
-          .orderBy("id", "desc")
-          .limit(50)
-          .execute(),
-      ),
-      1,
-    ),
-  );
+  await step("Indexed lookup, 40k table", async () => {
+    const { timings, rows } = await time(40, (i) =>
+      db
+        .selectFrom("bench_order_line")
+        .selectAll()
+        .where("order_id", "=", ((i * 37) % SCALE.orders) + 1)
+        .execute(),
+    );
+    return summarise("Indexed lookup, 40k table", "read", timings, 1, { rows });
+  });
 
-  await step("LIKE scan, no index", async () =>
-    summarise(
-      "LIKE scan, no index",
-      "read",
-      await time(20, (index) =>
-        db
-          .selectFrom("bench_parent")
-          .selectAll()
-          .where("label", "like", `%-${String(index % 20)}%`)
-          .limit(50)
-          .execute(),
-      ),
-      1,
-      "The search box. A full scan by construction",
-    ),
-  );
+  await step("Composite index lookup", async () => {
+    const { timings, rows } = await time(40, (i) =>
+      db
+        .selectFrom("bench_stock")
+        .selectAll()
+        .where("warehouse_id", "=", (i % SCALE.warehouses) + 1)
+        .where("product_id", "=", ((i * 13) % SCALE.products) + 1)
+        .execute(),
+    );
+    return summarise("Composite index lookup", "read", timings, 1, {
+      rows,
+      note: "Both columns, neither selective alone",
+    });
+  });
 
-  await step("Join with aggregate", async () =>
-    summarise(
-      "Join with aggregate",
-      "read",
-      await time(20, () =>
-        db
-          .selectFrom("bench_parent")
-          .innerJoin("bench_child", "bench_child.parent_id", "bench_parent.id")
-          .select(({ fn }) => [
-            "bench_parent.bucket as bucket",
-            fn.count<number>("bench_child.id").as("lines"),
-            sql<number>`sum(bench_child.quantity * bench_child.unit_price_cents)`.as("total"),
-          ])
-          .groupBy("bench_parent.bucket")
-          .orderBy("total", "desc")
-          .execute(),
-      ),
-      1,
-      "Two tables, group by, sum - the dashboard's shape",
-    ),
-  );
+  await step("Unindexed LIKE over 5k rows", async () => {
+    const { timings, rows } = await time(15, (i) =>
+      db
+        .selectFrom("bench_customer")
+        .select(["id", "name"])
+        .where("notes", "like", `%sector ${String(i % 12)}%`)
+        .execute(),
+    );
+    return summarise("Unindexed LIKE over 5k rows", "read", timings, 1, {
+      rows,
+      note: "The search box. A full scan by construction",
+    });
+  });
 
-  await step("Count all rows", async () =>
-    summarise(
-      "Count all rows",
-      "read",
-      await time(20, () =>
-        db
-          .selectFrom("bench_child")
-          .select(({ fn }) => fn.countAll<number>().as("n"))
-          .executeTakeFirst(),
-      ),
-      1,
-    ),
-  );
+  await step("Deep pagination, offset 30k", async () => {
+    const { timings, rows } = await time(15, (i) =>
+      db
+        .selectFrom("bench_order_line")
+        .selectAll()
+        .orderBy("id")
+        .limit(50)
+        .offset(30_000 + i * 100)
+        .execute(),
+    );
+    return summarise("Deep pagination, offset 30k", "read", timings, 1, {
+      rows,
+      note: "SQLite still walks the skipped rows - the cost of OFFSET",
+    });
+  });
 
-  await step("Correlated subqueries in one round trip", async () =>
-    summarise(
-      "Correlated subqueries in one round trip",
-      "read",
-      await time(20, () =>
-        db
-          .selectNoFrom((eb) => [
-            eb
-              .selectFrom("bench_parent")
-              .select((e) => e.fn.countAll<number>().as("n"))
-              .as("parents"),
-            eb
-              .selectFrom("bench_child")
-              .select((e) => e.fn.countAll<number>().as("n"))
-              .as("children"),
-            eb
-              .selectFrom("bench_child")
-              .select(sql<number>`coalesce(sum(quantity * unit_price_cents), 0)`.as("n"))
-              .as("revenue"),
-          ])
-          .executeTakeFirst(),
-      ),
-      1,
-      "Eight numbers for one statement instead of eight statements",
-    ),
-  );
+  await step("Sort 10k rows without an index", async () => {
+    const { timings, rows } = await time(10, () =>
+      db
+        .selectFrom("bench_order")
+        .select(["id", "total_cents"])
+        .orderBy("total_cents", "desc")
+        .limit(100)
+        .execute(),
+    );
+    return summarise("Sort 10k rows without an index", "read", timings, 1, {
+      rows,
+      note: "total_cents is unindexed on purpose",
+    });
+  });
 
-  // ---- transactions and concurrency ---------------------------------------------------------
-  await step("Parent plus five children, one transaction", async () =>
-    summarise(
-      "Parent plus five children, one transaction",
-      "transaction",
-      await time(20, (index) =>
-        db.transaction().execute(async (trx) => {
-          const inserted = await trx
-            .insertInto("bench_parent")
+  await step("Count 40k rows", async () => {
+    const { timings } = await time(20, () =>
+      db
+        .selectFrom("bench_order_line")
+        .select(({ fn }) => fn.countAll<number>().as("n"))
+        .executeTakeFirst(),
+    );
+    return summarise("Count 40k rows", "read", timings, 1);
+  });
+
+  // ---- joins --------------------------------------------------------------------------------
+  await step("Two-table join with aggregate", async () => {
+    const { timings, rows } = await time(10, () =>
+      db
+        .selectFrom("bench_order")
+        .innerJoin("bench_order_line", "bench_order_line.order_id", "bench_order.id")
+        .select(({ fn }) => [
+          "bench_order.status as status",
+          fn.count<number>("bench_order_line.id").as("lines"),
+        ])
+        .groupBy("bench_order.status")
+        .execute(),
+    );
+    return summarise("Two-table join with aggregate", "join", timings, 1, { rows });
+  });
+
+  await step("Five-table join, grouped and sorted", async () => {
+    const { timings, rows } = await time(8, () =>
+      db
+        .selectFrom("bench_order_line")
+        .innerJoin("bench_order", "bench_order.id", "bench_order_line.order_id")
+        .innerJoin("bench_customer", "bench_customer.id", "bench_order.customer_id")
+        .innerJoin("bench_city", "bench_city.id", "bench_customer.city_id")
+        .innerJoin("bench_region", "bench_region.id", "bench_city.region_id")
+        .select(({ fn }) => [
+          "bench_region.name as region",
+          fn.count<number>("bench_order_line.id").as("lines"),
+          sql<number>`sum(bench_order_line.quantity * bench_order_line.unit_price_cents)`.as(
+            "revenue",
+          ),
+        ])
+        .groupBy("bench_region.name")
+        .orderBy("revenue", "desc")
+        .execute(),
+    );
+    return summarise("Five-table join, grouped and sorted", "join", timings, 1, {
+      rows,
+      note: "40k lines up through order, customer, city, region",
+    });
+  });
+
+  await step("Six-table join with HAVING", async () => {
+    const { timings, rows } = await time(8, (i) =>
+      db
+        .selectFrom("bench_order_line")
+        .innerJoin("bench_product", "bench_product.id", "bench_order_line.product_id")
+        .innerJoin("bench_category", "bench_category.id", "bench_product.category_id")
+        .innerJoin("bench_order", "bench_order.id", "bench_order_line.order_id")
+        .innerJoin("bench_customer", "bench_customer.id", "bench_order.customer_id")
+        .innerJoin("bench_city", "bench_city.id", "bench_customer.city_id")
+        .select(({ fn }) => [
+          "bench_category.name as category",
+          "bench_city.name as city",
+          fn.count<number>("bench_order_line.id").as("lines"),
+        ])
+        .where("bench_order.status", "=", ["draft", "confirmed", "delivered"][i % 3]!)
+        .groupBy(["bench_category.name", "bench_city.name"])
+        .having((eb) => eb(eb.fn.count("bench_order_line.id"), ">", 2))
+        .limit(200)
+        .execute(),
+    );
+    return summarise("Six-table join with HAVING", "join", timings, 1, {
+      rows,
+      note: "Grouped on two columns across six tables",
+    });
+  });
+
+  await step("Correlated subquery per row", async () => {
+    const { timings, rows } = await time(8, () =>
+      db
+        .selectFrom("bench_customer")
+        .select((eb) => [
+          "bench_customer.id",
+          eb
+            .selectFrom("bench_order")
+            .select((e) => e.fn.countAll<number>().as("n"))
+            .whereRef("bench_order.customer_id", "=", "bench_customer.id")
+            .as("orders"),
+        ])
+        .limit(300)
+        .execute(),
+    );
+    return summarise("Correlated subquery per row", "join", timings, 1, {
+      rows,
+      note: "300 subqueries in one statement",
+    });
+  });
+
+  await step("Left join finding absences", async () => {
+    const { timings, rows } = await time(8, () =>
+      db
+        .selectFrom("bench_order")
+        .leftJoin("bench_payment", "bench_payment.order_id", "bench_order.id")
+        .select(["bench_order.id"])
+        .where("bench_payment.id", "is", null)
+        .limit(500)
+        .execute(),
+    );
+    return summarise("Left join finding absences", "join", timings, 1, {
+      rows,
+      note: "Unpaid orders - what a reconciliation screen asks",
+    });
+  });
+
+  // ---- writes -------------------------------------------------------------------------------
+  await step("Insert one row", async () => {
+    const { timings } = await time(30, (i) =>
+      db
+        .insertInto("bench_payment")
+        .values({
+          order_id: (i % SCALE.orders) + 1,
+          amount_cents: 100,
+          method: "bench-single",
+          created_at: EPOCH,
+        })
+        .execute(),
+    );
+    return summarise("Insert one row", "write", timings, 1, {
+      note: "One statement, one commit - the worst case per row",
+    });
+  });
+
+  await step("Insert 1000 rows in one transaction", async () => {
+    const { timings } = await time(3, (run) =>
+      db.transaction().execute(async (trx) => {
+        for (let i = 0; i < 1000; i++) {
+          await trx
+            .insertInto("bench_payment")
             .values({
-              created_at: at,
-              label: `tx-${String(index)}`,
-              bucket: index % 20,
-              amount_cents: 777,
+              order_id: (i % SCALE.orders) + 1,
+              amount_cents: 1,
+              method: `bench-bulk-${String(run)}`,
+              created_at: EPOCH,
             })
-            .executeTakeFirstOrThrow();
-
-          const parentId = Number(inserted.insertId ?? 0);
-          if (!parentId) throw new Error("the parent was written but reported no id");
-
-          for (let child = 0; child < 5; child++) {
-            await trx
-              .insertInto("bench_child")
-              .values({ parent_id: parentId, quantity: child + 1, unit_price_cents: 300 })
-              .execute();
-          }
-        }),
-      ),
-      6,
-      "Needs insertId inside a transaction - saving an order",
-    ),
-  );
-
-  await step("Rollback", async () =>
-    summarise(
-      "Rollback",
-      "transaction",
-      await time(15, (index) =>
-        db
-          .transaction()
-          .execute(async (trx) => {
-            await trx
-              .insertInto("bench_parent")
-              .values({
-                created_at: at,
-                label: `rollback-${String(index)}`,
-                bucket: 0,
-                amount_cents: 1,
-              })
-              .execute();
-            throw new Error("rollback");
-          })
-          .catch(() => undefined),
-      ),
-      1,
-      "An abandoned write costs something too",
-    ),
-  );
-
-  const read = () => db.selectFrom("bench_parent").select("id").limit(5).execute();
-
-  await step("Five reads, issued together", async () =>
-    summarise(
-      "Five reads, issued together",
-      "concurrency",
-      await time(20, () => Promise.all([read(), read(), read(), read(), read()])),
-      5,
-      "What a screen loading with Promise.all pays",
-    ),
-  );
-
-  await step("Five reads, one at a time", async () =>
-    summarise(
-      "Five reads, one at a time",
-      "concurrency",
-      await time(20, async () => {
-        for (let index = 0; index < 5; index++) await read();
+            .execute();
+        }
       }),
-      5,
-      "The same work awaited in a loop",
-    ),
-  );
+    );
+    return summarise("Insert 1000 rows in one transaction", "write", timings, 1000, {
+      note: "One commit for 1000 rows - what a sync batch should look like",
+    });
+  });
 
-  await step("Read while a write is in flight", async () =>
-    summarise(
-      "Read while a write is in flight",
-      "concurrency",
-      await time(15, (index) => {
-        const write = db
-          .insertInto("bench_parent")
+  await step("Multi-row insert, 150 per statement", async () => {
+    const { timings } = await time(4, (run) =>
+      db
+        .insertInto("bench_payment")
+        .values(
+          Array.from({ length: 150 }, (_, i) => ({
+            order_id: (i % SCALE.orders) + 1,
+            amount_cents: 2,
+            method: `bench-multi-${String(run)}`,
+            created_at: EPOCH,
+          })),
+        )
+        .execute(),
+    );
+    return summarise("Multi-row insert, 150 per statement", "write", timings, 150, {
+      note: "Bounded by SQLite's parameter cap, not by choice",
+    });
+  });
+
+  await step("Update by primary key", async () => {
+    const { timings } = await time(30, (i) =>
+      db
+        .updateTable("bench_stock")
+        .set({ quantity: 500 + i })
+        .where("id", "=", ((i * 211) % SCALE.stock) + 1)
+        .execute(),
+    );
+    return summarise("Update by primary key", "write", timings, 1);
+  });
+
+  await step("Bulk update, 2000 rows", async () => {
+    const { timings } = await time(3, (i) =>
+      db
+        .updateTable("bench_stock")
+        .set({ quantity: 700 + i })
+        .where("warehouse_id", "=", (i % SCALE.warehouses) + 1)
+        .execute(),
+    );
+    return summarise("Bulk update, 2000 rows", "write", timings, 2000, {
+      note: "One statement over an indexed predicate",
+    });
+  });
+
+  await step("Update through a subquery", async () => {
+    const { timings } = await time(3, () =>
+      db
+        .updateTable("bench_order")
+        .set({
+          total_cents: sql<number>`(select coalesce(sum(quantity * unit_price_cents), 0) from bench_order_line where bench_order_line.order_id = bench_order.id)`,
+        })
+        .where("id", "<=", 500)
+        .execute(),
+    );
+    return summarise("Update through a subquery", "write", timings, 500, {
+      note: "Recomputing order totals from their lines",
+    });
+  });
+
+  await step("Predicate delete over 8k rows", async () => {
+    const { timings } = await time(1, () =>
+      db.deleteFrom("bench_payment").where("method", "like", "bench-%").execute(),
+    );
+    return summarise("Predicate delete over 8k rows", "write", timings, 1, {
+      note: "Removes everything the write cases added, and measures the delete",
+    });
+  });
+
+  // ---- transactions -------------------------------------------------------------------------
+  await step("Order with lines and payment, one transaction", async () => {
+    const { timings } = await time(15, (i) =>
+      db.transaction().execute(async (trx) => {
+        const order = await trx
+          .insertInto("bench_order")
           .values({
-            created_at: at,
-            label: `mixed-${String(index)}`,
-            bucket: 2,
-            amount_cents: 42,
+            customer_id: (i % SCALE.customers) + 1,
+            reference: `BENCH-${String(i)}`,
+            status: "draft",
+            created_at: EPOCH,
+            total_cents: 0,
           })
-          .execute();
-        return Promise.all([write, read()]);
-      }),
-      2,
-      "Where a lock that serialises reads would show up",
-    ),
-  );
+          .executeTakeFirstOrThrow();
 
-  await reset(db);
+        const orderId = Number(order.insertId ?? 0);
+        if (!orderId) throw new Error("the order was written but reported no id");
+
+        for (let line = 0; line < 5; line++) {
+          await trx
+            .insertInto("bench_order_line")
+            .values({
+              order_id: orderId,
+              product_id: ((i + line) % SCALE.products) + 1,
+              quantity: line + 1,
+              unit_price_cents: 1000,
+            })
+            .execute();
+        }
+        await trx
+          .insertInto("bench_payment")
+          .values({ order_id: orderId, amount_cents: 5000, method: "bench-tx", created_at: EPOCH })
+          .execute();
+      }),
+    );
+    return summarise("Order with lines and payment, one transaction", "transaction", timings, 7, {
+      note: "Needs insertId inside a transaction - saving an order",
+    });
+  });
+
+  await step("Cascading delete", async () => {
+    const { timings } = await time(1, () =>
+      db.deleteFrom("bench_order").where("reference", "like", "BENCH-%").execute(),
+    );
+    return summarise("Cascading delete", "transaction", timings, 15, {
+      note: "Orders with their lines and payments, restoring the dataset",
+    });
+  });
+
+  await step("Rollback", async () => {
+    const { timings } = await time(10, (i) =>
+      db
+        .transaction()
+        .execute(async (trx) => {
+          await trx
+            .insertInto("bench_payment")
+            .values({
+              order_id: (i % SCALE.orders) + 1,
+              amount_cents: 1,
+              method: "bench-rollback",
+              created_at: EPOCH,
+            })
+            .execute();
+          throw new Error("rollback");
+        })
+        .catch(() => undefined),
+    );
+    return summarise("Rollback", "transaction", timings, 1, {
+      note: "An abandoned write costs something too",
+    });
+  });
+
+  // ---- schema -------------------------------------------------------------------------------
+  await step("Create an index on 40k rows", async () => {
+    const { timings } = await time(3, async () => {
+      await sql.raw("DROP INDEX IF EXISTS idx_bench_line_qty").execute(db);
+      await sql.raw("CREATE INDEX idx_bench_line_qty ON bench_order_line(quantity)").execute(db);
+      return null;
+    });
+    await sql.raw("DROP INDEX IF EXISTS idx_bench_line_qty").execute(db);
+    return summarise("Create an index on 40k rows", "schema", timings, 1, {
+      note: "What a migration costs on a table that is already full",
+    });
+  });
+
+  await step("ANALYZE", async () => {
+    const { timings } = await time(2, () => sql.raw("ANALYZE").execute(db));
+    return summarise("ANALYZE", "schema", timings, 1, {
+      note: "The statistics the planner uses to pick an index",
+    });
+  });
+
+  // ---- concurrency --------------------------------------------------------------------------
+  const heavyRead = () =>
+    db
+      .selectFrom("bench_order_line")
+      .innerJoin("bench_order", "bench_order.id", "bench_order_line.order_id")
+      .select(({ fn }) => [fn.count<number>("bench_order_line.id").as("n")])
+      .where("bench_order.status", "=", "confirmed")
+      .execute();
+
+  await step("Five heavy reads, issued together", async () => {
+    const { timings } = await time(8, () =>
+      Promise.all([heavyRead(), heavyRead(), heavyRead(), heavyRead(), heavyRead()]),
+    );
+    return summarise("Five heavy reads, issued together", "concurrency", timings, 5, {
+      note: "What a screen loading with Promise.all pays",
+    });
+  });
+
+  await step("Five heavy reads, one at a time", async () => {
+    const { timings } = await time(8, async () => {
+      for (let i = 0; i < 5; i++) await heavyRead();
+      return null;
+    });
+    return summarise("Five heavy reads, one at a time", "concurrency", timings, 5, {
+      note: "The same work awaited in a loop",
+    });
+  });
+
+  await step("Read while a 1000-row write is in flight", async () => {
+    const { timings } = await time(5, (run) => {
+      const write = db.transaction().execute(async (trx) => {
+        for (let i = 0; i < 1000; i++) {
+          await trx
+            .insertInto("bench_payment")
+            .values({
+              order_id: (i % SCALE.orders) + 1,
+              amount_cents: 3,
+              method: `bench-mixed-${String(run)}`,
+              created_at: EPOCH,
+            })
+            .execute();
+        }
+      });
+      return Promise.all([write, heavyRead()]);
+    });
+    return summarise("Read while a 1000-row write is in flight", "concurrency", timings, 1, {
+      note: "Where a lock that serialises reads behind a sync would show up",
+    });
+  });
+
+  // Everything this run added, gone - so the next run starts from the same dataset.
+  await db.deleteFrom("bench_payment").where("method", "like", "bench-%").execute();
+  await db.deleteFrom("bench_order").where("reference", "like", "BENCH-%").execute();
 
   return {
     engine: "",
     at: 0,
     rowsSeeded,
+    seedMs,
     cases,
     totalMs: round(performance.now() - started),
   };
 }
+
+/** Fixed, so a row's timestamp never varies between runs. */
+const EPOCH = "1970-01-01T00:00:00.000Z";
