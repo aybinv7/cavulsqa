@@ -50,6 +50,8 @@ export function createVueQueryMetrics(options: VueQueryMetricsOptions = {}): Vue
   const state = recorder.getState();
 
   if (options.exposeOnWindowAs && typeof window !== "undefined") {
+    // The property name is chosen at runtime, so it cannot be declared. `declare global` would put
+    // a name of the caller's choosing into every consumer's global namespace to avoid one cast.
     (window as unknown as Record<string, unknown>)[options.exposeOnWindowAs] = {
       snapshot: () => JSON.parse(JSON.stringify(recorder.getState())) as unknown,
       reset: () => recorder.reset(),

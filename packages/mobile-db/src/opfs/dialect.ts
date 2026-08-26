@@ -1,8 +1,8 @@
 import {
+  CompiledQuery,
   SqliteAdapter,
   SqliteIntrospector,
   SqliteQueryCompiler,
-  type CompiledQuery,
   type DatabaseConnection,
   type DatabaseIntrospector,
   type Dialect,
@@ -126,15 +126,15 @@ class OpfsDriver implements Driver {
   }
 
   async beginTransaction(connection: DatabaseConnection): Promise<void> {
-    await connection.executeQuery(raw("begin"));
+    await connection.executeQuery(CompiledQuery.raw("begin"));
   }
 
   async commitTransaction(connection: DatabaseConnection): Promise<void> {
-    await connection.executeQuery(raw("commit"));
+    await connection.executeQuery(CompiledQuery.raw("commit"));
   }
 
   async rollbackTransaction(connection: DatabaseConnection): Promise<void> {
-    await connection.executeQuery(raw("rollback"));
+    await connection.executeQuery(CompiledQuery.raw("rollback"));
   }
 
   async releaseConnection(): Promise<void> {}
@@ -142,10 +142,6 @@ class OpfsDriver implements Driver {
   async destroy(): Promise<void> {
     this.#channel.terminate();
   }
-}
-
-function raw(sql: string): CompiledQuery {
-  return { sql, parameters: [], query: { kind: "RawNode" } as never, queryId: {} as never };
 }
 
 /**

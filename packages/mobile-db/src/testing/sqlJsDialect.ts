@@ -1,8 +1,8 @@
 import {
+  CompiledQuery,
   SqliteAdapter,
   SqliteIntrospector,
   SqliteQueryCompiler,
-  type CompiledQuery,
   type DatabaseConnection,
   type Dialect,
   type Driver,
@@ -52,10 +52,6 @@ class SqlJsConnection implements DatabaseConnection {
   }
 }
 
-function statement(sql: string): CompiledQuery {
-  return { sql, parameters: [], query: { kind: "RawNode" } as never, queryId: {} as never };
-}
-
 export async function createSqlJsDialect(): Promise<Dialect> {
   const SQL = await initSqlJs();
   const connection = new SqlJsConnection(new SQL.Database());
@@ -64,13 +60,13 @@ export async function createSqlJsDialect(): Promise<Dialect> {
     init: async () => {},
     acquireConnection: async () => connection,
     beginTransaction: async (conn) => {
-      await conn.executeQuery(statement("begin"));
+      await conn.executeQuery(CompiledQuery.raw("begin"));
     },
     commitTransaction: async (conn) => {
-      await conn.executeQuery(statement("commit"));
+      await conn.executeQuery(CompiledQuery.raw("commit"));
     },
     rollbackTransaction: async (conn) => {
-      await conn.executeQuery(statement("rollback"));
+      await conn.executeQuery(CompiledQuery.raw("rollback"));
     },
     releaseConnection: async () => {},
     destroy: async () => {},

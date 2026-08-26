@@ -1,3 +1,4 @@
+import type { BindingSpec, OpfsSAHPoolDatabase, Sqlite3Static } from "@sqlite.org/sqlite-wasm";
 import type { OpfsExecResult, OpfsRequest, OpfsResponse, OpfsWorkerScope } from "./protocol.js";
 
 /**
@@ -17,14 +18,8 @@ import type { OpfsExecResult, OpfsRequest, OpfsResponse, OpfsWorkerScope } from 
 export function runOpfsWorker(
   scope: OpfsWorkerScope = globalThis as unknown as OpfsWorkerScope,
 ): void {
-  let database: { exec: (options: unknown) => unknown; close: () => void } | null = null;
-  let sqlite3: {
-    oo1: { OpfsSAHPoolDb: new (name: string) => never };
-    capi: {
-      sqlite3_changes: (p: unknown) => number;
-      sqlite3_last_insert_rowid: (p: unknown) => number;
-    };
-  } | null = null;
+  let database: OpfsSAHPoolDatabase | null = null;
+  let sqlite3: Sqlite3Static | null = null;
 
   const reply = (message: OpfsResponse) => {
     scope.postMessage(message);
@@ -32,12 +27,7 @@ export function runOpfsWorker(
 
   async function open(name: string, capacity: number): Promise<void> {
     const { default: sqlite3InitModule } = await import("@sqlite.org/sqlite-wasm");
-    const runtime = (await sqlite3InitModule()) as never as NonNullable<typeof sqlite3> & {
-      installOpfsSAHPoolVfs: (options: {
-        initialCapacity?: number;
-        name?: string;
-      }) => Promise<{ OpfsSAHPoolDb: new (file: string) => never }>;
-    };
+    const runtime = await sqlite3InitModule();
 
     // The SAH pool VFS, not the plain `opfs` one: it needs neither SharedArrayBuffer nor
     // cross-origin isolation, so it works under Capacitor's https://localhost without the
@@ -45,28 +35,26 @@ export function runOpfsWorker(
     const pool = await runtime.installOpfsSAHPoolVfs({ initialCapacity: capacity });
 
     sqlite3 = runtime;
-    database = new pool.OpfsSAHPoolDb(`/${name}`) as never;
+    database = new pool.OpfsSAHPoolDb(`/${name}`);
   }
 
   function exec(sql: string, parameters: readonly unknown[]): OpfsExecResult {
     if (!database || !sqlite3) throw new Error("[mobile-db] the OPFS database is not open");
 
-    const rows: unknown[] = [];
-    database.exec({
+    const rows = database.exec({
       sql,
-      bind: parameters.length ? [...parameters] : undefined,
+      bind: parameters.length ? ([...parameters] as BindingSpec) : undefined,
       rowMode: "object",
-      resultRows: rows,
+      returnValue: "resultRows",
     });
 
-    const pointer = (database as unknown as { pointer: unknown }).pointer;
     const inserting = /^\s*insert\b/i.test(sql);
 
     return {
       rows,
-      numAffectedRows: sqlite3.capi.sqlite3_changes(pointer),
+      numAffectedRows: sqlite3.capi.sqlite3_changes(database),
       // Only an insert moves last_insert_rowid(); on an update it names a row nothing touched.
-      insertId: inserting ? sqlite3.capi.sqlite3_last_insert_rowid(pointer) : null,
+      insertId: inserting ? Number(sqlite3.capi.sqlite3_last_insert_rowid(database)) : null,
     };
   }
 
