@@ -23,6 +23,7 @@
     "@cavulsqa/mobile-db": "workspace:*",
     "@cavulsqa/reactive-db": "workspace:*",
     "@cavulsqa/reactive-vue": "workspace:*",
+    "@sqlite.org/sqlite-wasm": "catalog:",
     "@tailwindcss/vite": "catalog:",
     "@vueuse/core": "catalog:",
     "framework7": "^9.0.2",

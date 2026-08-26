@@ -69,7 +69,9 @@
     "deleteConfirm": "Delete this order and its lines?",
     "tapHint": "Tap an order to open it.",
     "allOrders": "Recent orders",
-    "matches": "{count} matches"
+    "matches": "{count} matches",
+    "engineSwitch": "Change it in Settings, then restart",
+    "measuredOn": "Measured on {engine}"
   },
   "metrics": {
     "totalQueries": "Queries run",
@@ -112,7 +114,12 @@
     "dialogText": "Dialogs, sheets and toasts all come from Framework7 - no extra dependency.",
     "sheetText": "A sheet modal. The Android back button closes this before it navigates.",
     "aboutText": "Built on {'@'}cavulsqa/mobile-db, reactive-db and reactive-vue. Replace this text with your own.",
-    "footer": "Change these screens in src/modules/settings/."
+    "footer": "Change these screens in src/modules/settings/.",
+    "storage": "Storage",
+    "engine": "Database engine",
+    "engineActive": "Running now",
+    "engineHint": "The engine decides how a query reaches SQLite. Capacitor crosses the native bridge; OPFS runs SQLite as WebAssembly against a real file in a worker, with no bridge. Measure both on the Reactive screen.",
+    "engineRestart": "Restart the app to open the database on the new engine."
   },
   "errors": {
     "notFoundTitle": "Not found",

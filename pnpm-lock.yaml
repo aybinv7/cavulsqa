@@ -399,6 +399,9 @@ importers:
       '@cavulsqa/reactive-vue':
         specifier: workspace:*
         version: link:../../packages/reactive-vue
+      '@sqlite.org/sqlite-wasm':
+        specifier: 'catalog:'
+        version: 3.53.0-build1
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.3.3(@voidzero-dev/vite-plus-core@0.3.0(@types/node@24.13.3)(jiti@2.7.0)(typescript@5.9.3)(yaml@2.9.0))

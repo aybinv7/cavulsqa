@@ -46,6 +46,7 @@
           :reads-per-run="readsPerRun"
           :is-native="isNative"
           :platform="platform"
+          :engine-name="engineName"
           @measure="measurePipelining"
         />
       </F7Tab>
@@ -101,6 +102,7 @@ const {
   readsPerRun,
   isNative,
   platform,
+  engineName,
   seed,
   advance,
   remove,
