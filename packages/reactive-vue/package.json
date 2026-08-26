@@ -41,10 +41,10 @@
   },
   "devDependencies": {
     "@cavulsqa/reactive-db": "workspace:*",
-    "@types/node": "^26.1.1",
+    "@types/node": "catalog:",
     "bumpp": "^11.1.0",
     "happy-dom": "catalog:",
-    "typescript": "^7.0.2",
+    "typescript": "catalog:",
     "vite": "catalog:",
     "vite-plus": "catalog:",
     "vue": "catalog:"

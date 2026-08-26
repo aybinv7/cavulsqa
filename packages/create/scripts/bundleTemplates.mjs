@@ -88,12 +88,32 @@ function copyTree(from, to) {
   }
 }
 
-// Emptied rather than removed, with retries: on Windows an editor, a watcher or an indexer holding
-// a handle on the directory itself turns `rm -r` into EPERM, while its contents delete fine.
-mkdirSync(OUT, { recursive: true });
-for (const entry of readdirSync(OUT)) {
-  rmSync(join(OUT, entry), { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+/**
+ * Emptied leaf-first, and a directory that refuses to go is left in place.
+ *
+ * On Windows an editor, a watcher or an indexer holding a handle on a directory turns `rm -r` into
+ * EPERM - but the files inside it still unlink. Removing files first and treating a stubborn
+ * directory as good enough keeps a build from failing because something else has the folder open,
+ * and a leftover empty directory changes nothing about what gets packed.
+ */
+function emptyDirectory(dir) {
+  if (!existsSync(dir)) return;
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      emptyDirectory(full);
+      try {
+        rmSync(full, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+      } catch {
+        // Held open by something else; its contents are gone, which is what matters.
+      }
+      continue;
+    }
+    rmSync(full, { force: true, maxRetries: 5, retryDelay: 100 });
+  }
 }
+
+emptyDirectory(OUT);
 
 const bundled = [];
 for (const name of readdirSync(join(ROOT, "templates"))) {

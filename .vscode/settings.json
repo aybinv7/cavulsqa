@@ -1,0 +1,13 @@
+{
+  // packages/create/templates is a build artifact rebuilt on every pack. Watching it made an
+  // editor hold handles on files the bundler then tried to delete, which failed the build with
+  // EPERM on Windows.
+  "files.watcherExclude": {
+    "**/packages/create/templates/**": true,
+    "**/dist/**": true,
+    "**/android/**": true
+  },
+  "search.exclude": {
+    "**/packages/create/templates": true
+  }
+}
