@@ -22,7 +22,7 @@ if (!["patch", "minor", "major"].includes(release)) {
 const manifestPath = join(PACKAGE, "package.json");
 const pkg = JSON.parse(readFileSync(manifestPath, "utf8"));
 
-const fingerprint = fingerprintTemplates(join(ROOT, "templates"));
+const fingerprint = fingerprintTemplates(ROOT);
 const unchanged = pkg.templatesFingerprint === fingerprint;
 
 const [major, minor, patch] = pkg.version.split(".").map(Number);

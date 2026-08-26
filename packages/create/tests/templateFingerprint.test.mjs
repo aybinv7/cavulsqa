@@ -14,7 +14,7 @@ const ROOT = dirname(dirname(PACKAGE));
  */
 test("the templates have not changed since @cavulsqa/create was last stamped", () => {
   const pkg = JSON.parse(readFileSync(join(PACKAGE, "package.json"), "utf8"));
-  const current = fingerprintTemplates(join(ROOT, "templates"));
+  const current = fingerprintTemplates(ROOT);
 
   expect(
     current,
