@@ -78,6 +78,14 @@ jobs:
         working-directory: ${{ runner.temp }}/smoke
         run: pnpm build
 
+      # Capacitor 8 compiles against Java 21; the runner's default JDK is older and gradle fails
+      # with "invalid source release: 21" deep inside capacitor-android.
+      - uses: actions/setup-java@v4
+        if: inputs.android != false
+        with:
+          distribution: temurin
+          java-version: "21"
+
       - name: Add the android platform and assemble
         if: inputs.android != false
         working-directory: ${{ runner.temp }}/smoke

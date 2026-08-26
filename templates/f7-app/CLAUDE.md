@@ -98,5 +98,8 @@ something visual, say plainly that you have not seen it run.
 - Do not add a data-fetching library. If you need a shared cache across screens, read the note in
   `@cavulsqa/reactive-vue`'s README about driving TanStack Query from the bus rather than growing
   `useReactiveQuery`.
+- Do not assume the toolchain. Capacitor 8 compiles against **JDK 21** - an older default JDK
+  fails with `invalid source release: 21` from inside capacitor-android, which reads as a
+  Capacitor bug and is not one.
 - Do not build for the web. `vp dev` in a browser runs sql.js in memory so the app is inspectable;
   the target is a device, and anything that only works in a browser is not done.
