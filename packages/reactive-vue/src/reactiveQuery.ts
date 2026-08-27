@@ -6,21 +6,26 @@ import {
   ref,
   watch,
   type ComputedRef,
+  type MaybeRefOrGetter,
   type Ref,
 } from "vue";
 import {
   calcRetryDelay,
   createVisibilityGate,
+  hashQueryKey,
   noopMetrics,
   type OnTableChangeFn,
+  type QueryKey,
   type QueryMetrics,
   type ReactiveQueryOptions,
   type TableChangeEvent,
+  type TableName,
 } from "@cavulsqa/reactive-db";
+import { resolveQueryKey } from "./queryKey.js";
 
 const DEFAULT_DEBOUNCE = 100;
 
-const ALWAYS_VISIBLE: { value: boolean } = { value: true };
+const ALWAYS_VISIBLE: ComputedRef<boolean> = computed(() => true);
 
 export interface ReactiveQueryLogger {
   debug: (message: string, ...details: unknown[]) => void;
@@ -34,13 +39,26 @@ const consoleLogger: ReactiveQueryLogger = {
   error: (message, ...details) => console.error(message, ...details),
 };
 
-/**
- * `enabled` may be a ref, so a screen can defer its first read until it is actually shown.
- * Framework7 mounts every tab at startup; without this, a tab the user has not opened still
- * competes for the one native database thread while the first screen is loading.
- */
-export type VueReactiveQueryOptions<T> = Omit<ReactiveQueryOptions<T>, "enabled"> & {
+export type VueReactiveQueryOptions<T, DB = Record<string, unknown>> = Omit<
+  ReactiveQueryOptions<T, DB>,
+  "enabled" | "queryKey" | "isVisible"
+> & {
+  /**
+   * `enabled` may be a ref, so a screen can defer its first read until it is actually shown.
+   * Framework7 mounts every tab at startup; without this, a tab the user has not opened still
+   * competes for the one database thread while the first screen is loading.
+   */
   enabled?: boolean | Ref<boolean> | ComputedRef<boolean>;
+  /**
+   * Identity, from the values the query reads: `["order", id]`, not `"order"`.
+   *
+   * Refs inside the key are unwrapped and tracked, so `["search", term]` re-keys the query as the
+   * term moves: the key follows the filter and brings the debounced refetch with it, instead of a
+   * manual `refetch()` on every keystroke.
+   */
+  queryKey: MaybeRefOrGetter<QueryKey>;
+  /** A real ref, because a plain object cannot be watched and a deferred refetch would never run. */
+  isVisible?: Ref<boolean> | ComputedRef<boolean>;
 };
 
 export interface ReactiveQuery<T> {
@@ -56,9 +74,9 @@ export interface ReactiveQuery<T> {
   cancel: () => void;
 }
 
-export interface CreateReactiveQueryDeps {
+export interface CreateReactiveQueryDeps<DB = Record<string, unknown>> {
   /** Subscribe to table changes. Wire this to the same change bus the writes emit on. */
-  onTableChange: OnTableChangeFn;
+  onTableChange: OnTableChangeFn<DB>;
   /** Defaults to a no-op recorder. Pass `createVueQueryMetrics().recorder` to collect timings. */
   metrics?: QueryMetrics;
   /**
@@ -67,11 +85,10 @@ export interface CreateReactiveQueryDeps {
    * router that mounts every tab up front, pass an adapter - `usePageVisibility` from
    * `@cavulsqa/reactive-vue/framework7` is one.
    */
-  useVisibility?: () => { value: boolean };
+  useVisibility?: () => Ref<boolean> | ComputedRef<boolean>;
   /**
-   * Warn when two mounted queries share a `queryKey` but watch different tables - they are
-   * different queries, so the second is handed the first's rows. Defaults to on outside
-   * production.
+   * Warn when two mounted queries share a key but watch different tables - they are different
+   * queries, so the second is handed the first's rows. On unless turned off.
    */
   warnOnKeyConflict?: boolean;
   /**
@@ -81,20 +98,20 @@ export interface CreateReactiveQueryDeps {
   logger?: ReactiveQueryLogger;
 }
 
-export interface ReactiveQueryComposables {
+export interface ReactiveQueryComposables<DB = Record<string, unknown>> {
   useReactiveQuery: <T>(
     queryFn: () => Promise<T>,
-    options: VueReactiveQueryOptions<T>,
+    options: VueReactiveQueryOptions<T, DB>,
   ) => ReactiveQuery<T>;
   useStructuralQuery: <T>(
     queryFn: () => Promise<T>,
-    tables: string[],
-    options: Omit<VueReactiveQueryOptions<T>, "tables" | "refetchOn">,
+    tables: TableName<DB>[],
+    options: Omit<VueReactiveQueryOptions<T, DB>, "tables" | "refetchOn">,
   ) => ReactiveQuery<T>;
   useStaticQuery: <T>(
     queryFn: () => Promise<T>,
-    tables: string[],
-    options: Omit<VueReactiveQueryOptions<T>, "tables" | "enabled">,
+    tables: TableName<DB>[],
+    options: Omit<VueReactiveQueryOptions<T, DB>, "tables" | "enabled">,
   ) => ReactiveQuery<T>;
 }
 
@@ -102,8 +119,19 @@ export interface ReactiveQueryComposables {
  * Binds the reactive-db primitives to Vue's lifecycle once, and returns the composables an app
  * calls everywhere. The change bus and the metrics recorder are app-owned singletons, so they are
  * injected here rather than created per query.
+ *
+ * Pass the schema - `createReactiveQuery<Database>({...})` - and every `tables` entry is checked
+ * against it. A misspelt table name is the one mistake this library cannot report at run time: the
+ * query subscribes to nothing and simply never refetches.
+ *
+ * `deps` is `NoInfer` because `keyof DB` is not an inference site TypeScript can invert: handed an
+ * already-typed `onTableChange`, it solved DB as a union of one object per table, and every
+ * `tables` entry in the app then failed against `never`. Now the schema comes from the type
+ * argument or not at all.
  */
-export function createReactiveQuery(deps: CreateReactiveQueryDeps): ReactiveQueryComposables {
+export function createReactiveQuery<DB = Record<string, unknown>>(
+  deps: NoInfer<CreateReactiveQueryDeps<DB>>,
+): ReactiveQueryComposables<DB> {
   const metrics = deps.metrics ?? noopMetrics;
   const resolveVisibility = deps.useVisibility ?? (() => ALWAYS_VISIBLE);
   const warnOnKeyConflict = deps.warnOnKeyConflict ?? true;
@@ -117,37 +145,37 @@ export function createReactiveQuery(deps: CreateReactiveQueryDeps): ReactiveQuer
   // the cheapest signal that two call sites are not in fact the same query.
   const watchedTablesByKey = new Map<string, { tables: string; holders: number }>();
 
-  function claimKey(queryKey: string, tables: string[]): void {
+  function claimKey(key: string, tables: TableName<DB>[]): void {
     const signature = [...tables].sort().join(",");
-    const existing = watchedTablesByKey.get(queryKey);
+    const existing = watchedTablesByKey.get(key);
 
     if (!existing) {
-      watchedTablesByKey.set(queryKey, { tables: signature, holders: 1 });
+      watchedTablesByKey.set(key, { tables: signature, holders: 1 });
       return;
     }
 
     if (warnOnKeyConflict && existing.tables !== signature) {
       logger.warn(
-        `[useReactiveQuery] queryKey "${queryKey}" is mounted twice watching different tables ` +
+        `[useReactiveQuery] the key ${key} is mounted twice watching different tables ` +
           `("${existing.tables}" and "${signature}"). These are different queries sharing an ` +
-          `identity, so one will receive the other's result. Use uniqueQueryKey() for a key that ` +
-          `is never shared.`,
+          `identity, so one will receive the other's result. Add what distinguishes them to the ` +
+          `key.`,
       );
     }
 
     existing.holders += 1;
   }
 
-  function releaseKey(queryKey: string): void {
-    const existing = watchedTablesByKey.get(queryKey);
+  function releaseKey(key: string): void {
+    const existing = watchedTablesByKey.get(key);
     if (!existing) return;
     existing.holders -= 1;
-    if (existing.holders <= 0) watchedTablesByKey.delete(queryKey);
+    if (existing.holders <= 0) watchedTablesByKey.delete(key);
   }
 
   function useReactiveQuery<T>(
     queryFn: () => Promise<T>,
-    options: VueReactiveQueryOptions<T>,
+    options: VueReactiveQueryOptions<T, DB>,
   ): ReactiveQuery<T> {
     const data = ref<T | null>(null) as Ref<T | null>;
     const loading = ref(false);
@@ -165,7 +193,7 @@ export function createReactiveQuery(deps: CreateReactiveQueryDeps): ReactiveQuer
     const debounceMs = options.debounce ?? DEFAULT_DEBOUNCE;
     const enabledRef = isRef(options.enabled) ? options.enabled : ref(options.enabled !== false);
     const fetchOnMount = options.fetchOnMount !== false;
-    const queryKey = options.queryKey;
+    const keyHash = computed(() => hashQueryKey(resolveQueryKey(options.queryKey)));
     const cancelOnUnmount = options.cancelOnUnmount !== false;
     const maxRetries = options.retry === false ? 0 : (options.retry ?? 0);
 
@@ -215,12 +243,14 @@ export function createReactiveQuery(deps: CreateReactiveQueryDeps): ReactiveQuer
       attempt = 0,
       force = false,
     ): Promise<void> {
-      if (!force && inFlightQueries.has(queryKey)) {
+      const key = keyHash.value;
+
+      if (!force && inFlightQueries.has(key)) {
         if (options.debug) {
-          logger.debug(`[useReactiveQuery] Deduping query: ${queryKey}`);
+          logger.debug(`[useReactiveQuery] Deduping query: ${key}`);
         }
         try {
-          data.value = (await inFlightQueries.get(queryKey)) as T;
+          data.value = (await inFlightQueries.get(key)) as T;
           metrics.recordCacheHit();
         } catch {
           // The owner of the shared promise reports the failure; a deduped caller stays quiet.
@@ -242,7 +272,7 @@ export function createReactiveQuery(deps: CreateReactiveQueryDeps): ReactiveQuer
       const startTime = performance.now();
 
       const queryPromise = queryFn();
-      inFlightQueries.set(queryKey, queryPromise);
+      inFlightQueries.set(key, queryPromise);
 
       try {
         const result = await queryPromise;
@@ -255,7 +285,7 @@ export function createReactiveQuery(deps: CreateReactiveQueryDeps): ReactiveQuer
         retryCount.value = 0;
 
         const duration = performance.now() - startTime;
-        metrics.recordQuery(queryKey, duration);
+        metrics.recordQuery(key, duration);
 
         if (options.debug) {
           logger.debug(`[useReactiveQuery] Query executed (${duration.toFixed(1)}ms):`, result);
@@ -269,7 +299,7 @@ export function createReactiveQuery(deps: CreateReactiveQueryDeps): ReactiveQuer
 
         if (attempt < maxRetries) {
           const delay = calcRetryDelay(attempt, options.retryDelay);
-          inFlightQueries.delete(queryKey);
+          inFlightQueries.delete(key);
           if (options.debug) {
             logger.debug(`[useReactiveQuery] Retry ${attempt + 1}/${maxRetries} in ${delay}ms`);
           }
@@ -282,17 +312,17 @@ export function createReactiveQuery(deps: CreateReactiveQueryDeps): ReactiveQuer
         isStale.value = false;
 
         logger.error("[useReactiveQuery] Query failed:", err);
-        metrics.recordError(queryKey);
+        metrics.recordError(key);
         options.onError?.(errorObj);
       } finally {
-        loading.value = false;
-        if (inFlightQueries.get(queryKey) === queryPromise) {
-          inFlightQueries.delete(queryKey);
+        if (requestId === activeRequestId) loading.value = false;
+        if (inFlightQueries.get(key) === queryPromise) {
+          inFlightQueries.delete(key);
         }
       }
     }
 
-    function scheduledRefetch() {
+    function scheduledRefetch(changedTable?: string) {
       if (isCacheValidNow()) {
         if (options.debug) {
           logger.debug("[useReactiveQuery] Cache valid, skipping refetch");
@@ -304,7 +334,7 @@ export function createReactiveQuery(deps: CreateReactiveQueryDeps): ReactiveQuer
       if (debounceTimer) clearTimeout(debounceTimer);
 
       debounceTimer = setTimeout(() => {
-        metrics.recordRefetch(options.tables[0] ?? "unknown");
+        if (changedTable) metrics.recordRefetch(changedTable);
         void executeQueryWithRetry();
         debounceTimer = null;
       }, debounceMs);
@@ -346,12 +376,15 @@ export function createReactiveQuery(deps: CreateReactiveQueryDeps): ReactiveQuer
     const visibility = options.isVisible ?? resolveVisibility();
     let unsubscribe: (() => void) | null = null;
     let stopVisibilityWatch: (() => void) | null = null;
+    let stopKeyWatch: (() => void) | null = null;
+    let claimedKey: string | null = null;
     let active = false;
 
     function activate() {
       if (active) return;
       active = true;
-      claimKey(queryKey, options.tables);
+      claimedKey = keyHash.value;
+      claimKey(claimedKey, options.tables);
 
       if (fetchOnMount) void executeQueryWithRetry();
 
@@ -363,17 +396,25 @@ export function createReactiveQuery(deps: CreateReactiveQueryDeps): ReactiveQuer
         if (!shouldTriggerRefetch(event)) return;
 
         if (gate.recordChange(visibility.value) === "refetch") {
+          scheduledRefetch(event.table);
+        }
+      });
+
+      stopVisibilityWatch = watch(visibility, (visible) => {
+        if (visible && gate.recordVisible() === "refetch") {
           scheduledRefetch();
         }
       });
 
-      if (isRef(visibility)) {
-        stopVisibilityWatch = watch(visibility, (visible) => {
-          if (visible && gate.recordVisible() === "refetch") {
-            scheduledRefetch();
-          }
-        });
-      }
+      // A moved key means the rows on screen answer a question nobody is asking any more, so the
+      // cache window is dropped with it rather than keeping the previous key's data alive.
+      stopKeyWatch = watch(keyHash, (next, previous) => {
+        releaseKey(previous);
+        claimKey(next, options.tables);
+        claimedKey = next;
+        lastFetchTime.value = 0;
+        scheduledRefetch();
+      });
 
       metrics.incrementListeners();
     }
@@ -381,11 +422,16 @@ export function createReactiveQuery(deps: CreateReactiveQueryDeps): ReactiveQuer
     function deactivate() {
       if (!active) return;
       active = false;
-      releaseKey(queryKey);
+      if (claimedKey !== null) {
+        releaseKey(claimedKey);
+        claimedKey = null;
+      }
       unsubscribe?.();
       unsubscribe = null;
       stopVisibilityWatch?.();
       stopVisibilityWatch = null;
+      stopKeyWatch?.();
+      stopKeyWatch = null;
       metrics.decrementListeners();
     }
 

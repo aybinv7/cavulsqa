@@ -44,10 +44,10 @@ apps can share one offline-first data layer instead of each growing its own.
   recorder are arguments to `createReactiveQuery`, because writes must emit on the same bus the
   queries listen to. Do not introduce a module-level bus or recorder in the package — importing
   app globals directly is what made this layer un-shareable where it came from.
-- **A `queryKey` is an identity.** Two mounted queries sharing one await a single request and
-  share the result, so a duplicated key crosses two queries' results. Default to
-  `uniqueQueryKey()`; a stable literal is opt-in sharing. The conflict warning is a backstop, not
-  a design.
+- **A `queryKey` is an identity, and it is an array of arguments.** Two mounted queries whose keys
+  hash alike await one request and share the result, which is only safe because the key carries
+  what distinguishes them. Never key on a bare name; put the route param, the filter ref, the
+  arguments in it. The conflict warning is a backstop, not a design.
 - **Do not grow `useReactiveQuery` into a cache library.** `cacheTime` is a per-instance
   revalidation window and `createResultCache` is deliberately unwired. A shared cache needs
   by-table invalidation of cached entries, which is most of TanStack Query - if that is the

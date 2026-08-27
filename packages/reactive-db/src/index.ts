@@ -1,4 +1,5 @@
 export * from "./events.js";
+export * from "./queryKey.js";
 export * from "./resultCache.js";
 export * from "./visibilityGate.js";
 export * from "./mutationProxy.js";

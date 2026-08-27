@@ -61,27 +61,25 @@ function listTemplates() {
 
   // The manifest is what `vp create` reads; the directory is what actually shipped. Trust the
   // directory, and let the manifest supply the descriptions.
-  return readdirSync(BUNDLED).map((name) => ({
-    name,
-    description: declared.find((entry) => entry.name === name)?.description ?? "",
-  }));
+  return readdirSync(BUNDLED, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => ({
+      name: entry.name,
+      description: declared.find((listed) => listed.name === entry.name)?.description ?? "",
+    }));
 }
 
 /**
- * The engine ids a template actually offers, read out of its own candidate list rather than kept in
- * a second list here - a generator that knows more engines than the template does is a generator
- * that writes a `.env` the app ignores.
+ * The engine ids a template offers, from the template's own manifest. `bundleTemplates.mjs` refuses
+ * to publish a template whose manifest disagrees with the engines its code implements, so this is
+ * data rather than a second opinion.
  */
 function listEngines(templateDir) {
   try {
-    const source = readFileSync(
-      join(templateDir, "src/shared/database/candidates/types.ts"),
-      "utf8",
-    );
-    const union = /export type StorageId =([\s\S]*?);/.exec(source)?.[1] ?? "";
-    return [...union.matchAll(/"([a-z0-9-]+)"/g)].map((match) => match[1]);
+    const pkg = JSON.parse(readFileSync(join(templateDir, "package.json"), "utf8"));
+    return pkg.cavulsqa?.storageEngines ?? [];
   } catch {
-    // A template without the candidate module simply has no engine choice to offer.
+    // A template that declares none simply has no engine choice to offer.
     return [];
   }
 }
@@ -133,7 +131,12 @@ async function main() {
     const appId =
       flags.get("app-id") ?? (await ask("Android application id", `com.ayb.${bareName}`));
 
-    const engines = listEngines(join(BUNDLED, template));
+    const from = flags.get("from");
+    const templateDir =
+      typeof from === "string" ? resolve(process.cwd(), from) : join(BUNDLED, template);
+
+    // Read from the directory that will actually be copied, so --from offers its own engines.
+    const engines = listEngines(templateDir);
     let engine = flags.get("engine");
     if (typeof engine !== "string" && engines.length > 1) {
       engine = await ask(`Storage engine [${engines.join(", ")}]`, engines[0]);
@@ -149,10 +152,6 @@ async function main() {
 
     const dir = flags.get("dir") ?? (await ask("Directory", `./${name}`));
     const out = isAbsolute(dir) ? dir : resolve(process.cwd(), dir);
-
-    const from = flags.get("from");
-    const templateDir =
-      typeof from === "string" ? resolve(process.cwd(), from) : join(BUNDLED, template);
 
     scaffold({
       templateDir,

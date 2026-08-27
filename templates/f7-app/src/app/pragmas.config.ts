@@ -1,19 +1,11 @@
 /**
- * PRAGMAs applied to every engine, identically, right after it opens.
+ * PRAGMAs applied to every engine identically, because SQLite's defaults are per-build and two
+ * engines left on their own are not comparable - an unpinned `synchronous` alone produced a 1.47x
+ * "ranking" between engines that were the same speed.
  *
- * They live here rather than inside a candidate for one reason: SQLite's defaults are per-build, and
- * two engines left on their own defaults are not comparable. Measuring them without pinning this
- * produced a 1.47x "ranking" that may have been nothing but a difference in `synchronous`.
- *
- * `fast` is what a benchmark should use - both engines pushed as hard as they go, so the comparison
- * is between engines rather than between journal settings. It is not a safe default for an app that
- * holds a day's orders: `synchronous = OFF` means the OS, not SQLite, decides when bytes reach
- * storage, so a crash or a battery pull can leave the database corrupt rather than merely stale.
- *
- * `safe` keeps SQLite's durability guarantee and pays for it on single writes, which the benchmark
- * measures at 19-57 ms depending on engine. Both settings batch equally well - inside one
- * transaction the cost per row falls under 3 ms either way - so an app that batches its writes gives
- * up very little by staying safe.
+ * `fast` is for measuring only: `synchronous = OFF` hands durability to the OS, so a battery pull can
+ * leave the database corrupt rather than merely stale. `safe` costs 19-57 ms on a single write and
+ * under 3 ms per row inside a transaction, so an app that batches gives up very little.
  */
 export type PragmaProfile = "fast" | "safe";
 
@@ -35,14 +27,6 @@ const PROFILES: Record<PragmaProfile, readonly string[]> = {
   ],
 };
 
-/**
- * From `VITE_PRAGMA_PROFILE`, defaulting to `safe`.
- *
- * Safe by default because the cost is small once writes are batched - inside one transaction the
- * per-row difference is under a millisecond - and the failure it prevents is a corrupt database
- * rather than a slow one. Set `fast` when measuring, where the point is to compare engines rather
- * than journal settings.
- */
 export const pragmaProfile: PragmaProfile =
   import.meta.env.VITE_PRAGMA_PROFILE === "fast" ? "fast" : "safe";
 

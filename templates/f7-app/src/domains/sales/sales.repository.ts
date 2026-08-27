@@ -1,5 +1,5 @@
 import { sql, type Kysely } from "kysely";
-import { nowISO } from "@cavulsqa/mobile-db/core";
+import { nowISO } from "@cavulsqa/mobile-db";
 import type { Database } from "@/shared/database/schema";
 
 export interface DashboardStats {

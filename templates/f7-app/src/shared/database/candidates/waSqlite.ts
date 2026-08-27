@@ -1,4 +1,4 @@
-import { WaSQLiteDialect, type WaVfsKind } from "@cavulsqa/mobile-db/wa";
+import { createWaDialect, type WaVfsKind } from "@cavulsqa/mobile-db/wa";
 import WaWorker from "../wa.worker?worker";
 import { probeIndexedDb, probeOpfsCapable } from "../storage";
 import type { StorageCandidate } from "./types";
@@ -24,9 +24,7 @@ function waCandidate(
     // Nothing below the official pool has been on a phone yet.
     evidence: "expected",
     createDialect: () =>
-      Promise.resolve(
-        new WaSQLiteDialect({ worker: new WaWorker(), name: "app-wa.sqlite3", kind }),
-      ),
+      Promise.resolve(createWaDialect({ worker: new WaWorker(), name: "app-wa.sqlite3", kind })),
   };
 }
 

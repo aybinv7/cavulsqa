@@ -82,7 +82,7 @@ import {
 } from "@/domains/sales/sales.repository";
 import { useHiddenTabbar } from "@/shared/composables/useTabbarVisibility";
 import { getDatabase, rdb } from "@/shared/database/database";
-import { uniqueQueryKey, useReactiveQuery } from "@/shared/database/queries";
+import { useReactiveQuery } from "@/shared/database/queries";
 
 const { t } = useI18n();
 
@@ -100,7 +100,7 @@ const statuses = ["draft", "confirmed", "delivered"] as const;
  */
 const query = useReactiveQuery(() => loadOrderDetail(getDatabase().db, orderId), {
   tables: ["sales_order", "order_line", "customer", "product", "customer_tag"],
-  queryKey: uniqueQueryKey(`demo:order-${String(orderId)}`),
+  queryKey: ["demo:order", orderId],
 });
 
 const order = computed<OrderDetail | null>(() => query.data.value ?? null);

@@ -1,4 +1,4 @@
-import { OpfsSQLiteDialect } from "@cavulsqa/mobile-db/opfs";
+import { createOpfsDialect } from "@cavulsqa/mobile-db/opfs";
 import OpfsWorker from "../opfs.worker?worker";
 import { probeOpfsCapable } from "../storage";
 import type { StorageCandidate } from "./types";
@@ -21,5 +21,5 @@ export const opfsSahPool: StorageCandidate = {
   evidence: "measured",
   probe: probeOpfsCapable,
   createDialect: () =>
-    Promise.resolve(new OpfsSQLiteDialect({ worker: new OpfsWorker(), name: "app.sqlite3" })),
+    Promise.resolve(createOpfsDialect({ worker: new OpfsWorker(), name: "app.sqlite3" })),
 };

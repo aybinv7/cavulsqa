@@ -16,13 +16,14 @@ which is the one failure an offline app cannot afford: the user has no network t
   product names and the customer's tags, so it lists all five. Count the tables in the SQL, not the
   ones you were thinking about.
 
-- **`queryKey` is a process-wide identity, not a label.** Two mounted queries sharing a key await
-  one request and share its result — right for the same list rendered twice, wrong for two
-  different queries that happen to be named alike, and the second silently receives the first's
-  rows. Framework7 keeps pages mounted, so two instances of one screen genuinely coexist.
+- **`queryKey` is a process-wide identity built from arguments, not a label.** It is an array, and
+  two mounted queries whose keys match await one request and share its result. Framework7 keeps
+  pages mounted, so two instances of one screen genuinely coexist — which is exactly why the key
+  has to carry what distinguishes them: `["demo:order", orderId]`, never `["demo:order"]`.
 
-  Default to `uniqueQueryKey("prefix")`. A stable literal is opt-in sharing, and anything
-  parameterised by a route param or a ref must never use one.
+  Put every value the query reads in the key. A ref belongs there directly — `["demo:search", term]`
+  — and the query re-runs through its own `debounce` when the ref moves, so a filtered screen never
+  calls `refetch()` by hand.
 
 - **`debounce`** collapses a burst. A loop of twenty inserts should refetch once, not twenty times.
 

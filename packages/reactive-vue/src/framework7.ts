@@ -1,4 +1,5 @@
 import {
+  computed,
   getCurrentInstance,
   inject,
   onBeforeUnmount,
@@ -6,6 +7,7 @@ import {
   provide,
   ref,
   type ComponentInternalInstance,
+  type ComputedRef,
   type InjectionKey,
   type Ref,
 } from "vue";
@@ -25,7 +27,7 @@ export const FRAMEWORK7_PAGE_EVENTS: PageVisibilityEvents = {
 
 const PAGE_VISIBILITY_KEY: InjectionKey<Ref<boolean>> = Symbol("pageVisibility");
 
-const ALWAYS_VISIBLE: { value: boolean } = { value: true };
+const ALWAYS_VISIBLE: ComputedRef<boolean> = computed(() => true);
 
 const ownVisibility = new WeakMap<ComponentInternalInstance, Ref<boolean>>();
 
@@ -91,7 +93,7 @@ export function providePageVisibility(options: ProvidePageVisibilityOptions = {}
  * The provider's own component reads its ref directly: `provide` is not visible to the component
  * that called it.
  */
-export function usePageVisibility(): { value: boolean } {
+export function usePageVisibility(): Ref<boolean> | ComputedRef<boolean> {
   const instance = getCurrentInstance();
   if (!instance) return ALWAYS_VISIBLE;
   return ownVisibility.get(instance) ?? inject(PAGE_VISIBILITY_KEY, ALWAYS_VISIBLE);

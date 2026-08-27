@@ -60,7 +60,7 @@
 import { useHiddenTabbar } from "@/shared/composables/useTabbarVisibility";
 import { searchOrders, type OrderRow } from "@/domains/sales/sales.repository";
 import { getDatabase } from "@/shared/database/database";
-import { uniqueQueryKey, useReactiveQuery } from "@/shared/database/queries";
+import { useReactiveQuery } from "@/shared/database/queries";
 
 const { t } = useI18n();
 
@@ -75,7 +75,7 @@ const term = ref("");
  */
 const query = useReactiveQuery(() => searchOrders(getDatabase().db, term.value), {
   tables: ["sales_order", "order_line", "customer"],
-  queryKey: uniqueQueryKey("demo:search"),
+  queryKey: ["demo:search", term],
   debounce: 200,
 });
 
@@ -83,12 +83,10 @@ const results = computed<OrderRow[]>(() => query.data.value ?? []);
 
 function onInput(event: Event) {
   term.value = (event.target as HTMLInputElement).value;
-  void query.refetch();
 }
 
 function onClear() {
   term.value = "";
-  void query.refetch();
 }
 
 const formatter = new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 });

@@ -74,7 +74,7 @@ test("selectFrom does not emit any change event", async () => {
   expect(emitChange).not.toHaveBeenCalled();
 });
 
-test("transaction emits one bulk event per distinct touched table, after commit", async () => {
+test("transaction reports what it did per table, after commit", async () => {
   const emitChange = vi.fn();
   const rdb = createReactiveDb<any>({ getDb: () => createStubDb() as any, emitChange });
 
@@ -85,9 +85,25 @@ test("transaction emits one bulk event per distinct touched table, after commit"
     expect(emitChange).not.toHaveBeenCalled();
   });
 
-  expect(emitChange).toHaveBeenCalledTimes(2);
-  expect(emitChange).toHaveBeenCalledWith("customer", "bulk");
-  expect(emitChange).toHaveBeenCalledWith("order", "bulk");
+  // Reporting "bulk" for everything meant a query with refetchOn: ["insert"] ignored the whole
+  // transaction - and transactions are where batched writes live.
+  expect(emitChange).toHaveBeenCalledWith("customer", "insert");
+  expect(emitChange).toHaveBeenCalledWith("customer", "update");
+  expect(emitChange).toHaveBeenCalledWith("order", "insert");
+  expect(emitChange).toHaveBeenCalledTimes(3);
+});
+
+test("a table written twice the same way is reported once", async () => {
+  const emitChange = vi.fn();
+  const rdb = createReactiveDb<any>({ getDb: () => createStubDb() as any, emitChange });
+
+  await rdb.transaction().execute(async (trx: any) => {
+    await (trx as any).insertInto("customer").values({}).execute();
+    await (trx as any).insertInto("customer").values({}).execute();
+  });
+
+  expect(emitChange).toHaveBeenCalledTimes(1);
+  expect(emitChange).toHaveBeenCalledWith("customer", "insert");
 });
 
 test("no event is emitted when the driver reports zero updated rows", async () => {

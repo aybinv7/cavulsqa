@@ -3,7 +3,8 @@ import { createApp, defineComponent, h, ref, type Ref } from "vue";
 import { createChangeBus, type TableChangeEvent } from "@cavulsqa/reactive-db";
 import { createReactiveQuery, type ReactiveQuery } from "../src/reactiveQuery.js";
 
-const ALWAYS_VISIBLE = { value: true };
+// A real ref: a plain object cannot be watched, so a deferred refetch would never wake up.
+const ALWAYS_VISIBLE: Ref<boolean> = ref(true);
 
 function mount<T>(setup: () => ReactiveQuery<T>): { query: ReactiveQuery<T>; unmount: () => void } {
   let captured: ReactiveQuery<T> | null = null;
@@ -45,7 +46,7 @@ test("fetches on mount and exposes the result", async () => {
   const { query, unmount } = mount(() =>
     useReactiveQuery(() => Promise.resolve("first"), {
       tables: ["sale_order"],
-      queryKey: "sale:list",
+      queryKey: ["sale:list"],
       isVisible: ALWAYS_VISIBLE,
     }),
   );
@@ -67,7 +68,7 @@ test("a table change refetches after the debounce window", async () => {
   const { unmount } = mount(() =>
     useReactiveQuery(queryFn, {
       tables: ["sale_order"],
-      queryKey: "sale:refetch",
+      queryKey: ["sale:refetch"],
       debounce: 5,
       isVisible: ALWAYS_VISIBLE,
     }),
@@ -94,7 +95,7 @@ test("refetchOn filters the change types that trigger a refetch", async () => {
   const { unmount } = mount(() =>
     useReactiveQuery(queryFn, {
       tables: ["sale_order"],
-      queryKey: "sale:filtered",
+      queryKey: ["sale:filtered"],
       debounce: 5,
       refetchOn: ["insert"],
       isVisible: ALWAYS_VISIBLE,
@@ -124,7 +125,7 @@ test("enabled: false defers the first read until it flips", async () => {
   const { unmount } = mount(() =>
     useReactiveQuery(queryFn, {
       tables: ["sale_order"],
-      queryKey: "sale:deferred",
+      queryKey: ["sale:deferred"],
       enabled,
       isVisible: ALWAYS_VISIBLE,
     }),
@@ -150,7 +151,7 @@ test("unmounting drops the table subscription", async () => {
   const { unmount } = mount(() =>
     useReactiveQuery(queryFn, {
       tables: ["sale_order"],
-      queryKey: "sale:unmount",
+      queryKey: ["sale:unmount"],
       debounce: 5,
       isVisible: ALWAYS_VISIBLE,
     }),
@@ -184,7 +185,7 @@ test("a failing query surfaces the error and reports it to the recorder", async 
   const { query, unmount } = mount(() =>
     useReactiveQuery(() => Promise.reject(new Error("no table")), {
       tables: ["sale_order"],
-      queryKey: "sale:failing",
+      queryKey: ["sale:failing"],
       isVisible: ALWAYS_VISIBLE,
       onError,
     }),
@@ -192,7 +193,7 @@ test("a failing query surfaces the error and reports it to the recorder", async 
 
   await flush();
   expect(query.error.value?.message).toBe("no table");
-  expect(recordError).toHaveBeenCalledWith("sale:failing");
+  expect(recordError).toHaveBeenCalledWith('["sale:failing"]');
   expect(onError).toHaveBeenCalledTimes(1);
   unmount();
 });
@@ -213,7 +214,7 @@ test("two call sites sharing a key await one query", async () => {
 
   const options = {
     tables: ["sale_order"],
-    queryKey: "sale:shared",
+    queryKey: ["sale:shared"],
     isVisible: ALWAYS_VISIBLE,
   };
 
@@ -241,7 +242,7 @@ test("a change while hidden refetches once the page becomes visible", async () =
   const { unmount } = mount(() =>
     useReactiveQuery(queryFn, {
       tables: ["sale_order"],
-      queryKey: "sale:hidden",
+      queryKey: ["sale:hidden"],
       debounce: 5,
       isVisible,
     }),
@@ -271,7 +272,7 @@ test("shouldRefetch can reject an event by its payload", async () => {
   const { unmount } = mount(() =>
     useReactiveQuery(queryFn, {
       tables: ["sale_order"],
-      queryKey: "sale:payload",
+      queryKey: ["sale:payload"],
       debounce: 5,
       isVisible: ALWAYS_VISIBLE,
       shouldRefetch: (event: TableChangeEvent) => event.affectedIds?.includes(7) ?? false,
