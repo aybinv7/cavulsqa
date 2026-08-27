@@ -1,3 +1,4 @@
+import { pruneEngines } from "./pruneEngines.mjs";
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
 
@@ -90,6 +91,13 @@ export function scaffold({ templateDir, out, name, appId, appName, engine, pragm
    * and change, while the choice of engine for one deployment is configuration. `.env.example` is
    * copied in by the template and documents every value.
    */
+  // Before the .env: picking an engine also removes the ones you did not pick, so the app installs
+  // only the plugin or wasm it actually reaches.
+  if (engine) {
+    const templateManifest = JSON.parse(readFileSync(join(templateDir, "package.json"), "utf8"));
+    pruneEngines(out, templateManifest, engine);
+  }
+
   if (engine || pragmas) {
     const lines = ["# Written by @cavulsqa/create. See .env.example for what these mean.", ""];
     if (engine) lines.push(`VITE_STORAGE_ENGINE=${engine}`);

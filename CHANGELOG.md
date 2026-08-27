@@ -81,6 +81,22 @@ If you are on something older, the breaking changes you have to cross were relea
 
 ## @cavulsqa/create
 
+### 2.7.0
+
+- **`--engine capacitor-sqlite`.** The template now offers the native plugin alongside the four
+  worker engines, and picking one **removes the others**. Choosing OPFS no longer installs
+  `@capacitor-community/sqlite` or ships the plugin in the APK for a candidate the app can never
+  reach - which is what made the choice cosmetic before.
+
+  The template describes its own engines in `cavulsqa.engineModules`, so the generator holds no
+  list of engine names: each entry is one candidate file, the engine ids it implements, the symbols
+  it exports and the dependency it pulls in. Pruning drops the file, its dependency, its ids from
+  `STORAGE_IDS`, its exports from the candidates barrel and from `DEFAULT_ORDER`, and its line from
+  `.env.example`. Generating without `--engine` still keeps everything.
+
+  Verified by generating both a Capacitor-only and an OPFS-only app against local tarballs: both
+  install, type-check and build clean.
+
 ### 2.6.0
 
 - Templates scaffold apps pinned to the `1.1.0` libraries.

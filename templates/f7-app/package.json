@@ -12,6 +12,7 @@
     "check": "vp check"
   },
   "dependencies": {
+    "@capacitor-community/sqlite": "catalog:",
     "@capacitor/android": "catalog:",
     "@capacitor/app": "^8.0.0",
     "@capacitor/core": "^8.0.0",
@@ -53,7 +54,50 @@
       "sqlite-wasm-opfs-sahpool",
       "wa-sqlite-access-handle-pool",
       "wa-sqlite-opfs-async",
-      "wa-sqlite-idb-batch-atomic"
-    ]
+      "wa-sqlite-idb-batch-atomic",
+      "capacitor-sqlite"
+    ],
+    "engineModules": {
+      "opfsSahPool": {
+        "file": "src/shared/database/candidates/opfsSahPool.ts",
+        "engines": [
+          "sqlite-wasm-opfs-sahpool"
+        ],
+        "exports": [
+          "opfsSahPool"
+        ],
+        "dependencies": [
+          "@sqlite.org/sqlite-wasm"
+        ]
+      },
+      "waSqlite": {
+        "file": "src/shared/database/candidates/waSqlite.ts",
+        "engines": [
+          "wa-sqlite-access-handle-pool",
+          "wa-sqlite-opfs-async",
+          "wa-sqlite-idb-batch-atomic"
+        ],
+        "exports": [
+          "waAccessHandlePool",
+          "waOriginPrivateFileSystem",
+          "waIdbBatchAtomic"
+        ],
+        "dependencies": [
+          "wa-sqlite"
+        ]
+      },
+      "capacitorSqlite": {
+        "file": "src/shared/database/candidates/capacitorSqlite.ts",
+        "engines": [
+          "capacitor-sqlite"
+        ],
+        "exports": [
+          "capacitorSqlite"
+        ],
+        "dependencies": [
+          "@capacitor-community/sqlite"
+        ]
+      }
+    }
   }
 }

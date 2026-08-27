@@ -12,6 +12,7 @@ export const STORAGE_IDS = [
   "wa-sqlite-access-handle-pool",
   "wa-sqlite-opfs-async",
   "wa-sqlite-idb-batch-atomic",
+  "capacitor-sqlite",
 ] as const;
 
 export type StorageId = (typeof STORAGE_IDS)[number];

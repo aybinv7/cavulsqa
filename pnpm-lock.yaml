@@ -205,6 +205,9 @@ settings:
 
 catalogs:
   default:
+    '@capacitor-community/sqlite':
+      specifier: ^8.1.1
+      version: 8.1.1
     '@capacitor/android':
       specifier: ^8.5.0
       version: 8.5.0
@@ -376,6 +379,9 @@ importers:
 
   templates/f7-app:
     dependencies:
+      '@capacitor-community/sqlite':
+        specifier: 'catalog:'
+        version: 8.1.1(@capacitor/core@8.5.0)
       '@capacitor/android':
         specifier: 'catalog:'
         version: 8.5.0(@capacitor/core@8.5.0)

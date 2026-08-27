@@ -1,4 +1,5 @@
 import {
+  capacitorSqlite,
   isStorageId,
   opfsSahPool,
   waAccessHandlePool,
@@ -10,11 +11,12 @@ import {
 
 /**
  * The knob. Walked in order, first candidate that opens wins, and the rest are never imported - so a
- * chain that stops at the first entry never downloads wa-sqlite's wasm.
+ * chain that stops at the first entry never downloads the others' wasm.
  *
- * Reorder freely to trade speed for reach: `waIdbBatchAtomic` first is the compatibility choice,
- * since IndexedDB is the only durable route on a WebView between Chromium 86 and 108. Only
- * `sqlite-wasm-opfs-sahpool` has been measured on a phone; the rest carry `evidence: "expected"`.
+ * Reorder freely to trade speed for reach: the entries lower down reach older WebViews, and each
+ * one states its own `tradeoff` and whether its `evidence` came from a device or a vendor's README.
+ * Read the list rather than this comment - `@cavulsqa/create` removes the engines an app did not
+ * ask for, so what is below is what this app actually has.
  *
  * No in-memory entry on purpose: a chain that ends somewhere data is not kept is worse than one that
  * fails and names every attempt.
@@ -24,6 +26,7 @@ export const DEFAULT_ORDER: StorageCandidate[] = [
   waAccessHandlePool,
   waOriginPrivateFileSystem,
   waIdbBatchAtomic,
+  capacitorSqlite,
 ];
 
 /**
