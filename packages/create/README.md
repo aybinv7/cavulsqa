@@ -44,7 +44,7 @@ The `f7-app` template: a tabbed shell, a `domains` / `modules` / `shared` layout
 sales demo over a six-table schema — dashboard aggregates, search, an order sheet, swipe actions,
 a detail screen — with tests against real SQLite.
 
-Underneath it, the data layer this repository publishes: `@cavulsqa/mobile-db` for Capacitor SQLite
+Underneath it, the data layer this repository publishes: `@cavulsqa/mobile-db` for OPFS SQLite
 under Kysely, `@cavulsqa/reactive-db` for the change bus, and `@cavulsqa/reactive-vue` for
 `useReactiveQuery`. A write announces the tables it touched and every query watching them refetches;
 nothing in a screen asks for a refresh.

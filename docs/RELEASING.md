@@ -5,14 +5,37 @@ Everything under `packages/` publishes to npm under the `@cavulsqa` scope. Anyth
 
 | Package                  | What it is                                    |
 | ------------------------ | --------------------------------------------- |
-| `@cavulsqa/mobile-db`    | Capacitor SQLite persistence for Kysely.      |
+| `@cavulsqa/mobile-db`    | OPFS SQLite persistence for Kysely.           |
 | `@cavulsqa/reactive-db`  | Framework-agnostic reactive query primitives. |
 | `@cavulsqa/reactive-vue` | Vue bindings for reactive-db.                 |
+
+## One version for the libraries
+
+`mobile-db`, `reactive-db` and `reactive-vue` release together at the same version. A bump moves all
+three even where nothing in one of them changed.
+
+That is not tidiness. Under `0.x` a caret range pins the minor - `^0.3.0` refuses `0.4.0` - so every
+release was already a wall a consumer had to climb, and climbing it meant moving all three anyway
+while reading three different numbers to work out which combination was current. Being past `1.0.0`
+is what removes the wall: an additive release is a minor, and `^1.x` takes it without anyone
+editing a manifest.
+
+The cost is real and accepted: some published versions of a package contain no change to that
+package. Two tests keep the policy honest rather than remembered - `libraryVersions.test.mjs` fails
+when the three disagree or when one slips back under `1.0.0`, and `workspacePeers.test.mjs` fails
+when a bump leaves a sibling's peer range behind.
+
+`@cavulsqa/create` is **not** in that set. Its version tracks template changes through the recorded
+fingerprint, on its own cadence.
 
 ## How a release happens
 
 1. Bump the version in the package's `package.json`. That file is the source of truth for what gets
-   released. `bumpp` is available in each package for this.
+   released. `bumpp` is available in each package for this. For the three libraries, bump all of
+   them to the same version and carry the peer ranges with it - `vp run -r test` says so if you
+   forget. A template edit or a library bump also needs
+   `pnpm --filter @cavulsqa/create run stamp [patch|minor|major]`, because both change what the
+   creator scaffolds.
 2. Run the **release** workflow (Actions > release > Run workflow). Leave `dry-run` checked the
    first time and read the log.
 3. Run it again with `dry-run` unchecked.

@@ -10,15 +10,15 @@ SQLite — it does not become the thing screens read.
 ## Stack
 
 Vue 3.5 `<script setup lang="ts">` · Framework7 9 (+ framework7-vue 8) · Capacitor 8 (Android
-first) · Kysely over `@capacitor-community/sqlite` · vue-i18n · Tailwind 4 · Vite+ (`vp`).
+first) · Kysely over SQLite in an OPFS worker · vue-i18n · Tailwind 4 · Vite+ (`vp`).
 
 Data layer comes from three published packages, not from this repo:
 
-| Package                  | What it gives you                                                  |
-| ------------------------ | ------------------------------------------------------------------ |
-| `@cavulsqa/mobile-db`    | The Capacitor SQLite dialect, migrations, transaction-aware writes |
-| `@cavulsqa/reactive-db`  | Change bus, result cache, visibility gate, query metrics           |
-| `@cavulsqa/reactive-vue` | `useReactiveQuery` and the Framework7 page-visibility adapter      |
+| Package                  | What it gives you                                             |
+| ------------------------ | ------------------------------------------------------------- |
+| `@cavulsqa/mobile-db`    | The OPFS worker dialect, migrations, transaction-aware writes |
+| `@cavulsqa/reactive-db`  | Change bus, result cache, visibility gate, query metrics      |
+| `@cavulsqa/reactive-vue` | `useReactiveQuery` and the Framework7 page-visibility adapter |
 
 Do not vendor or fork them. If one is wrong, fix it there and bump the version.
 

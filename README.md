@@ -8,30 +8,35 @@ reactivity, and nothing about where data comes from.
 
 ## Packages
 
-| Package                                           | What it is                                                                                                                                                                                      |
-| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`@cavulsqa/mobile-db`](packages/mobile-db)       | SQLite persistence for Kysely over three engines: the Capacitor plugin, official `sqlite-wasm` on OPFS, or `wa-sqlite`. Migrations, transaction-aware writes, column helpers, sql.js for tests. |
-| [`@cavulsqa/reactive-db`](packages/reactive-db)   | Framework-agnostic reactive query primitives: table-change bus, result cache, visibility gate, mutation proxy, query metrics.                                                                   |
-| [`@cavulsqa/reactive-vue`](packages/reactive-vue) | Vue bindings for the above: a `useReactiveQuery` composable, Framework7 page visibility, and a reactive metrics view.                                                                           |
+| Package                                           | What it is                                                                                                                                                                         |
+| ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@cavulsqa/mobile-db`](packages/mobile-db)       | SQLite persistence for Kysely in a worker against a real OPFS file: official `sqlite-wasm` or `wa-sqlite`. Migrations, transaction-aware writes, column helpers, sql.js for tests. |
+| [`@cavulsqa/reactive-db`](packages/reactive-db)   | Framework-agnostic reactive query primitives: table-change bus, result cache, visibility gate, mutation proxy, query metrics.                                                      |
+| [`@cavulsqa/reactive-vue`](packages/reactive-vue) | Vue bindings for the above: a `useReactiveQuery` composable, Framework7 page visibility, and a reactive metrics view.                                                              |
 
-## Three storage engines
+## Two storage engines, no native plugin
 
-`mobile-db` exposes each behind the same Kysely `Dialect`, so nothing above the dialect changes when
-you swap them:
+`mobile-db` runs SQLite compiled to WebAssembly in a worker, against a real file in OPFS. Each
+engine sits behind the same Kysely `Dialect`, so nothing above the dialect changes when you swap
+them:
 
 | Engine                                    | Import                     | Notes                                                                                                                       |
 | ----------------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `@capacitor-community/sqlite`             | `@cavulsqa/mobile-db`      | A real file behind a native bridge. Needs the plugin in the APK.                                                            |
-| `@sqlite.org/sqlite-wasm`, `opfs-sahpool` | `@cavulsqa/mobile-db/opfs` | **Fastest measured on a phone.** No native plugin at all.                                                                   |
+| `@sqlite.org/sqlite-wasm`, `opfs-sahpool` | `@cavulsqa/mobile-db/opfs` | **Fastest measured on a phone.** Needs a WebView on Chromium 109 or newer.                                                  |
 | `wa-sqlite` (3 VFS choices)               | `@cavulsqa/mobile-db/wa`   | JavaScript VFS layer, so it reaches IndexedDB — the only durable route on a WebView too old for synchronous access handles. |
 
-Measured on a phone at 100k rows across 10 tables, the Capacitor bridge is the only clear loser
-(~35.7 s against ~12 s for the suite); the two OPFS engines are indistinguishable. The single
-biggest factor is not the engine but **batching**: one measurement went from 691.8 ms to 32.0 ms
-(~21x) by writing a batch inside one transaction instead of a row at a time.
+`openFirstAvailable` walks a chain of these and opens the first one the device can actually run, so
+an old WebView gets a working app rather than one that refuses to start.
 
-An app that only uses a worker engine imports from `@cavulsqa/mobile-db/core` and drops the
-Capacitor plugin, and its native code, entirely.
+There was a third: a dialect over `@capacitor-community/sqlite`. It is gone. Measured on a phone
+against the OPFS engine on identical data, the native bridge wrote 9,158 rows in 16.9 s against
+6.9 s (2.4x slower) and ran the app's own screen queries about 1.3x slower. Its only win was
+opening ~195 ms sooner, once per launch, behind a splash screen. Dropping it also drops a native
+plugin, its Android build, and the connection mutex the plugin's single bridge forced on every
+read.
+
+The single biggest factor is still not the engine but **batching**: one measurement went from
+691.8 ms to 32.0 ms (~21x) by writing a batch inside one transaction instead of a row at a time.
 
 ## Deliberately not here
 

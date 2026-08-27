@@ -19,6 +19,7 @@ import {
 } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { publishedVersions } from "../lib/publishedVersions.mjs";
 
 const PACKAGE = dirname(dirname(fileURLToPath(import.meta.url)));
 const ROOT = dirname(dirname(PACKAGE));
@@ -26,17 +27,6 @@ const OUT = join(PACKAGE, "templates");
 
 /** Generated, installed or platform-specific: none of it belongs in a published template. */
 const SKIP = new Set(["node_modules", "dist", "android", "ios", ".git", "pnpm-lock.yaml"]);
-
-function publishedVersions() {
-  const versions = new Map();
-  for (const dir of readdirSync(join(ROOT, "packages"))) {
-    const manifest = join(ROOT, "packages", dir, "package.json");
-    if (!existsSync(manifest)) continue;
-    const pkg = JSON.parse(readFileSync(manifest, "utf8"));
-    if (!pkg.private) versions.set(pkg.name, pkg.version);
-  }
-  return versions;
-}
 
 /** A deliberately small reader: the catalog is a flat block of `name: range` and nothing else. */
 function catalog() {
@@ -55,7 +45,7 @@ function catalog() {
   return entries;
 }
 
-const versions = publishedVersions();
+const versions = publishedVersions(ROOT);
 const ranges = catalog();
 
 /**

@@ -1,6 +1,6 @@
 {
   "name": "@cavulsqa/reactive-db",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "Framework-agnostic reactive query primitives: table-change bus, result cache, visibility gate, mutation proxy, query metrics.",
   "keywords": [
     "cache",
