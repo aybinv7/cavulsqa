@@ -55,7 +55,6 @@
     "@capacitor-community/sqlite": ">=7",
     "@capacitor/core": ">=8",
     "@sqlite.org/sqlite-wasm": ">=3.50",
-    "capacitor-sqlite-kysely": ">=1",
     "kysely": "^0.29",
     "sql.js": ">=1.13",
     "wa-sqlite": ">=1"
@@ -68,9 +67,6 @@
       "optional": true
     },
     "@sqlite.org/sqlite-wasm": {
-      "optional": true
-    },
-    "capacitor-sqlite-kysely": {
       "optional": true
     },
     "sql.js": {

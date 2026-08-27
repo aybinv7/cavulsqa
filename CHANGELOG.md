@@ -26,6 +26,8 @@ the library too, which was not the decision anyone made. This restores it.
 - **Added:** `getRawConnection()` on the handle the Capacitor engine returns
   (`CapacitorMobileDatabase<DB>`), for native access to the file. Not on `MobileDatabase<DB>`,
   which an OPFS app implements and cannot promise it.
+- **Removed:** the `capacitor-sqlite-kysely` peer dependency. Nothing in the source has imported it
+  for some time, and a peer nobody imports is a question every consumer has to answer for nothing.
 - **Changed:** every engine peer dependency is now optional. `kysely` is the only hard requirement,
   so installing `mobile-db` no longer asks an OPFS app for the Capacitor plugin, or a Capacitor app
   for `wa-sqlite`.

@@ -19,6 +19,7 @@ import {
 } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { catalog } from "../lib/catalog.mjs";
 import { publishedVersions } from "../lib/publishedVersions.mjs";
 
 const PACKAGE = dirname(dirname(fileURLToPath(import.meta.url)));
@@ -28,25 +29,8 @@ const OUT = join(PACKAGE, "templates");
 /** Generated, installed or platform-specific: none of it belongs in a published template. */
 const SKIP = new Set(["node_modules", "dist", "android", "ios", ".git", "pnpm-lock.yaml"]);
 
-/** A deliberately small reader: the catalog is a flat block of `name: range` and nothing else. */
-function catalog() {
-  const entries = new Map();
-  let inside = false;
-  for (const line of readFileSync(join(ROOT, "pnpm-workspace.yaml"), "utf8").split(/\r?\n/)) {
-    if (/^catalog:\s*$/.test(line)) {
-      inside = true;
-      continue;
-    }
-    if (inside && /^\S/.test(line)) break;
-    if (!inside) continue;
-    const match = /^\s+"?([^":]+)"?:\s*(.+?)\s*$/.exec(line);
-    if (match) entries.set(match[1], match[2].replace(/^["']|["']$/g, ""));
-  }
-  return entries;
-}
-
 const versions = publishedVersions(ROOT);
-const ranges = catalog();
+const ranges = catalog(ROOT);
 
 /**
  * The engine list a template publishes for tooling has to be the one its code implements.
