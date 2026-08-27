@@ -297,9 +297,6 @@ importers:
       '@capacitor/core':
         specifier: '>=8'
         version: 8.5.0
-      capacitor-sqlite-kysely:
-        specifier: '>=1'
-        version: 1.0.2(@capacitor/core@8.5.0)(kysely@0.29.5)
     devDependencies:
       '@sqlite.org/sqlite-wasm':
         specifier: 'catalog:'
@@ -1868,12 +1865,6 @@ packages:
   cac@7.0.0:
     resolution: {integrity: sha512-tixWYgm5ZoOD+3g6UTea91eow5z6AAHaho3g0V9CNSNb45gM8SmflpAc+GRd1InC4AqN/07Unrgp56Y94N9hJQ==}
     engines: {node: '>=20.19.0'}
-
-  capacitor-sqlite-kysely@1.0.2:
-    resolution: {integrity: sha512-6TCikYQtCtfLIwDCKP/ZgFybMzlWzs+sdWIFG0ezVSf3kQnarWmOQBAw+yFfmc4aa2zCDYefnBFxX8oOSNawDA==}
-    peerDependencies:
-      '@capacitor/core': '>=5.0.0'
-      kysely: '>=0.26.0'
 
   chai@6.2.2:
     resolution: {integrity: sha512-NUPRluOfOiTKBKvWPtSD4PhFvWCqOi0BGStNWs57X9js7XGTprSmFoz5F0tWhR4WPjNeR9jXqdC7/UpSJTnlRg==}
@@ -4206,11 +4197,6 @@ snapshots:
       yaml: 2.9.0
 
   cac@7.0.0: {}
-
-  capacitor-sqlite-kysely@1.0.2(@capacitor/core@8.5.0)(kysely@0.29.5):
-    dependencies:
-      '@capacitor/core': 8.5.0
-      kysely: 0.29.5
 
   chai@6.2.2: {}
 
