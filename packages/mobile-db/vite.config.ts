@@ -4,6 +4,7 @@ export default defineConfig({
   pack: {
     entry: {
       index: "src/index.ts",
+      capacitor: "src/capacitor/index.ts",
       testing: "src/testing/sqlJsDialect.ts",
       opfs: "src/opfs/index.ts",
       wa: "src/wa/index.ts",

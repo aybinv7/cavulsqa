@@ -8,6 +8,39 @@ cadence and has its own section.
 
 ## Libraries
 
+### 1.1.0
+
+**The Capacitor SQLite engine is back, behind `@cavulsqa/mobile-db/capacitor`.**
+
+It should never have left. `0.6.0` made the _template_ OPFS-only and deliberately kept the dialect
+in the library, for the reason recorded in that commit: the worker is serial, where this dialect
+keeps reads outside the write lock, so an app that writes continuously while the UI reads - or that
+needs SQLCipher, or native access to the file - should still use it. A later change removed it from
+the library too, which was not the decision anyone made. This restores it.
+
+- **Added:** `@cavulsqa/mobile-db/capacitor` exports `SharedConnectionSQLiteDialect` and
+  `createMobileDatabase`. Its own entry point, like `/opfs` and `/wa`, so an app on a worker engine
+  never pulls the native plugin into its APK for code that never runs. This is the one change from
+  the pre-removal layout, where the dialect sat on the main entry and `/core` existed to escape it;
+  `.` is now engine-independent and `/core` is gone as redundant.
+- **Added:** `getRawConnection()` on the handle the Capacitor engine returns
+  (`CapacitorMobileDatabase<DB>`), for native access to the file. Not on `MobileDatabase<DB>`,
+  which an OPFS app implements and cannot promise it.
+- **Changed:** every engine peer dependency is now optional. `kysely` is the only hard requirement,
+  so installing `mobile-db` no longer asks an OPFS app for the Capacitor plugin, or a Capacitor app
+  for `wa-sqlite`.
+- **Fixed:** the Capacitor dialect routed reads and writes on `sql.includes("select")`, so
+  `insert into "archive" ("id") select "id" from "customer"` went down the read path - the rows were
+  inserted, but it reported no change count and the caller saw a write that had apparently done
+  nothing. It now decides on the compiled query tree via `statementFacts`, the same as the worker
+  dialect. Two tests cover it, and they fail against the old logic.
+- **Fixed:** the Capacitor engine carried its own copy of the migration fast path and its own
+  `ConnectionLock`. Both are now the shared ones, so it picks up the better migration error (which
+  names the failing migration) and there is one lock implementation instead of two.
+
+`reactive-db` and `reactive-vue` are unchanged in this release; they carry the version because the
+libraries release together.
+
 ### 1.0.0
 
 **No API change.** Entry points and peer dependencies are identical to the previous release
@@ -47,6 +80,10 @@ If you are on something older, the breaking changes you have to cross were relea
   the key so it re-runs when the key moves.
 
 ## @cavulsqa/create
+
+### 2.6.0
+
+- Templates scaffold apps pinned to the `1.1.0` libraries.
 
 ### 2.5.0
 

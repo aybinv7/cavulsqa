@@ -1,3 +1,4 @@
+import { ConnectionLock } from "./connectionLock.js";
 import {
   CompiledQuery,
   SqliteAdapter,
@@ -165,31 +166,6 @@ class WorkerChannel<TOpen> {
   terminate(): void {
     this.#break(new Error(`[mobile-db] ${this.#label} was terminated`));
     this.#worker.terminate();
-  }
-}
-
-/**
- * A fair, non-reentrant async lock: waiters resume in arrival order, so writes keep the order they
- * were issued in rather than the order the event loop happens to resume.
- */
-class ConnectionLock {
-  #waiting: (() => void)[] = [];
-  #held = false;
-
-  async acquire(): Promise<void> {
-    if (!this.#held) {
-      this.#held = true;
-      return;
-    }
-    await new Promise<void>((resolve) => {
-      this.#waiting.push(resolve);
-    });
-  }
-
-  release(): void {
-    const next = this.#waiting.shift();
-    if (next) next();
-    else this.#held = false;
   }
 }
 
