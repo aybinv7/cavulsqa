@@ -36,9 +36,19 @@ fingerprint, on its own cadence.
    forget. A template edit or a library bump also needs
    `pnpm --filter @cavulsqa/create run stamp [patch|minor|major]`, because both change what the
    creator scaffolds.
-2. Run the **release** workflow (Actions > release > Run workflow). Leave `dry-run` checked the
+2. Add the entry to [CHANGELOG.md](../CHANGELOG.md). A version with no entry is a version nobody
+   can upgrade to on purpose - and because the libraries share a number, a package can publish with
+   no change of its own, so the version alone tells a consumer nothing.
+3. Run the **release** workflow (Actions > release > Run workflow). Leave `dry-run` checked the
    first time and read the log.
-3. Run it again with `dry-run` unchecked.
+4. Run it again with `dry-run` unchecked.
+5. Tag and publish a GitHub release, so the version is navigable from something other than a commit
+   SHA. Libraries use `v<version>`; the creator uses `create-v<version>`:
+
+   ```sh
+   git tag -a v1.0.0 -m "libraries 1.0.0" && git push origin v1.0.0
+   gh release create v1.0.0 --title "Libraries 1.0.0" --notes-file <(...)
+   ```
 
 `npm publish` refuses a version that already exists, so a run only ships the packages you actually
 bumped and re-running is safe. Nothing writes back to the repository, so no bot commit races a
