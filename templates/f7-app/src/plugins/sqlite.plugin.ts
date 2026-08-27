@@ -8,14 +8,25 @@ const OPEN_TIMEOUT_MS = 10_000;
  * empty `#app` and nothing in the console. The timeout turns a hang into a message.
  */
 export async function sqlitePlugin(): Promise<void> {
-  await Promise.race([
-    openDatabase(),
-    new Promise<never>((_, reject) => {
-      setTimeout(
-        () =>
-          reject(new Error(`opening the database did not finish in ${String(OPEN_TIMEOUT_MS)}ms`)),
-        OPEN_TIMEOUT_MS,
-      );
-    }),
-  ]);
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
+  try {
+    await Promise.race([
+      openDatabase(),
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(
+          () =>
+            reject(
+              new Error(`opening the database did not finish in ${String(OPEN_TIMEOUT_MS)}ms`),
+            ),
+          OPEN_TIMEOUT_MS,
+        );
+      }),
+    ]);
+  } finally {
+    // Losing the race does not stop the timer, which then held the event loop for the full timeout
+    // after a fast open. The walk itself is not cancellable, but `openDatabase` memoises it, so a
+    // retry joins the attempt already running instead of racing it for the same OPFS directory.
+    clearTimeout(timer);
+  }
 }

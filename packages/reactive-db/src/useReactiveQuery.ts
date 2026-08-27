@@ -1,8 +1,11 @@
-import type { TableChangeEvent } from "./events.js";
+import type { ALL_TABLES, TableChangeEvent, TableName } from "./events.js";
+import type { QueryKey } from "./queryKey.js";
 
-export interface ReactiveQueryOptions<T = unknown> {
-  tables: string[];
-  queryKey: string;
+export interface ReactiveQueryOptions<T = unknown, DB = Record<string, unknown>> {
+  /** Every table the query function reads. Under-list one and the screen goes stale in silence. */
+  tables: TableName<DB>[];
+  /** Identity, taken from the arguments the query reads. See `hashQueryKey`. */
+  queryKey: QueryKey;
   debounce?: number;
   debug?: boolean;
   refetchOn?: TableChangeEvent["type"][];
@@ -33,8 +36,8 @@ export interface QueryMetrics {
   decrementListeners(): void;
 }
 
-export type OnTableChangeFn = (
-  tables: string[],
+export type OnTableChangeFn<DB = Record<string, unknown>> = (
+  tables: (TableName<DB> | typeof ALL_TABLES)[],
   callback: (event: TableChangeEvent) => void,
 ) => () => void;
 

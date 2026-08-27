@@ -22,7 +22,7 @@ function personalise(entry, text, { name, appName }) {
 
 function manifest(source, { name, appName, templateName }) {
   const pkg = JSON.parse(source);
-  const { private: _private, ...rest } = pkg;
+  const { private: _private, cavulsqa: _cavulsqa, ...rest } = pkg;
   return `${JSON.stringify(
     {
       ...rest,
@@ -37,9 +37,19 @@ function manifest(source, { name, appName, templateName }) {
   )}\n`;
 }
 
+/**
+ * Installed, generated or platform-specific: none of it belongs in a generated app.
+ *
+ * A bundled template never contains these, but `--from` points at a live working copy that usually
+ * does - and `node_modules` is full of directory symlinks, which `isDirectory()` reports as files and
+ * `readFileSync` then rejects with EISDIR. `--from` could not generate anything at all.
+ */
+const SKIP = new Set(["node_modules", "dist", "android", "ios", ".git", "pnpm-lock.yaml"]);
+
 function copyTree(from, to, transform) {
   mkdirSync(to, { recursive: true });
   for (const entry of readdirSync(from, { withFileTypes: true })) {
+    if (SKIP.has(entry.name)) continue;
     const source = join(from, entry.name);
     const target = join(to, entry.name);
     if (entry.isDirectory()) {
@@ -123,7 +133,7 @@ Generated from \`@cavulsqa/create\` (${templateName}).
 
 \`\`\`bash
 pnpm install
-pnpm dev            # browser, sql.js in memory - data does not survive a reload
+pnpm dev            # browser, SQLite in a worker on OPFS - data survives a reload
 npx cap add android # once
 pnpm build && npx cap sync android && npx cap run android
 \`\`\`

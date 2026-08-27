@@ -9,6 +9,7 @@ import {
   type QueryResult,
 } from "kysely";
 import initSqlJs, { type SqlJsDatabase } from "sql.js/dist/sql-asm.js";
+import { statementFacts } from "../statementFacts.js";
 
 class SqlJsConnection implements DatabaseConnection {
   readonly #db: SqlJsDatabase;
@@ -28,7 +29,7 @@ class SqlJsConnection implements DatabaseConnection {
       return {
         rows,
         numAffectedRows: BigInt(this.#db.getRowsModified()),
-        insertId: this.#lastInsertId(compiledQuery.sql),
+        insertId: this.#lastInsertId(statementFacts(compiledQuery).inserts),
       };
     } finally {
       statement.free();
@@ -40,8 +41,8 @@ class SqlJsConnection implements DatabaseConnection {
    * against `insertId` has to behave the same here or the tests pass on a path the device does not
    * take.
    */
-  #lastInsertId(sql: string): bigint | undefined {
-    if (!/^\s*insert\b/i.test(sql)) return undefined;
+  #lastInsertId(inserting: boolean): bigint | undefined {
+    if (!inserting) return undefined;
     const rowid = this.#db.exec("SELECT last_insert_rowid()")[0]?.values[0]?.[0];
     return typeof rowid === "number" ? BigInt(rowid) : undefined;
   }

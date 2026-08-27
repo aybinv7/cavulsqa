@@ -15,7 +15,7 @@ import {
   type OrderRow,
 } from "@/domains/sales/sales.repository";
 import { activeStorageLabel, changeBus, getDatabase, rdb } from "@/shared/database/database";
-import { uniqueQueryKey, useReactiveQuery } from "@/shared/database/queries";
+import { useReactiveQuery } from "@/shared/database/queries";
 
 export interface BusEntry {
   /** Monotonic, because a millisecond timestamp is not unique - several events share one. */
@@ -62,13 +62,13 @@ export function useReactiveDemo() {
   const statsQuery = useReactiveQuery(() => loadDashboardStats(getDatabase().db), {
     // Four tables, because the tiles aggregate across all of them.
     tables: ["customer", "product", "sales_order", "order_line"],
-    queryKey: uniqueQueryKey("demo:stats"),
+    queryKey: ["demo:stats"],
     debounce: 250,
   });
 
   const ordersQuery = useReactiveQuery(() => searchOrders(getDatabase().db, ""), {
     tables: ["sales_order", "order_line", "customer"],
-    queryKey: uniqueQueryKey("demo:orders"),
+    queryKey: ["demo:orders"],
     debounce: 250,
   });
 
@@ -118,10 +118,9 @@ export function useReactiveDemo() {
   /**
    * Reads issued together against reads awaited one by one.
    *
-   * On a device the ratio is the point: the native bridge pipelines concurrent calls and the dialect
-   * keeps reads out of the write lock, so a screen loading with `Promise.all` pays once rather than
-   * N times. In a browser it sits near 1x because sql.js in memory has no bridge to pipeline, and
-   * the screen says so rather than reporting a number that reads as a regression.
+   * The worker executes statements one at a time, so this measures how much of a read is the message
+   * round trip rather than the query - it cannot show queries overlapping, and a ratio near 1x is
+   * the expected result rather than a regression.
    */
   async function measurePipelining(): Promise<void> {
     measuring.value = true;

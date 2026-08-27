@@ -1,6 +1,6 @@
+import type { WorkerExecResult } from "../workerDialect.js";
 import {
   needsAsyncBuild,
-  type WaExecResult,
   type WaRequest,
   type WaResponse,
   type WaVfsKind,
@@ -49,7 +49,11 @@ export function runWaWorker(scope: WaWorkerScope = globalThis as unknown as WaWo
     handle = await runtime.open_v2(name);
   }
 
-  async function exec(sql: string, parameters: readonly unknown[]): Promise<WaExecResult> {
+  async function exec(
+    sql: string,
+    parameters: readonly unknown[],
+    inserts: boolean,
+  ): Promise<WorkerExecResult> {
     if (!sqlite3 || handle === null)
       throw new Error("[mobile-db] the wa-sqlite database is not open");
     const runtime = sqlite3;
@@ -67,20 +71,18 @@ export function runWaWorker(scope: WaWorkerScope = globalThis as unknown as WaWo
       }
     }
 
-    const inserting = /^\s*insert\b/i.test(sql);
-
     return {
       rows,
       numAffectedRows: runtime.changes(db),
       // Only an insert moves last_insert_rowid(); on an update it names a row nothing touched.
-      insertId: inserting ? await lastInsertRowId(runtime, db) : null,
+      insertId: inserts ? await lastInsertRowId(runtime, db) : null,
     };
   }
 
   scope.onmessage = (event: { data: WaRequest }) => {
     const request = event.data;
 
-    const settle = (work: () => Promise<WaExecResult | null>) => {
+    const settle = (work: () => Promise<WorkerExecResult | null>) => {
       void work().then(
         (result) => {
           reply({ id: request.id, ok: true, result });
@@ -95,7 +97,7 @@ export function runWaWorker(scope: WaWorkerScope = globalThis as unknown as WaWo
       settle(() => open(request.kind, request.name).then(() => null));
       return;
     }
-    settle(() => exec(request.sql, request.parameters));
+    settle(() => exec(request.sql, request.parameters, request.inserts));
   };
 }
 

@@ -36,26 +36,28 @@ const orderId = Number(inserted.insertId ?? 0);
 if (!orderId) throw new Error("the order was written but the database reported no id for it");
 ```
 
-The SQLite plugin runs a statement issued inside an open transaction through `query()`, which
-executes it and drops its RETURNING rows. `.returning("id").executeTakeFirstOrThrow()` therefore
-threw `no result` from an insert that had in fact succeeded — a message that sends you hunting for a
-failed write. `@cavulsqa/mobile-db` now throws a message that says so, and fills `insertId` from
-`last_insert_rowid()` on both sides of a transaction boundary. The sql.js test dialect reports it
-too, so a repository written this way behaves the same in tests as on a device.
+`insertId` is the portable answer. Every engine reports it — the worker engines from
+`last_insert_rowid()`, the sql.js test dialect the same way — so a repository written against it
+behaves identically in tests and on a device. `.returning(...)` does work on the worker engines, but
+it is the one thing that differs between them: the Capacitor plugin runs a statement issued inside an
+open transaction through `query()`, which executes it and silently drops its RETURNING rows, so
+`.returning("id").executeTakeFirstOrThrow()` threw `no result` from an insert that had in fact
+succeeded. `@cavulsqa/mobile-db` now throws a message that says so instead.
 
-## The web path is not the device path
+## The web path is the device path
 
-On a device the database is a real file behind the Capacitor plugin. In a browser it is sql.js in
-memory, through the dialect `@cavulsqa/mobile-db` ships for its own tests. Two consequences:
+Both run the same engine: SQLite compiled to WebAssembly, in a worker, with the database file in
+OPFS. There is no Capacitor SQLite plugin in this template and no sql.js outside the tests. So:
 
-- Browser data does not survive a reload. That is expected, not a bug to fix.
-- The plugin's own web mode is deliberately unused: it needs a `jeep-sqlite` element and a
-  `sql-wasm.wasm` whose build must match the glue jeep-sqlite bundles, a pairing outside this
-  template's control that fails as a `WebAssembly LinkError` on an upstream bump.
+- **Browser data survives a reload.** OPFS is durable storage, not memory. Clear it from
+  Diagnostics, or through the browser's site-data controls.
+- A bug reproduced in the browser is very likely the same bug as on the device, which was not true
+  when the two ran different engines.
+- `localStorage["app.storage.force"]` pins the chain to one engine id, for comparing them.
 
-Measurements taken in a browser do not transfer. Concurrent reads are several times faster than
-sequential ones **on a device**, because the native bridge pipelines them; in memory there is no
-bridge and the ratio sits at 1.
+What still does not transfer is **timing**. A phone's storage and CPU are nothing like a laptop's,
+and the worker is serial either way, so a ratio measured in a browser says nothing about the device.
+Run the Diagnostics benchmark on hardware.
 
 ## Proof obligations
 

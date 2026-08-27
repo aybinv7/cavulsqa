@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -86,4 +86,21 @@ test("it refuses to write over an existing directory", () => {
   expect(() =>
     scaffold({ templateDir: TEMPLATE, out: app, name: "x", appId: "a.b", appName: "X" }),
   ).toThrow(/already exists/);
+});
+
+/**
+ * `--from` points at a live working copy, which has `node_modules` in it - and that is full of
+ * directory symlinks, which `readdirSync(..., {withFileTypes: true})` reports as files and
+ * `readFileSync` then rejects with EISDIR. Generating from a source template failed outright.
+ */
+test("generating from a live template skips what is installed or generated", () => {
+  const source = join(dirname(dirname(PACKAGE)), "templates", "f7-app");
+  const generated = generate({ templateDir: source });
+
+  for (const unwanted of ["node_modules", "dist", "android", "ios", "pnpm-lock.yaml"]) {
+    expect(existsSync(join(generated, unwanted)), unwanted).toBe(false);
+  }
+  // It still produced a usable app rather than an empty directory.
+  expect(existsSync(join(generated, "src/main.ts"))).toBe(true);
+  expect(existsSync(join(generated, "package.json"))).toBe(true);
 });

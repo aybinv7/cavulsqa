@@ -1,16 +1,30 @@
 import type { Dialect } from "kysely";
 
-export type StorageId =
-  | "sqlite-wasm-opfs-sahpool"
-  | "wa-sqlite-access-handle-pool"
-  | "wa-sqlite-opfs-async"
-  | "wa-sqlite-idb-batch-atomic";
+/**
+ * Every engine this template offers, as values rather than only as a type.
+ *
+ * A types-only union cannot be read at runtime, and everything that needs the list had to invent
+ * its own copy: `@cavulsqa/create` was regexing this very file to populate `--engine`, and
+ * `localStorage`'s override was cast rather than checked.
+ */
+export const STORAGE_IDS = [
+  "sqlite-wasm-opfs-sahpool",
+  "wa-sqlite-access-handle-pool",
+  "wa-sqlite-opfs-async",
+  "wa-sqlite-idb-batch-atomic",
+] as const;
 
-export interface StorageProbe {
-  supported: boolean;
-  /** Present when unsupported, phrased so the person reading it can act on it. */
-  reason?: string;
+export type StorageId = (typeof STORAGE_IDS)[number];
+
+export function isStorageId(value: string): value is StorageId {
+  return (STORAGE_IDS as readonly string[]).includes(value);
 }
+
+/**
+ * A union rather than an optional field, so an unsupported probe cannot forget its reason and a
+ * supported one cannot carry a stale one.
+ */
+export type StorageProbe = { supported: true } | { supported: false; reason: string };
 
 /**
  * One way to persist SQLite, described well enough to choose between them without reading the code.

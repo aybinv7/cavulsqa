@@ -9,15 +9,7 @@ export interface TabDefinition {
   iconMd: string;
 }
 
-/**
- * The tab bar is data: add an entry, add a route file in the matching module, and the shell, the bar
- * and the navigation all follow. Each tab is a Framework7 view with its own history, so switching
- * away and back returns to the same screen.
- *
- * Icons are given per theme rather than once. Framework7 picks `icon-ios` or `icon-md` from the
- * active theme, which is what makes the bar look native on both platforms instead of iOS glyphs on
- * Android.
- */
+/** Add an entry plus a route file in the matching module; the shell and the bar follow. */
 export const tabs: TabDefinition[] = [
   { id: "home", labelKey: "tabs.home", iconIos: "house_fill", iconMd: "home" },
   { id: "demo", labelKey: "tabs.demo", iconIos: "bolt_fill", iconMd: "bolt" },

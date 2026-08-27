@@ -26,6 +26,10 @@ declare const __APP_VERSION__: string;
  * The environment this app reads. Declared, so a typo in a variable name is a type error rather than
  * a silent `undefined` that falls back to the default and looks like the setting was ignored.
  *
+ * The engine is `string`, not `StorageId`, because a `.env` is unchecked text: a union here would
+ * claim a guarantee nothing enforces. `storage.config.ts` narrows it with `isStorageId` and reports
+ * a value it does not recognise.
+ *
  * See `.env.example` for what each value means.
  */
 interface ImportMetaEnv {

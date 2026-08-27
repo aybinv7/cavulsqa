@@ -47,5 +47,13 @@
     "vite": "catalog:",
     "vite-plus": "catalog:",
     "vue-tsc": "^3.2.4"
+  },
+  "cavulsqa": {
+    "storageEngines": [
+      "sqlite-wasm-opfs-sahpool",
+      "wa-sqlite-access-handle-pool",
+      "wa-sqlite-opfs-async",
+      "wa-sqlite-idb-batch-atomic"
+    ]
   }
 }

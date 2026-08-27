@@ -1,5 +1,6 @@
 import type { BindingSpec, OpfsSAHPoolDatabase, Sqlite3Static } from "@sqlite.org/sqlite-wasm";
-import type { OpfsExecResult, OpfsRequest, OpfsResponse, OpfsWorkerScope } from "./protocol.js";
+import type { WorkerExecResult } from "../workerDialect.js";
+import type { OpfsRequest, OpfsResponse, OpfsWorkerScope } from "./protocol.js";
 
 /**
  * The worker half of the OPFS engine, as a function rather than a worker file.
@@ -38,7 +39,7 @@ export function runOpfsWorker(
     database = new pool.OpfsSAHPoolDb(`/${name}`);
   }
 
-  function exec(sql: string, parameters: readonly unknown[]): OpfsExecResult {
+  function exec(sql: string, parameters: readonly unknown[], inserts: boolean): WorkerExecResult {
     if (!database || !sqlite3) throw new Error("[mobile-db] the OPFS database is not open");
 
     const rows = database.exec({
@@ -48,20 +49,18 @@ export function runOpfsWorker(
       returnValue: "resultRows",
     });
 
-    const inserting = /^\s*insert\b/i.test(sql);
-
     return {
       rows,
       numAffectedRows: sqlite3.capi.sqlite3_changes(database),
       // Only an insert moves last_insert_rowid(); on an update it names a row nothing touched.
-      insertId: inserting ? Number(sqlite3.capi.sqlite3_last_insert_rowid(database)) : null,
+      insertId: inserts ? Number(sqlite3.capi.sqlite3_last_insert_rowid(database)) : null,
     };
   }
 
   scope.onmessage = (event: { data: OpfsRequest }) => {
     const request = event.data;
 
-    const settle = (work: () => OpfsExecResult | null | Promise<null>) => {
+    const settle = (work: () => WorkerExecResult | null | Promise<null>) => {
       try {
         const outcome = work();
         if (outcome instanceof Promise) {
@@ -85,7 +84,7 @@ export function runOpfsWorker(
       settle(() => open(request.name, request.capacity ?? 12).then(() => null));
       return;
     }
-    settle(() => exec(request.sql, request.parameters));
+    settle(() => exec(request.sql, request.parameters, request.inserts));
   };
 }
 

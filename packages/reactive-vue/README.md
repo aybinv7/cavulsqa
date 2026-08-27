@@ -7,8 +7,6 @@ copy between apps.
   `useStaticQuery`, bound to Vue's lifecycle: fetch on mount, refetch on table change (debounced),
   in-flight deduplication by query key, retry with backoff, stale-while-revalidate, a per-instance
   cache window, cancel on unmount, and a deferred first read via a reactive `enabled`.
-- `uniqueQueryKey(prefix)` — a key that is never shared, so a query is never deduplicated against
-  another.
 - An injectable `logger`, so failures reach your error service rather than only the console.
 - `createVueQueryMetrics()` — the recorder with its state in `reactive()`, plus a `useQueryMetrics`
   composable of derived counters for a dev-tools panel.
@@ -51,7 +49,7 @@ Then, at a call site:
 ```ts
 const { data, loading, error, refetch } = useReactiveQuery(
   () => rdb.selectFrom("sale_order").selectAll().execute(),
-  { tables: ["sale_order"], queryKey: uniqueQueryKey("sale_order:list") },
+  { tables: ["sale_order"], queryKey: ["sale_order:list"] },
 );
 ```
 
@@ -66,15 +64,33 @@ createReactiveQuery({
 });
 ```
 
-## queryKey is an identity, not a label
+## queryKey is an identity, built from arguments
 
-Two mounted queries sharing a `queryKey` await a single request and share its result. That is
-correct for the same list rendered twice, and wrong for two different queries that happen to be
-named alike — the second is handed the first's rows.
+A key is an array, and two mounted queries whose keys hash alike await one request and share its
+result. That is what you want — the same list rendered twice costs one query — and it is only safe
+because the key carries the arguments:
 
-So: `uniqueQueryKey("sale_order:list")` unless sharing is the point, in which case use a stable
-literal. As a backstop, mounting the same key against different `tables` logs a warning; pass
-`warnOnKeyConflict: false` to silence it.
+```ts
+queryKey: ["sale_order", id]; // two detail pages, two identities
+queryKey: ["sale_order:list"]; // one list, shared wherever it appears
+```
+
+Refs inside a key are unwrapped and tracked, so the key can follow a filter. When it moves, the
+query re-runs through the same debounce a table change uses — no `refetch()` on every keystroke:
+
+```ts
+const term = ref("");
+useReactiveQuery(() => search(term.value), {
+  tables: ["sale_order"],
+  queryKey: ["sale_order:search", term],
+  debounce: 200,
+});
+```
+
+A key may hold anything JSON can represent; object field order does not matter. A function or a
+symbol throws rather than hashing to the same string as every other one. As a backstop, mounting
+the same key against different `tables` logs a warning; pass `warnOnKeyConflict: false` to silence
+it.
 
 ## What this does not do
 
@@ -96,7 +112,7 @@ competes for the one native database thread while the first screen loads:
 ```ts
 useReactiveQuery(load, {
   tables: ["partner"],
-  queryKey: uniqueQueryKey("partner:list"),
+  queryKey: ["partner:list"],
   enabled: isTabActive, // a ref - activation starts the read and the subscription together
 });
 ```

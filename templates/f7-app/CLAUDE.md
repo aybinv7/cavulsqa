@@ -64,7 +64,8 @@ The short version of the rules, each earned by a real bug:
   screen goes stale with no error. See `.claude/rules/data-fetching.md`.
 - **Every write goes through `rdb`**, never `getDatabase().db`. `rdb` announces the tables it
   touched; a raw write is invisible to every query watching them.
-- **`queryKey` is an identity, not a label.** Default to `uniqueQueryKey()`.
+- **`queryKey` is an identity built from arguments**, not a label: `["demo:order", orderId]`.
+  Refs in the key are tracked, so a filter belongs in it rather than in a manual `refetch()`.
 - **An inserted id comes from `insertId`, never `.returning(...)`.** Inside a transaction the
   SQLite plugin executes the statement and drops its RETURNING rows, so the insert succeeds and
   kysely reports `no result`. See `.claude/rules/database.md`.

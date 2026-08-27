@@ -2,7 +2,6 @@ import { afterEach, beforeEach, expect, test, vi } from "vite-plus/test";
 import { createApp, defineComponent, h } from "vue";
 import { createChangeBus } from "@cavulsqa/reactive-db";
 import { createReactiveQuery, type ReactiveQueryLogger } from "../src/reactiveQuery.js";
-import { uniqueQueryKey } from "../src/queryKeys.js";
 
 function mount(setup: () => unknown): () => void {
   const app = createApp(
@@ -44,7 +43,7 @@ test("a failure goes to the injected logger, not the console", async () => {
   const unmount = mount(() =>
     useReactiveQuery(() => Promise.reject(new Error("no table")), {
       tables: ["sale_order"],
-      queryKey: uniqueQueryKey("sale:logged"),
+      queryKey: ["sale:logged"],
     }),
   );
 
@@ -66,10 +65,10 @@ test("a key conflict is reported through the injected logger", async () => {
   const { useReactiveQuery } = createReactiveQuery({ onTableChange: bus.on, logger });
 
   const first = mount(() =>
-    useReactiveQuery(() => Promise.resolve("a"), { tables: ["sale_order"], queryKey: "dup" }),
+    useReactiveQuery(() => Promise.resolve("a"), { tables: ["sale_order"], queryKey: ["dup"] }),
   );
   const second = mount(() =>
-    useReactiveQuery(() => Promise.resolve("b"), { tables: ["partner"], queryKey: "dup" }),
+    useReactiveQuery(() => Promise.resolve("b"), { tables: ["partner"], queryKey: ["dup"] }),
   );
 
   await vi.advanceTimersByTimeAsync(0);
@@ -92,7 +91,7 @@ test("retries run while the query is mounted", async () => {
   const unmount = mount(() =>
     useReactiveQuery(queryFn, {
       tables: ["sale_order"],
-      queryKey: uniqueQueryKey("sale:retrying"),
+      queryKey: ["sale:retrying"],
       retry: 2,
       retryDelay: 1000,
     }),
@@ -120,7 +119,7 @@ test("unmounting during the backoff abandons the retry", async () => {
   const unmount = mount(() =>
     useReactiveQuery(queryFn, {
       tables: ["sale_order"],
-      queryKey: uniqueQueryKey("sale:abandoned"),
+      queryKey: ["sale:abandoned"],
       retry: 3,
       retryDelay: 1000,
     }),
@@ -149,7 +148,7 @@ test("cacheTime suppresses a refetch inside the window and allows it after", asy
   const unmount = mount(() =>
     useReactiveQuery(queryFn, {
       tables: ["sale_order"],
-      queryKey: uniqueQueryKey("sale:cached"),
+      queryKey: ["sale:cached"],
       debounce: 5,
       cacheTime: 10_000,
     }),

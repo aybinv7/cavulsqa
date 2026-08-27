@@ -89,7 +89,7 @@ No `ref`, no lifecycle, no Framework7, no imports from `modules/`.
 ```ts
 import { listThings, saveThing, type ThingRow } from "@/domains/thing/thing.repository";
 import { getDatabase, rdb } from "@/shared/database/database";
-import { uniqueQueryKey, useReactiveQuery } from "@/shared/database/queries";
+import { useReactiveQuery } from "@/shared/database/queries";
 
 export function useFeature() {
   const term = ref("");
@@ -98,7 +98,8 @@ export function useFeature() {
   const query = useReactiveQuery(() => listThings(getDatabase().db, term.value), {
     // Every table the SQL touches. A join means each joined table.
     tables: ["thing"],
-    queryKey: uniqueQueryKey("feature:things"),
+    // The term is part of the identity, so the query re-runs (debounced) as it moves.
+    queryKey: ["feature:things", term],
     debounce: 250,
   });
 

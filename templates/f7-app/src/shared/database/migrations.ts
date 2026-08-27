@@ -1,4 +1,4 @@
-import { createTableWithDefaults, type MigrationSet } from "@cavulsqa/mobile-db/core";
+import { createTableWithDefaults, type MigrationSet } from "@cavulsqa/mobile-db";
 import { sql } from "kysely";
 
 /**

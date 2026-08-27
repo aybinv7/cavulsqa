@@ -58,6 +58,34 @@ function catalog() {
 const versions = publishedVersions();
 const ranges = catalog();
 
+/**
+ * The engine list a template publishes for tooling has to be the one its code implements.
+ *
+ * Two representations are unavoidable: the type needs a literal union, and the generator needs
+ * values it can read without a TypeScript compiler. What is avoidable is drift, so bundling refuses
+ * to ship a template whose manifest and `STORAGE_IDS` disagree - and the generator, which used to
+ * regex this file at run time with no way to complain, now just reads the manifest.
+ */
+function assertEnginesAgree(from, name, declared) {
+  const path = join(from, "src/shared/database/candidates/types.ts");
+  if (!existsSync(path)) return;
+
+  const block = /export const STORAGE_IDS = \[([\s\S]*?)\] as const;/.exec(
+    readFileSync(path, "utf8"),
+  );
+  if (!block) throw new Error(`${name}: ${path} declares no STORAGE_IDS`);
+
+  const implemented = [...block[1].matchAll(/"([a-z0-9-]+)"/g)].map((match) => match[1]);
+  const listed = declared ?? [];
+
+  if (implemented.join(",") !== listed.join(",")) {
+    throw new Error(
+      `${name}: package.json cavulsqa.storageEngines is [${listed.join(", ")}] but ` +
+        `STORAGE_IDS is [${implemented.join(", ")}]. Make them match.`,
+    );
+  }
+}
+
 function resolveDeps(deps, template) {
   if (!deps) return undefined;
   const resolved = {};
@@ -125,6 +153,7 @@ for (const name of readdirSync(join(ROOT, "templates"))) {
 
   const manifestPath = join(to, "package.json");
   const pkg = JSON.parse(readFileSync(manifestPath, "utf8"));
+  assertEnginesAgree(from, name, pkg.cavulsqa?.storageEngines);
   // `private` and the workspace-only name are dropped by the generator, which renames the app.
   writeFileSync(
     manifestPath,

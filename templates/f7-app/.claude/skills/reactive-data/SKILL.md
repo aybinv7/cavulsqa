@@ -13,7 +13,7 @@ tables it touched and every query watching one of them refetches. Nothing calls 
 ```ts
 const query = useReactiveQuery(() => searchOrders(getDatabase().db, term.value), {
   tables: ["sales_order", "order_line", "customer"],
-  queryKey: uniqueQueryKey("demo:orders"),
+  queryKey: ["demo:orders", term],
   debounce: 250,
 });
 ```
@@ -24,9 +24,10 @@ const query = useReactiveQuery(() => searchOrders(getDatabase().db, term.value),
 2. **List every table the SQL touches in `tables`.** Count them in the query, not from memory: a
    join means each joined table. Under-list and the screen goes stale with no error; over-list and
    an unrelated write re-runs an expensive query.
-3. `queryKey`: default to `uniqueQueryKey("prefix")`. A stable literal means "share this result with
-   any other query using the same key", which is right for one list rendered twice and wrong for
-   anything parameterised.
+3. `queryKey` is an array of the values the query reads. Two mounted queries whose keys match
+   share one request, so anything that distinguishes them belongs in the key — a route param, a
+   filter ref. Refs are unwrapped and tracked: when one moves the query re-runs through its own
+   `debounce`, so never pair a key with a manual `refetch()`.
 4. `debounce` so a burst of writes causes one refetch.
 
 ## Adding a write
