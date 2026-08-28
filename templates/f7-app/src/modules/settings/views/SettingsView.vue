@@ -52,7 +52,7 @@
       </F7ListItem>
     </F7List>
     <F7Block class="mt-0!">
-      <p class="m-0 text-[13px] opacity-60">{{ t("settings.engineHint") }}</p>
+      <p class="m-0 text-[13px] opacity-60">{{ tradeoff }}</p>
     </F7Block>
 
     <F7BlockTitle>{{ t("settings.tryIt") }}</F7BlockTitle>
