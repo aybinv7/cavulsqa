@@ -1,6 +1,6 @@
 {
   "name": "@cavulsqa/mobile-db",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "SQLite for Kysely on a phone: WebAssembly in a worker against a real OPFS file, or the native Capacitor plugin, with migrations, transaction-aware writes and column helpers.",
   "keywords": [
     "capacitor",

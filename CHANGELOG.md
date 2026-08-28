@@ -8,6 +8,36 @@ cadence and has its own section.
 
 ## Libraries
 
+### 1.2.0
+
+**New package: `@cavulsqa/repository`** - per-table data access over a stable row identity.
+
+Extracted from presalio, where it had grown into two things at once. The half worth sharing is
+generic: look a row up by an identity that survives a rebuilt database or a restored backup, stamp a
+write time, and hide soft-deleted rows unless asked. The other half - a draft lifecycle, a
+`_sync_status` column, a delete that behaves differently for a row the server has never seen - is a
+sync model, and shipping it here would have made one app's sync design the standard for every app
+the template generates. cavulsqa deliberately has no opinion about a server.
+
+So the split is by layer, matching the rest of the scope: `mobile-db` is the engine, `reactive-db`
+the reactivity, `repository` the data access above both. Anything that syncs wraps it - reads come
+free, and only the write semantics differ.
+
+- `createRepository(table, deps)` - `list` / `getById` / `getByRuid` / `findWhere` / `insert` /
+  `update` / `softDelete` / `restore` / `query`.
+- `createLocalFirstTable(db, name)` and `LOCAL_FIRST_COLUMNS` - the five columns a repository reads:
+  `id`, `_ruid`, `_create_date`, `_write_date`, `_delete_date`. `mobile-db`'s
+  `createTableWithDefaults` still gives a plain `id` + `created_at` and knows nothing about them,
+  which is right for a SQLite layer.
+- `readDb` and `rdb` are separate handles on purpose: reads through the plain one, writes through
+  the reactive proxy. Passing the proxy for reads would make every read announce a change, and every
+  query watching the table would refetch on every read. A test pins it.
+
+Twelve tests against real SQLite rather than a stub, because a stub accepts SQL that SQLite refuses.
+
+`mobile-db`, `reactive-db` and `reactive-vue` are unchanged; they carry the version because the
+libraries release together.
+
 ### 1.1.0
 
 **The Capacitor SQLite engine is back, behind `@cavulsqa/mobile-db/capacitor`.**

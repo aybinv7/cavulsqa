@@ -1,6 +1,6 @@
 {
   "name": "@cavulsqa/reactive-vue",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Vue bindings for @cavulsqa/reactive-db: a reactive query composable, Framework7 page visibility, and a reactive metrics view.",
   "keywords": [
     "framework7",
