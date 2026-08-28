@@ -21,13 +21,11 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { catalog } from "../lib/catalog.mjs";
 import { publishedVersions } from "../lib/publishedVersions.mjs";
+import { listTemplateFiles } from "../lib/templateFiles.mjs";
 
 const PACKAGE = dirname(dirname(fileURLToPath(import.meta.url)));
 const ROOT = dirname(dirname(PACKAGE));
 const OUT = join(PACKAGE, "templates");
-
-/** Generated, installed or platform-specific: none of it belongs in a published template. */
-const SKIP = new Set(["node_modules", "dist", "android", "ios", ".git", "pnpm-lock.yaml"]);
 
 const versions = publishedVersions(ROOT);
 const ranges = catalog(ROOT);
@@ -80,13 +78,10 @@ function resolveDeps(deps, template) {
 }
 
 function copyTree(from, to) {
-  mkdirSync(to, { recursive: true });
-  for (const entry of readdirSync(from, { withFileTypes: true })) {
-    if (SKIP.has(entry.name)) continue;
-    const source = join(from, entry.name);
-    const target = join(to, entry.name);
-    if (entry.isDirectory()) copyTree(source, target);
-    else cpSync(source, target);
+  for (const file of listTemplateFiles(from)) {
+    const target = join(to, file);
+    mkdirSync(dirname(target), { recursive: true });
+    cpSync(join(from, file), target);
   }
 }
 

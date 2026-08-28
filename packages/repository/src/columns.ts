@@ -1,4 +1,4 @@
-import type { CreateTableBuilder, Kysely } from "kysely";
+import type { CreateTableBuilder, Generated, Kysely } from "kysely";
 
 /**
  * The columns a repository reads and writes.
@@ -28,7 +28,8 @@ export const LOCAL_FIRST_COLUMNS = {
 
 /** The shape every row a repository serves has, whatever else the table holds. */
 export interface LocalFirstRow {
-  id: number;
+  /** Assigned by SQLite, so a row being inserted does not have one yet. */
+  id: Generated<number>;
   _ruid: string;
   _create_date: string;
   _write_date: string;
@@ -42,15 +43,18 @@ export interface LocalFirstRow {
  * which is why they are not here. This package has no opinion about a server.
  */
 export function createLocalFirstTable(
-  db: Kysely<never>,
+  // `any` rather than a generic: a migration is handed `Kysely<unknown>`, the schema builder is
+  // untyped by nature, and every stricter signature here just moves a cast to the caller.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  db: Kysely<any>,
   tableName: string,
-): CreateTableBuilder<never, never> {
+): CreateTableBuilder<any, any> {
   const columns = LOCAL_FIRST_COLUMNS;
-  return (db as Kysely<never>).schema
+  return db.schema
     .createTable(tableName.replace(/\./g, "_"))
     .addColumn(columns.id, "integer", (col) => col.primaryKey().autoIncrement())
     .addColumn(columns.ruid, "text", (col) => col.notNull().unique())
     .addColumn(columns.createDate, "text", (col) => col.notNull())
     .addColumn(columns.writeDate, "text", (col) => col.notNull())
-    .addColumn(columns.deleteDate, "text") as CreateTableBuilder<never, never>;
+    .addColumn(columns.deleteDate, "text");
 }

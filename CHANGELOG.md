@@ -121,6 +121,21 @@ If you are on something older, the breaking changes you have to cross were relea
 
 ## @cavulsqa/create
 
+### 2.9.0
+
+- **Only tracked files are copied.** Both the bundler and the generator walked the directory and
+  skipped a list of names, which lets through anything nobody thought to name: a maintainer's stray
+  `build/` and a deploy log reached a generated app, and would have shipped inside the published
+  creator. They ask git now - the same list the template fingerprint is computed from, so what ships
+  and what is hashed cannot drift apart. The walk remains for a bundled template, which carries no
+  repository.
+- **Fixed:** the template's `vite.config.ts` did not exclude `auto-imports.d.ts` and
+  `components.d.ts` from formatting, so every generated app inherited a build and a commit hook
+  taking turns rewriting a generated file. The monorepo root had the exclusion; the template did
+  not.
+- **Fixed:** the app's SQLite blurb still described the native bridge - "writes take turns on the
+  one native connection" - on a template that ships on OPFS. Both locales.
+
 ### 2.7.0
 
 - **`--engine capacitor-sqlite`.** The template now offers the native plugin alongside the four

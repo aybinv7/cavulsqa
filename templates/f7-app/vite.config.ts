@@ -91,5 +91,13 @@ export default defineConfig({
   server: { port: 5173 },
   build: { target: "esnext" },
   lint: { options: { typeAware: false } },
-  fmt: {},
+  /**
+   * The unplugin declaration files are committed - vue-tsc has no idea what `ref` or an F7
+   * component is without them - but the generator rewrites them on every run, and what it emits is
+   * not what oxfmt emits. Formatting them means a build and a commit hook take turns rewriting a
+   * file no human wrote and no human can keep formatted.
+   */
+  fmt: {
+    ignorePatterns: ["**/auto-imports.d.ts", "**/components.d.ts"],
+  },
 });

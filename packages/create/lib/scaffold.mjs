@@ -1,6 +1,7 @@
+import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { basename, dirname, join } from "node:path";
+import { listTemplateFiles } from "./templateFiles.mjs";
 import { pruneEngines } from "./pruneEngines.mjs";
-import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
-import { basename, join } from "node:path";
 
 /** Files whose contents carry the app's identity and have to be rewritten, not copied. */
 function personalise(entry, text, { name, appName }) {
@@ -38,26 +39,12 @@ function manifest(source, { name, appName, templateName }) {
   )}\n`;
 }
 
-/**
- * Installed, generated or platform-specific: none of it belongs in a generated app.
- *
- * A bundled template never contains these, but `--from` points at a live working copy that usually
- * does - and `node_modules` is full of directory symlinks, which `isDirectory()` reports as files and
- * `readFileSync` then rejects with EISDIR. `--from` could not generate anything at all.
- */
-const SKIP = new Set(["node_modules", "dist", "android", "ios", ".git", "pnpm-lock.yaml"]);
-
 function copyTree(from, to, transform) {
-  mkdirSync(to, { recursive: true });
-  for (const entry of readdirSync(from, { withFileTypes: true })) {
-    if (SKIP.has(entry.name)) continue;
-    const source = join(from, entry.name);
-    const target = join(to, entry.name);
-    if (entry.isDirectory()) {
-      copyTree(source, target, transform);
-      continue;
-    }
-    const rewritten = transform(entry.name, source);
+  for (const file of listTemplateFiles(from)) {
+    const source = join(from, file);
+    const target = join(to, file);
+    mkdirSync(dirname(target), { recursive: true });
+    const rewritten = transform(basename(file), source);
     if (rewritten === null) cpSync(source, target);
     else writeFileSync(target, rewritten);
   }
