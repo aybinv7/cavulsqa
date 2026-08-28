@@ -100,6 +100,40 @@ export async function createMobileDatabase<DB>(
   };
 }
 
+export interface CapacitorDialectOptions {
+  /** The database file name, without an extension. */
+  name: string;
+  sqlite?: SQLiteConnection;
+  /**
+   * Serialize statements and transactions over the shared connection. On by default: one connection
+   * cannot serve two writers, and two writes in the same tick otherwise race for the BEGIN.
+   */
+  serializeAccess?: boolean;
+}
+
+/**
+ * A ready dialect on the native plugin, opened the careful way.
+ *
+ * The counterpart to `createOpfsDialect` and `createWaDialect`, and the reason it exists rather than
+ * leaving callers to build `SharedConnectionSQLiteDialect` themselves: opening this plugin is not one
+ * call. A WebView reload leaves the native connection alive while the JS registry that tracked it is
+ * gone, so a naive `createConnection` throws "already exists" on the second open - which is every
+ * hot reload, and every resume after Android has killed the WebView.
+ */
+export async function createCapacitorDialect(
+  options: CapacitorDialectOptions,
+): Promise<SharedConnectionSQLiteDialect> {
+  const sqlite = options.sqlite ?? new SQLiteConnection(CapacitorSQLite);
+  const database = await openConnection(sqlite, options.name);
+
+  return new SharedConnectionSQLiteDialect({
+    database,
+    sqlite,
+    name: options.name,
+    serializeAccess: options.serializeAccess ?? true,
+  });
+}
+
 async function openConnection(sqlite: SQLiteConnection, name: string): Promise<SQLiteDBConnection> {
   await reconcileConnections(sqlite);
 

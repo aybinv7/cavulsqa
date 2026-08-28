@@ -23,6 +23,14 @@ So the split is by layer, matching the rest of the scope: `mobile-db` is the eng
 the reactivity, `repository` the data access above both. Anything that syncs wraps it - reads come
 free, and only the write semantics differ.
 
+**Also:** `@cavulsqa/mobile-db/capacitor` exports `createCapacitorDialect`, the counterpart to
+`createOpfsDialect` and `createWaDialect`. Opening the native plugin is not one call - a WebView
+reload leaves the native connection alive while the JS registry that tracked it is gone, so a naive
+`createConnection` throws "already exists" on the second open, which is every hot reload and every
+resume after Android has killed the WebView. That handling already existed inside
+`createMobileDatabase`; it is reachable on its own now, and the template's engine candidate uses it
+rather than a hand-rolled open.
+
 - `createRepository(table, deps)` - `list` / `getById` / `getByRuid` / `findWhere` / `insert` /
   `update` / `softDelete` / `restore` / `query`.
 - `createLocalFirstTable(db, name)` and `LOCAL_FIRST_COLUMNS` - the five columns a repository reads:

@@ -30,18 +30,7 @@ export const capacitorSqlite: StorageCandidate = {
   evidence: "measured",
   probe: probeNativePlatform,
   createDialect: async () => {
-    const [{ CapacitorSQLite, SQLiteConnection }, { SharedConnectionSQLiteDialect }] =
-      await Promise.all([
-        import("@capacitor-community/sqlite"),
-        import("@cavulsqa/mobile-db/capacitor"),
-      ]);
-
-    const sqlite = new SQLiteConnection(CapacitorSQLite);
-    const name = "app.sqlite3";
-    await sqlite.createConnection(name, false, "no-encryption", 1, false);
-    const database = await sqlite.retrieveConnection(name, false);
-    await database.open();
-
-    return new SharedConnectionSQLiteDialect({ database, sqlite, name, serializeAccess: true });
+    const { createCapacitorDialect } = await import("@cavulsqa/mobile-db/capacitor");
+    return await createCapacitorDialect({ name: "app.sqlite3" });
   },
 };
