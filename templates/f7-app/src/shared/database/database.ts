@@ -3,7 +3,7 @@ import { Migrator } from "kysely/migration";
 import { runWrite, type MobileDatabase } from "@cavulsqa/mobile-db";
 import { createChangeBus, createReactiveDb } from "@cavulsqa/reactive-db";
 import { pragmaProfile, pragmasFor } from "@/app/pragmas.config";
-import { storageChain } from "@/app/storage.config";
+import { preferredEngine, storageChain } from "@/app/storage.config";
 import { isStorageId, type StorageAttempt, type StorageCandidate } from "./candidates";
 import { migrations } from "./migrations";
 import { describeOpenFailure } from "./storage";
@@ -155,6 +155,14 @@ async function tryEveryCandidate(): Promise<MobileDatabase<Database>> {
       applied = opened.pragmas;
       chosen = candidate;
       attempts.push({ id: candidate.id, outcome: "opened" });
+      // Every launch names its engine. A preference that never arrived - a `.env` the build could
+      // not parse, a typo - otherwise looks exactly like one that was applied, and the app reports
+      // an engine nobody chose.
+      console.info(
+        `[storage] opened on ${candidate.id}` +
+          (preferredEngine ? ` (VITE_STORAGE_ENGINE=${preferredEngine})` : " (no preference set)"),
+        attempts,
+      );
       return database;
     } catch (error) {
       attempts.push({ id: candidate.id, outcome: "failed", detail: describeOpenFailure(error) });

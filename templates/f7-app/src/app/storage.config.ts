@@ -37,8 +37,17 @@ export const DEFAULT_ORDER: StorageCandidate[] = [
  * A typo is reported and ignored rather than fatal: it should not brick the build's output, but a
  * setting that was silently dropped looks exactly like one that was applied and did nothing.
  */
+/**
+ * What `VITE_STORAGE_ENGINE` was at build time, or undefined.
+ *
+ * Exported so the open can report it. Vite inlines this when it bundles, so an empty value means
+ * the variable never reached the build - a `.env` written as UTF-16 by PowerShell's `>` parses as
+ * garbage and is dropped without a word.
+ */
+export const preferredEngine = import.meta.env.VITE_STORAGE_ENGINE;
+
 function preferredFirst(candidates: StorageCandidate[]): StorageCandidate[] {
-  const preferred = import.meta.env.VITE_STORAGE_ENGINE;
+  const preferred = preferredEngine;
   if (!preferred) return candidates;
 
   if (!isStorageId(preferred)) {
