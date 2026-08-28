@@ -139,7 +139,7 @@
     "sqlite": {
       "title": "SQLite",
       "subtitle": "Kysely, offline-first",
-      "text": "Writes take turns on the one native connection while reads run in parallel."
+      "text": "SQLite compiled to WebAssembly, in a worker, against a real file in OPFS - no native plugin."
     },
     "reactive": {
       "title": "Reactive queries",

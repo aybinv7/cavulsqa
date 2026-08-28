@@ -139,7 +139,7 @@
     "sqlite": {
       "title": "SQLite",
       "subtitle": "Kysely, hors-ligne d'abord",
-      "text": "Les écritures se relaient sur la connexion native, les lectures restent parallèles."
+      "text": "SQLite compilé en WebAssembly, dans un worker, sur un vrai fichier OPFS - sans plugin natif."
     },
     "reactive": {
       "title": "Requêtes réactives",
