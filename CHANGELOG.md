@@ -121,6 +121,23 @@ If you are on something older, the breaking changes you have to cross were relea
 
 ## @cavulsqa/create
 
+### 2.9.2
+
+- **Fixed:** the Settings screen rendered the active engine's label dynamically and then a static
+  sentence underneath it. On the Capacitor plugin the app named the plugin and immediately claimed
+  "WebAssembly ... in a worker - no native bridge" while every statement was crossing one. It shows
+  the active candidate's own `tradeoff` now, so the description cannot disagree with the engine
+  above it.
+
+### 2.9.1
+
+- **Every open reports its engine.** A `.env` written by PowerShell's `>` is UTF-16; Vite's dotenv
+  reads it as UTF-8, gets a BOM and null bytes, and drops every variable in it without a word. So
+  `VITE_STORAGE_ENGINE` never reached the build, the chain took its silent "no preference" path, and
+  the app opened on the default engine while reporting that engine as though it had been chosen -
+  indistinguishable, from inside the app, from a preference that had been applied. The open now logs
+  the engine it landed on and the preference the build was compiled with.
+
 ### 2.9.0
 
 - **Only tracked files are copied.** Both the bundler and the generator walked the directory and
