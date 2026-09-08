@@ -184,3 +184,83 @@ test("concurrent writes are serialized", async () => {
   stub.reply(execs[1].id, ok);
   await writes;
 });
+
+test("an outside read waits for a transaction to commit", async () => {
+  const stub = stubWorker();
+  const db = connect(stub, 10_000);
+  let continueTransaction: (() => void) | undefined;
+
+  const transaction = db.transaction().execute(async (trx) => {
+    await trx.insertInto("thing").values({ id: 1 }).execute();
+    await new Promise<void>((resolve) => {
+      continueTransaction = resolve;
+    });
+  });
+
+  await stub.letItOpen();
+  stub.reply((await stub.awaitRequest("exec")).id, ok);
+  let execs = stub.requests.filter((request) => request.type === "exec");
+
+  for (let attempt = 0; execs.length < 2 && attempt < 200; attempt++) {
+    await new Promise((resolve) => setTimeout(resolve, 1));
+    execs = stub.requests.filter((request) => request.type === "exec");
+  }
+  stub.reply(execs[1].id, ok);
+
+  const read = db.selectFrom("thing").selectAll().execute();
+  await new Promise((resolve) => setTimeout(resolve, 30));
+  expect(stub.requests.filter((request) => request.type === "exec")).toHaveLength(2);
+
+  continueTransaction?.();
+  for (let attempt = 0; execs.length < 3 && attempt < 200; attempt++) {
+    await new Promise((resolve) => setTimeout(resolve, 1));
+    execs = stub.requests.filter((request) => request.type === "exec");
+  }
+  stub.reply(execs[2].id, ok);
+
+  for (let attempt = 0; execs.length < 4 && attempt < 200; attempt++) {
+    await new Promise((resolve) => setTimeout(resolve, 1));
+    execs = stub.requests.filter((request) => request.type === "exec");
+  }
+  stub.reply(execs[3].id, ok);
+
+  await Promise.all([transaction, read]);
+});
+
+test("an outside read waits for a transaction rollback", async () => {
+  const stub = stubWorker();
+  const db = connect(stub, 10_000);
+
+  const transaction = db.transaction().execute(async (trx) => {
+    await trx.insertInto("thing").values({ id: 1 }).execute();
+    throw new Error("rollback");
+  });
+  const transactionFailure = expect(transaction).rejects.toThrow("rollback");
+
+  await stub.letItOpen();
+  stub.reply((await stub.awaitRequest("exec")).id, ok);
+  let execs = stub.requests.filter((request) => request.type === "exec");
+
+  for (let attempt = 0; execs.length < 2 && attempt < 200; attempt++) {
+    await new Promise((resolve) => setTimeout(resolve, 1));
+    execs = stub.requests.filter((request) => request.type === "exec");
+  }
+  stub.reply(execs[1].id, ok);
+
+  const read = db.selectFrom("thing").selectAll().execute();
+  for (let attempt = 0; execs.length < 3 && attempt < 200; attempt++) {
+    await new Promise((resolve) => setTimeout(resolve, 1));
+    execs = stub.requests.filter((request) => request.type === "exec");
+  }
+  expect(stub.requests.filter((request) => request.type === "exec")).toHaveLength(3);
+  stub.reply(execs[2].id, ok);
+
+  for (let attempt = 0; execs.length < 4 && attempt < 200; attempt++) {
+    await new Promise((resolve) => setTimeout(resolve, 1));
+    execs = stub.requests.filter((request) => request.type === "exec");
+  }
+  stub.reply(execs[3].id, ok);
+
+  await transactionFailure;
+  await read;
+});

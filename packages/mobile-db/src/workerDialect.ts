@@ -1,4 +1,5 @@
 import { ConnectionLock } from "./connectionLock.js";
+import { TransactionBarrier } from "./transactionBarrier.js";
 import {
   CompiledQuery,
   SqliteAdapter,
@@ -172,11 +173,17 @@ class WorkerChannel<TOpen> {
 class WorkerConnection<TOpen> implements DatabaseConnection {
   readonly #channel: WorkerChannel<TOpen>;
   readonly #lock: ConnectionLock;
+  readonly #transactionBarrier: TransactionBarrier;
   #holdsLock = false;
 
-  constructor(channel: WorkerChannel<TOpen>, lock: ConnectionLock) {
+  constructor(
+    channel: WorkerChannel<TOpen>,
+    lock: ConnectionLock,
+    transactionBarrier: TransactionBarrier,
+  ) {
     this.#channel = channel;
     this.#lock = lock;
+    this.#transactionBarrier = transactionBarrier;
   }
 
   /**
@@ -187,10 +194,12 @@ class WorkerConnection<TOpen> implements DatabaseConnection {
     if (this.#holdsLock) return;
     await this.#lock.acquire();
     this.#holdsLock = true;
+    this.#transactionBarrier.begin();
   }
 
   releaseFromTransaction(): void {
     if (!this.#holdsLock) return;
+    this.#transactionBarrier.end();
     this.#holdsLock = false;
     this.#lock.release();
   }
@@ -199,13 +208,15 @@ class WorkerConnection<TOpen> implements DatabaseConnection {
     await this.#channel.open();
     const facts = statementFacts(compiledQuery);
 
-    // Reads never take the lock. The worker is serial, so they cannot corrupt anything - and
-    // holding them back is what made a screen loading with `Promise.all` pay a full round trip per
-    // query instead of posting them all and letting the worker run them back to back.
-    if (!facts.mutates) return this.#run<R>(compiledQuery, facts.inserts);
+    if (!facts.mutates) {
+      while (!this.#holdsLock) {
+        const idle = this.#transactionBarrier.waitForIdle();
+        if (!idle) break;
+        await idle;
+      }
+      return this.#run<R>(compiledQuery, facts.inserts);
+    }
 
-    // Already inside this connection's own transaction: nothing else can have opened one, because
-    // a transaction cannot take the lock while this connection holds it.
     if (this.#holdsLock) return this.#run<R>(compiledQuery, facts.inserts);
 
     await this.#lock.acquire();
@@ -239,6 +250,7 @@ class WorkerConnection<TOpen> implements DatabaseConnection {
 class WorkerDriver<TOpen> implements Driver {
   readonly #channel: WorkerChannel<TOpen>;
   readonly #lock = new ConnectionLock();
+  readonly #transactionBarrier = new TransactionBarrier();
 
   constructor(spec: WorkerDialectSpec<TOpen>) {
     this.#channel = new WorkerChannel(spec);
@@ -254,7 +266,7 @@ class WorkerDriver<TOpen> implements Driver {
    * statements take it one at a time.
    */
   async acquireConnection(): Promise<DatabaseConnection> {
-    return new WorkerConnection(this.#channel, this.#lock);
+    return new WorkerConnection(this.#channel, this.#lock, this.#transactionBarrier);
   }
 
   async beginTransaction(connection: DatabaseConnection): Promise<void> {
