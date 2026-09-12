@@ -34,6 +34,18 @@ export interface WorkerDialectSpec<TOpen> {
 
 const DEFAULT_REQUEST_TIMEOUT_MS = 30_000;
 
+export class WorkerRequestTimeoutError extends Error {
+  readonly outcome = "unknown";
+
+  constructor(label: string, timeoutMs: number) {
+    super(
+      `[mobile-db] ${label} did not answer within ${String(timeoutMs)}ms. ` +
+        "The worker may have been frozen or killed while the app was in the background.",
+    );
+    this.name = "WorkerRequestTimeoutError";
+  }
+}
+
 export interface WorkerExecResult {
   rows: unknown[];
   numAffectedRows: number;
@@ -94,6 +106,7 @@ class WorkerChannel<TOpen> {
   #nextId = 0;
   #opened: Promise<void> | null = null;
   #broken: Error | null = null;
+  #terminated = false;
 
   constructor(spec: WorkerDialectSpec<TOpen>) {
     this.#worker = spec.worker;
@@ -144,13 +157,8 @@ class WorkerChannel<TOpen> {
     const id = this.#nextId++;
     return new Promise<R>((resolve, reject) => {
       const timer = setTimeout(() => {
-        this.#settle(id);
-        reject(
-          new Error(
-            `[mobile-db] ${this.#label} did not answer within ${String(this.#timeoutMs)}ms. ` +
-              "The worker may have been frozen or killed while the app was in the background.",
-          ),
-        );
+        this.#break(new WorkerRequestTimeoutError(this.#label, this.#timeoutMs));
+        this.#terminate();
       }, this.#timeoutMs);
 
       this.#pending.set(id, { resolve: resolve as (result: unknown) => void, reject, timer });
@@ -166,6 +174,12 @@ class WorkerChannel<TOpen> {
 
   terminate(): void {
     this.#break(new Error(`[mobile-db] ${this.#label} was terminated`));
+    this.#terminate();
+  }
+
+  #terminate(): void {
+    if (this.#terminated) return;
+    this.#terminated = true;
     this.#worker.terminate();
   }
 }

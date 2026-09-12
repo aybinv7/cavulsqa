@@ -2,6 +2,7 @@ import { expect, test, vi } from "vite-plus/test";
 import { Kysely } from "kysely";
 import {
   createWorkerDialect,
+  WorkerRequestTimeoutError,
   type WorkerExecResult,
   type WorkerRequest,
   type WorkerResponse,
@@ -81,6 +82,24 @@ test("a statement the worker never answers rejects instead of hanging", async ()
   // There was no timeout at all. Android can freeze or kill a backgrounded app's worker, and every
   // request in flight then waited forever on a reply nobody was going to send.
   await expect(query).rejects.toThrow(/did not answer within 40ms/);
+});
+
+test("a timeout has an unknown outcome and cannot be retried through the same worker", async () => {
+  const stub = stubWorker();
+  const db = connect(stub);
+
+  const write = db.insertInto("thing").values({ id: 1 }).execute();
+  await stub.letItOpen();
+  const request = await stub.awaitRequest("exec");
+
+  await expect(write).rejects.toBeInstanceOf(WorkerRequestTimeoutError);
+  expect(stub.terminate).toHaveBeenCalledOnce();
+
+  stub.reply(request.id, ok);
+
+  await expect(db.insertInto("thing").values({ id: 2 }).execute()).rejects.toBeInstanceOf(
+    WorkerRequestTimeoutError,
+  );
 });
 
 test("terminating rejects what was in flight", async () => {
