@@ -8,6 +8,23 @@ cadence and has its own section.
 
 ## Libraries
 
+### 1.2.1
+
+**Fixed: a transaction on the worker connection could interleave with other work.** One worker owns
+one SQLite connection, so a statement issued while a transaction was open ran _inside_ that
+transaction without asking - and rolled back with it. Kysely's `transaction()` gives each caller
+what looks like a private scope, so nothing in the calling code suggests that an unrelated read or
+write happening at the same moment is now part of someone else's atomic unit. A `TransactionBarrier`
+holds other operations until the open transaction finishes.
+
+**Fixed: a timed-out worker request left the channel usable.** The timeout rejected that one request
+and kept the connection, which is the wrong shape for what a timeout means here: the worker never
+answered, so whether the statement committed is unknown, and on Android the usual cause is the
+process being frozen in the background - the reply can still arrive later, against work that has
+moved on. The timeout now breaks and terminates the channel, and the rejection is a
+`WorkerRequestTimeoutError` carrying `outcome: "unknown"` so a caller can tell "it failed" from "it
+may have happened".
+
 ### 1.2.0
 
 **New package: `@cavulsqa/repository`** - per-table data access over a stable row identity.
@@ -120,6 +137,23 @@ If you are on something older, the breaking changes you have to cross were relea
   the key so it re-runs when the key moves.
 
 ## @cavulsqa/create
+
+### 2.9.3
+
+- **Fixed:** two navigations racing each other could freeze a tab for good. Framework7 only enforces
+  `allowPageChange` for synchronous routes; the template's routes are async, and `asyncResolve` calls
+  the router's internal `load()` with `ignorePageChange: true`. So a navigate issued while a
+  transition was still animating - tapping a row as the back gesture ran, which is one thumb movement
+  - ran a forward on top of an in-flight backward. That destroys the previous page element and leaves
+    the router holding two copies of the same page, after which `loadBack` takes its same-url early
+    return and `back()` silently does nothing forever. `allowPageChange` reads `true` the whole time,
+    so the router looks healthy while the screen cannot move. A guard now drops the navigate or back
+    that loses the race - one boolean read, no queueing, so the one that wins is not slowed - while
+    still letting Framework7's own recursive `navigate`/`back` calls through.
+- **Fixed:** a route whose chunk failed to download froze the same way. `async` hooks resolved the
+  import but never rejected, and Framework7 unlocks the router only from `resolve` or `reject`, so
+  one failed chunk left that view locked for the rest of the session. Routes load through a
+  `lazyRoute` helper that always settles.
 
 ### 2.9.2
 
