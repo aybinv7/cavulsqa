@@ -57,6 +57,7 @@ const parameters = framework7Parameters(appTheme.value.theme, appTheme.value.dar
 onMounted(() => {
   // The native handlers need the Framework7 instance, which exists only once the shell is mounted.
   f7ready(async (instance) => {
+    useNavigationGuard();
     await initCapacitor(instance);
     hideSplashScreen();
   });

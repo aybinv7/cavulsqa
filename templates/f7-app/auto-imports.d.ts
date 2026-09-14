@@ -58,12 +58,14 @@ declare global {
   const initCapacitor: typeof import('./src/plugins/capacitor/index').initCapacitor
   const inject: typeof import('vue').inject
   const injectLocal: typeof import('@vueuse/core').injectLocal
+  const installNavigationGuard: typeof import('./src/shared/composables/useNavigationGuard').installNavigationGuard
   const isDefined: typeof import('@vueuse/core').isDefined
   const isProxy: typeof import('vue').isProxy
   const isReactive: typeof import('vue').isReactive
   const isReadonly: typeof import('vue').isReadonly
   const isRef: typeof import('vue').isRef
   const isShallow: typeof import('vue').isShallow
+  const lazyRoute: typeof import('./src/shared/utils/lazyRoute').lazyRoute
   const makeDestructurable: typeof import('@vueuse/core').makeDestructurable
   const markRaw: typeof import('vue').markRaw
   const nextTick: typeof import('vue').nextTick
@@ -230,6 +232,7 @@ declare global {
   const useMouseInElement: typeof import('@vueuse/core').useMouseInElement
   const useMousePressed: typeof import('@vueuse/core').useMousePressed
   const useMutationObserver: typeof import('@vueuse/core').useMutationObserver
+  const useNavigationGuard: typeof import('./src/shared/composables/useNavigationGuard').useNavigationGuard
   const useNavigatorLanguage: typeof import('@vueuse/core').useNavigatorLanguage
   const useNetwork: typeof import('@vueuse/core').useNetwork
   const useNow: typeof import('@vueuse/core').useNow
@@ -403,12 +406,14 @@ declare module 'vue' {
     readonly initCapacitor: UnwrapRef<typeof import('./src/plugins/capacitor/index')['initCapacitor']>
     readonly inject: UnwrapRef<typeof import('vue')['inject']>
     readonly injectLocal: UnwrapRef<typeof import('@vueuse/core')['injectLocal']>
+    readonly installNavigationGuard: UnwrapRef<typeof import('./src/shared/composables/useNavigationGuard')['installNavigationGuard']>
     readonly isDefined: UnwrapRef<typeof import('@vueuse/core')['isDefined']>
     readonly isProxy: UnwrapRef<typeof import('vue')['isProxy']>
     readonly isReactive: UnwrapRef<typeof import('vue')['isReactive']>
     readonly isReadonly: UnwrapRef<typeof import('vue')['isReadonly']>
     readonly isRef: UnwrapRef<typeof import('vue')['isRef']>
     readonly isShallow: UnwrapRef<typeof import('vue')['isShallow']>
+    readonly lazyRoute: UnwrapRef<typeof import('./src/shared/utils/lazyRoute')['lazyRoute']>
     readonly makeDestructurable: UnwrapRef<typeof import('@vueuse/core')['makeDestructurable']>
     readonly markRaw: UnwrapRef<typeof import('vue')['markRaw']>
     readonly nextTick: UnwrapRef<typeof import('vue')['nextTick']>
@@ -575,6 +580,7 @@ declare module 'vue' {
     readonly useMouseInElement: UnwrapRef<typeof import('@vueuse/core')['useMouseInElement']>
     readonly useMousePressed: UnwrapRef<typeof import('@vueuse/core')['useMousePressed']>
     readonly useMutationObserver: UnwrapRef<typeof import('@vueuse/core')['useMutationObserver']>
+    readonly useNavigationGuard: UnwrapRef<typeof import('./src/shared/composables/useNavigationGuard')['useNavigationGuard']>
     readonly useNavigatorLanguage: UnwrapRef<typeof import('@vueuse/core')['useNavigatorLanguage']>
     readonly useNetwork: UnwrapRef<typeof import('@vueuse/core')['useNetwork']>
     readonly useNow: UnwrapRef<typeof import('@vueuse/core')['useNow']>

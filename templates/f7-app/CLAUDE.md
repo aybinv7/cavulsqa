@@ -71,6 +71,9 @@ The short version of the rules, each earned by a real bug:
   kysely reports `no result`. See `.claude/rules/database.md`.
 - **Money is integer cents.** A float total is a rounding bug waiting to happen.
 - **`f7route` and `f7router` are props**, not imports: `defineProps<{ f7route: Router.Route }>()`.
+- **A route loads its component through `lazyRoute`**, never a bare `import().then(resolve)`.
+  Framework7 locks the router before calling the hook and only unlocks it from `resolve` or
+  `reject`; a hook that settles neither — one failed chunk — freezes that view for the session.
 - **In locale files, `@` and `|` are message syntax.** `@` starts a linked message and `|` a plural
   branch. A literal `@` must be `{'@'}` or the whole locale file fails to compile.
 - **No comments that narrate.** A comment explains a non-obvious _why_ — a platform quirk, an
