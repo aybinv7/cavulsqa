@@ -7,3 +7,5 @@ export * from "./logger.js";
 export * from "./statementFacts.js";
 export * from "./storage.js";
 export * from "./workerDialect.js";
+export * from "./capture/changeCapture.js";
+export * from "./capture/types.js";

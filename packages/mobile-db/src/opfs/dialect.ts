@@ -1,4 +1,5 @@
 import type { Dialect } from "kysely";
+import type { ChangeCapture } from "../capture/changeCapture.js";
 import { createWorkerDialect } from "../workerDialect.js";
 import type { OpfsOpenPayload } from "./protocol.js";
 
@@ -9,6 +10,8 @@ export interface OpfsDialectOptions extends OpfsOpenPayload {
    */
   worker: Worker;
   requestTimeoutMs?: number;
+  /** Records committed writes as SQLite changesets. */
+  capture?: ChangeCapture;
 }
 
 /**
@@ -24,5 +27,6 @@ export function createOpfsDialect(options: OpfsDialectOptions): Dialect {
     worker: options.worker,
     open: { name: options.name, capacity: options.capacity },
     requestTimeoutMs: options.requestTimeoutMs,
+    capture: options.capture,
   });
 }

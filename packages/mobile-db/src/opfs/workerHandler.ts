@@ -1,5 +1,7 @@
 import type { BindingSpec, OpfsSAHPoolDatabase, Sqlite3Static } from "@sqlite.org/sqlite-wasm";
 import type { WorkerExecResult } from "../workerDialect.js";
+import { createSessionCapture, type SessionCapture } from "../capture/sessionCapture.js";
+import type { CaptureReply, CaptureTables } from "../capture/types.js";
 import type { OpfsRequest, OpfsResponse, OpfsWorkerScope } from "./protocol.js";
 
 /**
@@ -21,10 +23,36 @@ export function runOpfsWorker(
 ): void {
   let database: OpfsSAHPoolDatabase | null = null;
   let sqlite3: Sqlite3Static | null = null;
+  let capture: SessionCapture | null = null;
 
   const reply = (message: OpfsResponse) => {
     scope.postMessage(message);
   };
+
+  function pushChangeset(): void {
+    if (!capture) return;
+    let bytes: Uint8Array | null;
+    try {
+      bytes = capture.collect();
+    } catch {
+      return;
+    }
+    if (bytes) scope.postMessage({ type: "changeset", bytes, at: Date.now() }, [bytes.buffer]);
+  }
+
+  function configureCapture(tables: CaptureTables | null): CaptureReply {
+    if (!database || !sqlite3) throw new Error("[mobile-db] the OPFS database is not open");
+    if (tables === null) {
+      capture?.stop();
+      capture = null;
+      return { supported: true, tables: [] };
+    }
+    if (typeof sqlite3.capi.sqlite3session_create !== "function") {
+      return { supported: false, reason: "this SQLite build has no session extension" };
+    }
+    capture ??= createSessionCapture(sqlite3, database);
+    return { supported: true, tables: capture.start(tables) };
+  }
 
   async function open(name: string, capacity: number): Promise<void> {
     const { default: sqlite3InitModule } = await import("@sqlite.org/sqlite-wasm");
@@ -60,7 +88,7 @@ export function runOpfsWorker(
   scope.onmessage = (event: { data: OpfsRequest }) => {
     const request = event.data;
 
-    const settle = (work: () => WorkerExecResult | null | Promise<null>) => {
+    const settle = (work: () => WorkerExecResult | CaptureReply | null | Promise<null>) => {
       try {
         const outcome = work();
         if (outcome instanceof Promise) {
@@ -84,7 +112,15 @@ export function runOpfsWorker(
       settle(() => open(request.name, request.capacity ?? 12).then(() => null));
       return;
     }
-    settle(() => exec(request.sql, request.parameters, request.inserts));
+    if (request.type === "capture") {
+      settle(() => configureCapture(request.tables));
+      return;
+    }
+    try {
+      settle(() => exec(request.sql, request.parameters, request.inserts));
+    } finally {
+      pushChangeset();
+    }
   };
 }
 

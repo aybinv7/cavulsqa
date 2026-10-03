@@ -15,6 +15,8 @@ import {
   type QueryResult,
 } from "kysely";
 import { statementFacts } from "./statementFacts.js";
+import type { ChangeCapture } from "./capture/changeCapture.js";
+import type { CaptureReply, CaptureTables } from "./capture/types.js";
 
 /** Everything a worker-backed SQLite engine needs above its own `open` payload. */
 export interface WorkerDialectSpec<TOpen> {
@@ -30,6 +32,8 @@ export interface WorkerDialectSpec<TOpen> {
    * waited on a reply that was never coming. A hang has no error message and no stack.
    */
   requestTimeoutMs?: number;
+  /** Records committed writes as changesets, when the engine supports it. */
+  capture?: ChangeCapture;
 }
 
 const DEFAULT_REQUEST_TIMEOUT_MS = 30_000;
@@ -64,15 +68,30 @@ export interface WorkerExecBody {
   inserts: boolean;
 }
 
+export interface WorkerCaptureBody {
+  type: "capture";
+  /** `null` stops the capture. */
+  tables: CaptureTables | null;
+}
+
 export type WorkerOpenBody<TOpen> = { type: "open" } & TOpen;
 
-export type WorkerBody<TOpen> = WorkerOpenBody<TOpen> | WorkerExecBody;
+export type WorkerBody<TOpen> = WorkerOpenBody<TOpen> | WorkerExecBody | WorkerCaptureBody;
 
 export type WorkerRequest<TOpen> = WorkerBody<TOpen> & { id: number };
 
 export type WorkerResponse =
-  | { id: number; ok: true; result: WorkerExecResult | null }
+  | { id: number; ok: true; result: WorkerExecResult | CaptureReply | null }
   | { id: number; ok: false; error: string };
+
+/** Sent by the worker unprompted, so it carries no request id. */
+export interface WorkerChangesetPush {
+  type: "changeset";
+  bytes: Uint8Array;
+  at: number;
+}
+
+export type WorkerMessage = WorkerResponse | WorkerChangesetPush;
 
 /**
  * What a worker half needs from its global scope, declared rather than imported: the
@@ -80,7 +99,7 @@ export type WorkerResponse =
  * `dom` - and this package needs `dom` for the `Worker` handle on the other side of the channel.
  */
 export interface WorkerScope<TOpen> {
-  postMessage: (message: WorkerResponse) => void;
+  postMessage: (message: WorkerMessage, transfer?: Transferable[]) => void;
   onmessage: ((event: { data: WorkerRequest<TOpen> }) => void) | null;
 }
 
@@ -107,6 +126,7 @@ class WorkerChannel<TOpen> {
   #opened: Promise<void> | null = null;
   #broken: Error | null = null;
   #terminated = false;
+  onChangeset: ((push: WorkerChangesetPush) => void) | null = null;
 
   constructor(spec: WorkerDialectSpec<TOpen>) {
     this.#worker = spec.worker;
@@ -114,8 +134,12 @@ class WorkerChannel<TOpen> {
     this.#open = spec.open;
     this.#timeoutMs = spec.requestTimeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS;
 
-    this.#worker.onmessage = (event: MessageEvent<WorkerResponse>) => {
+    this.#worker.onmessage = (event: MessageEvent<WorkerMessage>) => {
       const message = event.data;
+      if ("type" in message) {
+        this.onChangeset?.(message);
+        return;
+      }
       const waiting = this.#pending.get(message.id);
       if (!waiting) return;
       this.#settle(message.id);
@@ -265,9 +289,24 @@ class WorkerDriver<TOpen> implements Driver {
   readonly #channel: WorkerChannel<TOpen>;
   readonly #lock = new ConnectionLock();
   readonly #transactionBarrier = new TransactionBarrier();
+  readonly #unbindCapture: (() => void) | null = null;
 
   constructor(spec: WorkerDialectSpec<TOpen>) {
-    this.#channel = new WorkerChannel(spec);
+    const channel = new WorkerChannel(spec);
+    this.#channel = channel;
+
+    const capture = spec.capture;
+    if (capture) {
+      channel.onChangeset = (push) => {
+        capture.publish({ bytes: push.bytes, at: push.at });
+      };
+      this.#unbindCapture = capture.bind({
+        request: async (tables) => {
+          await channel.open();
+          return channel.send<CaptureReply | null>({ type: "capture", tables });
+        },
+      });
+    }
   }
 
   async init(): Promise<void> {
@@ -315,6 +354,7 @@ class WorkerDriver<TOpen> implements Driver {
   }
 
   async destroy(): Promise<void> {
+    this.#unbindCapture?.();
     this.#channel.terminate();
   }
 }

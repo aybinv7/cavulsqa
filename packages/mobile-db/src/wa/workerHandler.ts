@@ -1,3 +1,4 @@
+import type { CaptureReply } from "../capture/types.js";
 import type { WorkerExecResult } from "../workerDialect.js";
 import {
   needsAsyncBuild,
@@ -82,7 +83,7 @@ export function runWaWorker(scope: WaWorkerScope = globalThis as unknown as WaWo
   scope.onmessage = (event: { data: WaRequest }) => {
     const request = event.data;
 
-    const settle = (work: () => Promise<WorkerExecResult | null>) => {
+    const settle = (work: () => Promise<WorkerExecResult | CaptureReply | null>) => {
       void work().then(
         (result) => {
           reply({ id: request.id, ok: true, result });
@@ -95,6 +96,13 @@ export function runWaWorker(scope: WaWorkerScope = globalThis as unknown as WaWo
 
     if (request.type === "open") {
       settle(() => open(request.kind, request.name).then(() => null));
+      return;
+    }
+    if (request.type === "capture") {
+      settle(async () => ({
+        supported: false,
+        reason: "the wa-sqlite engine does not record changesets",
+      }));
       return;
     }
     settle(() => exec(request.sql, request.parameters, request.inserts));
