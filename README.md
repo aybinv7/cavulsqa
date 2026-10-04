@@ -8,11 +8,13 @@ reactivity, and nothing about where data comes from.
 
 ## Packages
 
-| Package                                           | What it is                                                                                                                                                                         |
-| ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`@cavulsqa/mobile-db`](packages/mobile-db)       | SQLite persistence for Kysely in a worker against a real OPFS file: official `sqlite-wasm` or `wa-sqlite`. Migrations, transaction-aware writes, column helpers, sql.js for tests. |
-| [`@cavulsqa/reactive-db`](packages/reactive-db)   | Framework-agnostic reactive query primitives: table-change bus, result cache, visibility gate, mutation proxy, query metrics.                                                      |
-| [`@cavulsqa/reactive-vue`](packages/reactive-vue) | Vue bindings for the above: a `useReactiveQuery` composable, Framework7 page visibility, and a reactive metrics view.                                                              |
+| Package                                           | What it is                                                                                                                                                                                               |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@cavulsqa/mobile-db`](packages/mobile-db)       | SQLite persistence for Kysely in a worker against a real OPFS file: official `sqlite-wasm` or `wa-sqlite`. Migrations, transaction-aware writes, column helpers, sql.js for tests.                       |
+| [`@cavulsqa/reactive-db`](packages/reactive-db)   | Framework-agnostic reactive query primitives: table-change bus, result cache, visibility gate, mutation proxy, query metrics.                                                                            |
+| [`@cavulsqa/reactive-vue`](packages/reactive-vue) | Vue bindings for the above: a `useReactiveQuery` composable, Framework7 page visibility, and a reactive metrics view.                                                                                    |
+| [`@cavulsqa/m3e`](packages/m3e)                   | Framework-free Material 3 Expressive core: 2025-spec dynamic colour, the 35-shape library with morphing, spring motion tokens, wavy progress geometry, the loading indicator, every system token as CSS. |
+| [`@cavulsqa/m3e-vue`](packages/m3e-vue)           | Material 3 Expressive components for Vue 3 on top of `m3e`: buttons and groups, FAB menu, flexible navigation, spring-driven sheets, menus, expressive lists, wavy progress, colour theming.             |
 
 ## Two storage engines, no native plugin
 

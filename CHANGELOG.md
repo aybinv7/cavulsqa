@@ -6,6 +6,59 @@ Starts at `1.0.0`. Earlier versions are in the git history and are not documente
 [docs/RELEASING.md](docs/RELEASING.md). `@cavulsqa/create` tracks template changes on its own
 cadence and has its own section.
 
+## Unreleased
+
+**New packages: `@cavulsqa/m3e` and `@cavulsqa/m3e-vue`** - Material 3 Expressive, extracted from the
+hand-ported copies in three apps into one tested source. `m3e` is framework-free: the 2025 colour
+spec with the variant fallback made explicit (`effectiveSpec`), all 35 `MaterialShapes` built from
+the androidx vertices, morphing, closed-form springs with velocity, `linear()` spring easings, the
+wavy progress and loading-indicator frames, and every `--md-sys-*` token. `m3e-vue` holds 56
+components (date and time pickers as dialog or sheet, Framework7-style wheel pickers, a virtual list
+that recycles its rows), an overlay stack Android back can close, and promise-based snackbar, dialog and action
+sheet services. Both join the libraries' shared version.
+
+**New package: `@cavulsqa/recorder`** - an in-app field recorder for Capacitor WebViews: rrweb,
+console, network, performance and database tracks in a `.capu` archive Capubridge opens. `f7-app`
+starts it after the database opens (`VITE_FIELD_RECORDER`, on in dev) and shares captures through the
+Android share sheet. It must be published before the next creator release.
+
+**New template: `m3e-app`** (`--template m3e-app`) - the same data layer in Material 3 Expressive,
+with Framework7 kept as the navigation engine only, a colour studio, an adaptive bar/rail shell, a
+component gallery and an `m3-expressive` skill. The creator now offers templates from a numbered
+menu; `f7-app` stays the default.
+
+**Fixed before release, found on a device audit:**
+
+- Framework7's core stylesheet sizes every bare `button` to `width: 100%`. The components never set
+  a width, so tabs overflowed the page and dragged it sideways, and dialog actions, the snackbar
+  action and the hero buttons each took a full row. The package now undoes it at zero specificity.
+- Vue compiles `:global(.parent) .child` to `.parent` alone. The FAB menu items never became
+  visible, and the right-to-left rules rotated the page root. Whole selectors are now wrapped, and a
+  test rejects the broken form.
+- Shadows, spacing and sizes were checked against the Compose Material3 sources: no shadow on
+  dialogs or FAB menu items, none on the floating toolbar (1dp with a FAB), the 48dp sheet handle
+  area, fixed tabs sharing the row, the split button's asymmetric padding, 24dp icons in icon
+  buttons, the snackbar under modal windows.
+- Pickers opened with `open` already true showed 00:00 instead of their value.
+- `m3e-app` keeps the splash up until the first page renders, hides it when the bootstrap fails
+  (also fixed in `f7-app`, where a failed database open left the splash up for good), offers a reload
+  when a route fails to load, and pluralises with the language's own rules.
+- Second device round: the wheel picker re-rendered every option on each detent (150 on a year
+  drum) and sat inside the sheet's blocking touch listener - it now marks the active option
+  directly and opts out of the sheet's drag. The sheet date picker has a compact header and pinned
+  actions. Calendars fill all six weeks with muted neighbouring days, and a disabled day that is
+  selected keeps its contrast. In landscape the page was pushed below the screen: `F7App` passes no
+  class through, so the shell's flex row never applied.
+- Wheels are now built like Framework7's picker: flat rows and gradient fades instead of a
+  scroll-driven 3D tilt per row and a mask on the scroller, which together lagged on phone GPUs.
+  Picker sheets drag only from their handle, so no blocking touch listener sits over the wheels,
+  and the per-detent haptic is throttled to one every 40ms.
+- Wheel columns take `loop`: hours, minutes, days and months roll over, re-centring on a middle
+  copy once a spin settles, instead of stopping at an end with empty rows.
+- `M3eResolver` resolves by the `M3` prefix, so a dev server sees components added after it started.
+- `m3e-app` development: linked packages skip pre-bundling, the component stylesheet is imported
+  outside Tailwind's compile, and a rebuild reloads the page once, after its files exist again.
+
 ## Libraries
 
 ### 1.2.1
