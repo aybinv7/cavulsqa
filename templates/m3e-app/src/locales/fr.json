@@ -493,7 +493,22 @@
       "priceFrom": "Prix minimum",
       "priceTo": "Prix maximum",
       "opensAt": "Ouvre à",
-      "closesAt": "Ferme à"
+      "closesAt": "Ferme à",
+      "smart": "Sélection intelligente",
+      "smartNote": "La sélection intelligente de Framework7 : une ligne qui nomme le choix ouvre une feuille d'options - plusieurs avec des coches et Terminé, une seule avec des boutons radio qui se ferme d'elle-même. Les longues listes ont un champ de recherche.",
+      "deliveryDays": "Jours de livraison",
+      "none": "Aucun",
+      "done": "Terminé",
+      "searchWilaya": "Rechercher une wilaya",
+      "days": {
+        "sat": "Samedi",
+        "sun": "Dimanche",
+        "mon": "Lundi",
+        "tue": "Mardi",
+        "wed": "Mercredi",
+        "thu": "Jeudi",
+        "fri": "Vendredi"
+      }
     },
     "inputs": {
       "search": "Barre de recherche",

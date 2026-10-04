@@ -216,7 +216,10 @@ attributes pass through. **`M3ExposedDropdown`** - Compose's exposed dropdown me
 keys, type-ahead), `editable` makes it Framework7's autocomplete (accent- and case-insensitive
 filter, bolded match, `limit`). For a remote source, `:filter="false"` + `v-model:query` +
 `loading`. Use it over radios past ~5 options, and over an action sheet when the field sits in a
-form. **`M3SearchBar`** - `v-model`, `@search`, `#leading`/`#trailing`, for
+form. **`M3SmartSelect`** - Framework7's smart select, a list row that opens a sheet of options:
+`options`, `v-model` (an array with `multiple`), `label`, `placeholder`; search appears past
+`searchFrom` (10). Prefer it to the exposed dropdown for multi-choice and inside settings lists.
+**`M3SearchBar`** - `v-model`, `@search`, `#leading`/`#trailing`, for
 filtering what is already on screen. **`M3SearchView`** - the bar that opens into a full-screen
 view (`v-model`, `v-model:expanded`, `placeholder`; results in the default slot with `{ query }`,
 recent searches when the query is empty); use it for searching a whole data set.

@@ -55,6 +55,35 @@
     </div>
   </GalleryBlock>
 
+  <GalleryBlock
+    :title="t('gallery.selection.smart')"
+    :note="t('gallery.selection.smartNote')"
+    stack
+  >
+    <M3List variant="segmented" class="-mx-1">
+      <M3SmartSelect
+        v-model="deliveryDays"
+        multiple
+        :label="t('gallery.selection.deliveryDays')"
+        :options="dayOptions"
+        :placeholder="t('gallery.selection.none')"
+        :done-label="t('gallery.selection.done')"
+      >
+        <template #leading><i-ms-calendar-month-outline-rounded /></template>
+      </M3SmartSelect>
+      <M3SmartSelect
+        v-model="zone"
+        :label="t('gallery.inputs.wilaya')"
+        :options="WILAYA_OPTIONS"
+        :placeholder="t('gallery.selection.none')"
+        :search-placeholder="t('gallery.selection.searchWilaya')"
+        :no-results-text="t('gallery.inputs.noMatches')"
+      >
+        <template #leading><i-ms-location-on-outline-rounded /></template>
+      </M3SmartSelect>
+    </M3List>
+  </GalleryBlock>
+
   <GalleryBlock :title="t('gallery.selection.checks')" :note="t('gallery.selection.checksNote')">
     <M3Checkbox v-model="terms" :label="t('gallery.selection.terms')" />
     <M3Checkbox :model-value="false" indeterminate :label="t('gallery.selection.partial')" />
@@ -149,6 +178,7 @@
 
 <script setup lang="ts">
 import GalleryBlock from "@/modules/gallery/components/GalleryBlock.vue";
+import { WILAYA_OPTIONS } from "@/modules/gallery/composables/wilayas";
 
 const { t } = useI18n();
 const SIZES = ["small", "medium", "large"] as const;
@@ -163,6 +193,12 @@ const cup = ref<(typeof SIZES)[number]>("medium");
 const volume = ref(40);
 const steps = ref(4);
 const guests = ref(2);
+const DAYS = ["sat", "sun", "mon", "tue", "wed", "thu", "fri"] as const;
+const deliveryDays = ref<string[]>(["sun", "tue", "thu"]);
+const zone = ref<number | null>(16);
+const dayOptions = computed(() =>
+  DAYS.map((day) => ({ value: day, label: t(`gallery.selection.days.${day}`) })),
+);
 const weight = ref(2.5);
 const units = ref(120);
 const brightness = ref(70);

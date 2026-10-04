@@ -493,7 +493,22 @@
       "priceFrom": "Minimum price",
       "priceTo": "Maximum price",
       "opensAt": "Opens at",
-      "closesAt": "Closes at"
+      "closesAt": "Closes at",
+      "smart": "Smart select",
+      "smartNote": "Framework7's smart select: a row naming the choice opens a sheet of options - several with check marks and Done, one with radio marks that closes on its own. Long lists get a search field.",
+      "deliveryDays": "Delivery days",
+      "none": "None",
+      "done": "Done",
+      "searchWilaya": "Search wilayas",
+      "days": {
+        "sat": "Saturday",
+        "sun": "Sunday",
+        "mon": "Monday",
+        "tue": "Tuesday",
+        "wed": "Wednesday",
+        "thu": "Thursday",
+        "fri": "Friday"
+      }
     },
     "inputs": {
       "search": "Search bar",
