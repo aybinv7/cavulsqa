@@ -60,8 +60,8 @@ provide(TAB_PANELS, {
   },
 });
 
-function render(report: boolean) {
-  const index = Math.max(0, indexOf(selected.value));
+function render(report: boolean, at = indexOf(selected.value)) {
+  const index = Math.max(0, at);
   const size = width.value || 1;
   if (track.value) {
     const x = (-index * size + offset) * (rtl ? -1 : 1);
@@ -112,7 +112,7 @@ useSwipeReveal({
         swiped = true;
         selected.value = values.value[target];
       }
-      render(true);
+      render(true, target);
     }
   },
 });

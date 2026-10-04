@@ -181,6 +181,8 @@ function onCommit() {
 .m3-stepper {
   display: inline-flex;
   flex: none;
+  align-self: flex-start;
+  width: max-content;
   align-items: center;
   box-sizing: border-box;
   color: var(--md-sys-color-on-surface);

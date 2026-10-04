@@ -24,6 +24,13 @@ import { COMMANDS, DEFAULT_TOOLBAR, type EditorCommand } from "./commands.js";
  * links; pasted content is cleaned the same way and dropping is refused. Choose `toolbar` from
  * the commands, with `"|"` for a divider.
  *
+ * The toolbar sits under the text by default: on Android the system's Cut / Copy / Paste menu
+ * floats above a selection and would cover a toolbar on top, and the bottom is nearer the thumb
+ * with the keyboard up. `toolbarPlacement="top"` puts it above.
+ *
+ * It is marked `data-keeps-keyboard`, so a tap-outside handler leaves the keyboard - and the
+ * selection - alone while a toolbar button is pressed.
+ *
  * It edits through the browser's own editing commands, which keeps undo, the IME and spell-check
  * native; it is not a document editor, and does no tables, images or collaborative editing.
  */
@@ -39,6 +46,7 @@ const props = withDefaults(
     invalidLinkText?: string;
     disabled?: boolean;
     rows?: number;
+    toolbarPlacement?: "top" | "bottom";
   }>(),
   {
     toolbar: () => DEFAULT_TOOLBAR,
@@ -49,6 +57,7 @@ const props = withDefaults(
     invalidLinkText: "Use an http, https, mailto or tel address",
     disabled: false,
     rows: 4,
+    toolbarPlacement: "bottom",
   },
 );
 
@@ -63,6 +72,8 @@ const linkDraft = shallowRef("");
 const linkInvalid = shallowRef(false);
 const linkAnchor = shallowRef<HTMLElement | null>(null);
 let saved: Range | null = null;
+let frozen = false;
+let thaw: ReturnType<typeof setTimeout> | undefined;
 let emitted = "";
 
 const items = computed(() =>
@@ -130,6 +141,7 @@ function refresh() {
 
 function onSelectionChange() {
   const selection = document.getSelection();
+  if (frozen || document.activeElement !== editor.value) return;
   if (!selection?.rangeCount || !within(selection.anchorNode)) return;
   saved = selection.getRangeAt(0).cloneRange();
   refresh();
@@ -145,7 +157,19 @@ function restore() {
   selection?.addRange(saved);
 }
 
+/**
+ * A touch on the toolbar collapses the text selection on Android before the button's click
+ * arrives, so the selection is held from that touch until the command has run.
+ */
+function freeze() {
+  frozen = true;
+  clearTimeout(thaw);
+  thaw = setTimeout(() => (frozen = false), 600);
+}
+
 function exec(command: EditorCommand) {
+  frozen = false;
+  clearTimeout(thaw);
   if (props.disabled) return;
   if (command === "link") {
     void openLink();
@@ -244,19 +268,26 @@ onMounted(() => {
   document.addEventListener("selectionchange", onSelectionChange);
 });
 
-onBeforeUnmount(() => document.removeEventListener("selectionchange", onSelectionChange));
+onBeforeUnmount(() => {
+  document.removeEventListener("selectionchange", onSelectionChange);
+  clearTimeout(thaw);
+});
 </script>
 
 <template>
   <div
     class="m3-text-editor"
-    :class="{ 'm3-text-editor--focused': focused, 'm3-text-editor--disabled': props.disabled }"
+    :class="[
+      `m3-text-editor--toolbar-${props.toolbarPlacement}`,
+      { 'm3-text-editor--focused': focused, 'm3-text-editor--disabled': props.disabled },
+    ]"
+    data-keeps-keyboard
   >
     <div
       class="m3-text-editor__toolbar"
       role="toolbar"
       :aria-label="props.label"
-      @pointerdown.prevent
+      @pointerdown.prevent="freeze"
     >
       <template v-for="item in items" :key="item.key">
         <span v-if="item.divider" class="m3-text-editor__divider" aria-hidden="true" />
@@ -336,6 +367,12 @@ onBeforeUnmount(() => document.removeEventListener("selectionchange", onSelectio
 
 .m3-text-editor--disabled {
   opacity: 0.38;
+}
+
+.m3-text-editor--toolbar-bottom .m3-text-editor__toolbar {
+  order: 1;
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+  border-bottom: 0;
 }
 
 .m3-text-editor__toolbar {

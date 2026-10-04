@@ -1,5 +1,5 @@
 import { mount } from "@vue/test-utils";
-import { describe, expect, test } from "vite-plus/test";
+import { describe, expect, test, vi } from "vite-plus/test";
 import { defineComponent, h, nextTick, ref } from "vue";
 import { M3Tab, M3TabPanel, M3TabPanels, M3Tabs, createM3e, createTabPager } from "../src/index.js";
 
@@ -50,6 +50,35 @@ describe("swipeable tab panels", () => {
     await nextTick();
     await nextTick();
     expect(text()).toEqual(["orders page", "payments page", "returns page"]);
+    wrapper.unmount();
+  });
+
+  test("a settled swipe reports the new page only, never the old one in between", async () => {
+    const { wrapper, selected, pager } = mountTabs();
+    await nextTick();
+    const panels = wrapper.get(".m3-tab-panels").element as HTMLElement;
+    vi.spyOn(panels, "getBoundingClientRect").mockReturnValue(new DOMRect(0, 0, 400, 600));
+    panels.setPointerCapture = vi.fn();
+    const seen: number[] = [];
+    const stop = pager.follow((position) => seen.push(position));
+    const pointer = (type: string, x: number) =>
+      new PointerEvent(type, {
+        pointerId: 1,
+        isPrimary: true,
+        clientX: x,
+        clientY: 100,
+        bubbles: true,
+        button: 0,
+      });
+    panels.dispatchEvent(pointer("pointerdown", 300));
+    panels.dispatchEvent(pointer("pointermove", 280));
+    panels.dispatchEvent(pointer("pointermove", 40));
+    panels.dispatchEvent(pointer("pointerup", 40));
+    await vi.waitFor(() => expect(selected.value).toBe("invoices"));
+    const afterMove = seen.slice(seen.findIndex((position) => position > 0.5));
+    expect(afterMove.every((position) => position > 0.5)).toBe(true);
+    expect(seen.at(-1)).toBe(1);
+    stop();
     wrapper.unmount();
   });
 

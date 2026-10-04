@@ -249,18 +249,33 @@ function onFocusOut(event: FocusEvent) {
   close();
 }
 
+let frame = 0;
+
+function follow(event?: Event) {
+  if (event?.target instanceof Node && panel.value?.contains(event.target)) return;
+  if (!frame)
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      place();
+    });
+}
+
 const listen = (on: boolean) => {
   if (on) {
     document.addEventListener("pointerdown", onPointerDown, true);
-    window.addEventListener("resize", place);
-    window.visualViewport?.addEventListener("resize", place);
-    window.visualViewport?.addEventListener("scroll", place);
+    document.addEventListener("scroll", follow, { capture: true, passive: true });
+    window.addEventListener("resize", follow);
+    window.visualViewport?.addEventListener("resize", follow);
+    window.visualViewport?.addEventListener("scroll", follow);
     return;
   }
   document.removeEventListener("pointerdown", onPointerDown, true);
-  window.removeEventListener("resize", place);
-  window.visualViewport?.removeEventListener("resize", place);
-  window.visualViewport?.removeEventListener("scroll", place);
+  document.removeEventListener("scroll", follow, { capture: true });
+  window.removeEventListener("resize", follow);
+  window.visualViewport?.removeEventListener("resize", follow);
+  window.visualViewport?.removeEventListener("scroll", follow);
+  if (frame) cancelAnimationFrame(frame);
+  frame = 0;
 };
 
 watch(open, (value) => listen(value));
