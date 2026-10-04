@@ -18,7 +18,13 @@
       :typing-label="typingLabel"
       :unread-label="unreadLabel"
       authors
-      @hold="openActions"
+      :reactions="REACTIONS"
+      :actions="actions"
+      :react-label="t('gallery.chat.react')"
+      :menu-label="t('gallery.chat.messageActions')"
+      :reactions-label="reactionsLabel"
+      @react="react"
+      @action="onAction"
       @press="openPhoto"
       @retry="retry"
     >
@@ -42,8 +48,12 @@
         @send="send"
       >
         <template #leading>
-          <M3IconButton :label="t('gallery.chat.attach')" @click="sendPhoto">
-            <i-ms-add-photo-alternate-outline-rounded />
+          <M3IconButton
+            :label="t('gallery.chat.attach')"
+            :aria-expanded="attachOpen"
+            @click="attachOpen = !attachOpen"
+          >
+            <i-ms-add-rounded class="chat-plus" :class="{ 'chat-plus--open': attachOpen }" />
           </M3IconButton>
         </template>
         <template #trailing>
@@ -52,6 +62,16 @@
           </M3IconButton>
         </template>
       </M3MessageBar>
+
+      <ChatAttachSheet
+        v-model:open="attachOpen"
+        :photos="photos"
+        @image="sendImage"
+        @text="send"
+        @recent="sendPhoto"
+        @failed="onFailed"
+        @unavailable="onUnavailable"
+      />
 
       <M3PhotoBrowser
         v-model:open="browserOpen"
@@ -65,26 +85,49 @@
 </template>
 
 <script setup lang="ts">
-import type { ChatMessage, MessageStatus, PhotoItem } from "@cavulsqa/m3e-vue";
+import type {
+  ChatMessage,
+  MessageAction,
+  MessageReaction,
+  MessageStatus,
+  PhotoItem,
+} from "@cavulsqa/m3e-vue";
 import { markRaw } from "vue";
 import CopyIcon from "~icons/material-symbols/content-copy-outline-rounded";
 import DeleteIcon from "~icons/material-symbols/delete-outline-rounded";
+import ChatAttachSheet from "@/modules/gallery/components/chat/ChatAttachSheet.vue";
 import { useChatDemo } from "@/modules/gallery/composables/useChatDemo";
 import { usePhotoScenes } from "@/modules/gallery/composables/usePhotoScenes";
 
 const { t, locale } = useI18n();
-const actionSheet = useActionSheet();
 const snackbar = useSnackbar();
 const { photos } = usePhotoScenes((kind) => t(`gallery.carousels.scenes.${kind}`));
-const { messages, typing, draft, send, sendPhoto, retry, remove, loadOlder } = useChatDemo(
-  (index) => {
+const REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "🙏", "🔥"] as const;
+
+const { messages, typing, draft, send, sendPhoto, sendImage, react, retry, remove, loadOlder } =
+  useChatDemo((index) => {
     const photo = photos.value[index % Math.max(1, photos.value.length)];
     if (!photo?.width || !photo.height) return null;
     return { src: photo.src, width: photo.width, height: photo.height, alt: photo.alt };
-  },
-);
+  });
 
 const browserOpen = ref(false);
+const attachOpen = ref(false);
+
+const actions = computed<MessageAction[]>(() => [
+  {
+    id: "copy",
+    label: t("gallery.chat.copy"),
+    icon: markRaw(CopyIcon),
+    when: (message) => Boolean(message.text),
+  },
+  {
+    id: "delete",
+    label: t("gallery.chat.delete"),
+    icon: markRaw(DeleteIcon),
+    tone: "destructive",
+  },
+]);
 const photoIndex = ref(0);
 
 const statusLabels = computed<Record<MessageStatus, string>>(() => ({
@@ -117,38 +160,51 @@ function openPhoto(message: ChatMessage) {
   browserOpen.value = true;
 }
 
-async function openActions(message: ChatMessage) {
-  const choice = await actionSheet.open({
-    title: message.text ?? t("gallery.chat.photo"),
-    groups: [
-      {
-        items: [
-          ...(message.text
-            ? [{ id: "copy", label: t("gallery.chat.copy"), icon: markRaw(CopyIcon) }]
-            : []),
-          {
-            id: "delete",
-            label: t("gallery.chat.delete"),
-            icon: markRaw(DeleteIcon),
-            tone: "destructive" as const,
-          },
-        ],
-      },
-    ],
-  });
-  if (choice === "delete") remove(message);
-  if (choice === "copy" && message.text) {
-    try {
-      await navigator.clipboard.writeText(message.text);
-      void snackbar.show({ message: t("gallery.chat.copied") });
-    } catch {
-      void snackbar.show({ message: t("gallery.chat.copyFailed") });
-    }
+function reactionsLabel(reactions: readonly MessageReaction[]) {
+  return reactions
+    .map((reaction) =>
+      t(
+        "gallery.chat.reactionCount",
+        { emoji: reaction.emoji, count: reaction.count ?? 1 },
+        reaction.count ?? 1,
+      ),
+    )
+    .join(", ");
+}
+
+function onFailed(name: string) {
+  void snackbar.show({ message: t("gallery.chat.attachFailed", { name }) });
+}
+
+function onUnavailable(label: string) {
+  void snackbar.show({ message: t("gallery.chat.attachUnavailable", { label }) });
+}
+
+async function onAction(message: ChatMessage, id: string) {
+  if (id === "delete") {
+    remove(message);
+    return;
+  }
+  if (id !== "copy" || !message.text) return;
+  try {
+    await navigator.clipboard.writeText(message.text);
+    void snackbar.show({ message: t("gallery.chat.copied") });
+  } catch {
+    void snackbar.show({ message: t("gallery.chat.copyFailed") });
   }
 }
 </script>
 
 <style scoped>
+.chat-plus {
+  transition: rotate var(--md-sys-motion-spring-fast-spatial-duration)
+    var(--md-sys-motion-spring-fast-spatial);
+}
+
+.chat-plus--open {
+  rotate: 45deg;
+}
+
 :global(.gallery-chat .page-content) {
   --m3-messages-min-height: calc(100% - 64px - env(safe-area-inset-top));
 

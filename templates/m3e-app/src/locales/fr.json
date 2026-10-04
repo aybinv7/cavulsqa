@@ -919,9 +919,8 @@
       "you": "Vous",
       "compose": "Message",
       "send": "Envoyer",
-      "attach": "Envoyer une photo",
+      "attach": "Joindre",
       "thumbsUp": "Ajouter un pouce levé",
-      "photo": "Photo",
       "photos": "Photos partagées",
       "retry": "Appuyez pour réessayer",
       "latest": "Aller au dernier message",
@@ -960,7 +959,24 @@
         "r2": "Bien reçu, merci.",
         "r3": "Bon travail aujourd'hui 💪",
         "r4": "Je passe au dépôt plus tard."
-      }
+      },
+      "attachTitle": "Envoyer",
+      "recent": "Photos récentes",
+      "sendPhoto": "Envoyer {name}",
+      "attachOptions": {
+        "gallery": "Galerie",
+        "camera": "Appareil photo",
+        "file": "Fichier",
+        "location": "Position",
+        "contact": "Contact",
+        "poll": "Sondage",
+        "event": "Événement"
+      },
+      "attachFailed": "Impossible de lire {name}",
+      "attachUnavailable": "{label} ne fait pas partie de cette démo",
+      "react": "Réagir",
+      "messageActions": "Actions sur le message",
+      "reactionCount": "{emoji} de {count} personne | {emoji} de {count} personnes"
     },
     "onboarding": {
       "title": "Visite guidée",

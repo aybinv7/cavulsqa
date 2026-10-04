@@ -255,6 +255,7 @@ declare global {
   const useKeyModifier: typeof import('@vueuse/core').useKeyModifier
   const useKeyboard: typeof import('./src/plugins/capacitor/useKeyboard').useKeyboard
   const useLastChanged: typeof import('@vueuse/core').useLastChanged
+  const useLocalAttachments: typeof import('./src/modules/gallery/composables/useLocalAttachments').useLocalAttachments
   const useLocalStorage: typeof import('@vueuse/core').useLocalStorage
   const useMagicKeys: typeof import('@vueuse/core').useMagicKeys
   const useManualRefHistory: typeof import('@vueuse/core').useManualRefHistory
@@ -669,6 +670,7 @@ declare module 'vue' {
     readonly useKeyModifier: UnwrapRef<typeof import('@vueuse/core')['useKeyModifier']>
     readonly useKeyboard: UnwrapRef<typeof import('./src/plugins/capacitor/useKeyboard')['useKeyboard']>
     readonly useLastChanged: UnwrapRef<typeof import('@vueuse/core')['useLastChanged']>
+    readonly useLocalAttachments: UnwrapRef<typeof import('./src/modules/gallery/composables/useLocalAttachments')['useLocalAttachments']>
     readonly useLocalStorage: UnwrapRef<typeof import('@vueuse/core')['useLocalStorage']>
     readonly useMagicKeys: UnwrapRef<typeof import('@vueuse/core')['useMagicKeys']>
     readonly useManualRefHistory: UnwrapRef<typeof import('@vueuse/core')['useManualRefHistory']>

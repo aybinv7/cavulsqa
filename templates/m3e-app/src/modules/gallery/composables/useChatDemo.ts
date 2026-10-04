@@ -1,4 +1,10 @@
-import type { ChatMessage, MessageImage, MessageStatus } from "@cavulsqa/m3e-vue";
+import {
+  applyReaction,
+  type ChatMessage,
+  type MessageImage,
+  type MessageReaction,
+  type MessageStatus,
+} from "@cavulsqa/m3e-vue";
 
 const AMINA = "Amina Benali";
 const KARIM = "Karim Haddad";
@@ -18,6 +24,21 @@ const OLDER: readonly Line[] = [
   [null, "o5"],
 ];
 
+const TEAM_REACTIONS = ["❤️", "👍", "🔥", "😂"] as const;
+
+function joinReaction(
+  reactions: readonly MessageReaction[] | undefined,
+  emoji: string,
+): MessageReaction[] {
+  const at = Date.now();
+  const list = [...(reactions ?? [])];
+  const index = list.findIndex((reaction) => reaction.emoji === emoji);
+  const existing = list[index];
+  if (existing) list[index] = { ...existing, count: (existing.count ?? 1) + 1, at };
+  else list.push({ emoji, count: 1, at });
+  return list;
+}
+
 const REPLIES: readonly Line[] = [
   [AMINA, "r1"],
   [KARIM, "r2"],
@@ -28,7 +49,8 @@ const REPLIES: readonly Line[] = [
 /**
  * A team conversation that behaves like a live one without a server: history pages in from above,
  * a sent message walks through sending, sent and delivered, a teammate types and answers, and the
- * answer marks what you sent as read. Every timer is cleared with the page.
+ * answer marks what you sent as read - and they react to it, springing onto the bubble. Every timer is
+ * cleared with the page.
  */
 export function useChatDemo(photo: (index: number) => MessageImage | null) {
   const { t } = useI18n();
@@ -66,7 +88,7 @@ export function useChatDemo(photo: (index: number) => MessageImage | null) {
       text(AMINA, "s1", now - 2 * DAY),
       text(null, "s2", now - 2 * DAY + 4 * MINUTE),
       text(AMINA, "s3", now - DAY),
-      text(null, "s4", now - DAY + 2 * MINUTE),
+      { ...text(null, "s4", now - DAY + 2 * MINUTE), reactions: [{ emoji: "🔥", count: 2 }] },
       text(null, "s5", now - DAY + 3 * MINUTE),
       { id: id(), sent: false, author: AMINA, at: now - DAY + 5 * MINUTE, text: "👏" },
       {
@@ -77,16 +99,27 @@ export function useChatDemo(photo: (index: number) => MessageImage | null) {
         text: t("gallery.chat.lines.s6"),
         ...(image ? { image } : {}),
       },
-      text(AMINA, "s7", morning + 3 * MINUTE),
+      {
+        ...text(AMINA, "s7", morning + 3 * MINUTE),
+        reactions: [{ emoji: "👍", mine: true }],
+      },
       text(null, "s8", morning + 6 * MINUTE),
       { ...text(null, "s9", morning + 7 * MINUTE), status: "failed" },
     ];
   }
 
-  function setStatus(target: string | number, status: MessageStatus) {
+  function update(target: string | number, change: (message: ChatMessage) => ChatMessage) {
     messages.value = messages.value.map((message) =>
-      message.id === target ? { ...message, status } : message,
+      message.id === target ? change(message) : message,
     );
+  }
+
+  function react(message: ChatMessage, emoji: string | null) {
+    update(message.id, (entry) => ({ ...entry, reactions: applyReaction(entry.reactions, emoji) }));
+  }
+
+  function setStatus(target: string | number, status: MessageStatus) {
+    update(target, (message) => ({ ...message, status }));
   }
 
   function deliver(target: string | number) {
@@ -100,6 +133,14 @@ export function useChatDemo(photo: (index: number) => MessageImage | null) {
     later(2200, () => (typing.value = { author: author! }));
     later(4600, () => {
       typing.value = false;
+      const lastSent = messages.value.findLast((message) => message.sent);
+      if (lastSent && replies % 2 === 1) {
+        const emoji = TEAM_REACTIONS[(replies >> 1) % TEAM_REACTIONS.length]!;
+        update(lastSent.id, (entry) => ({
+          ...entry,
+          reactions: joinReaction(entry.reactions, emoji),
+        }));
+      }
       messages.value = [
         ...messages.value.map((message) =>
           message.sent && message.status === "delivered"
@@ -128,10 +169,14 @@ export function useChatDemo(photo: (index: number) => MessageImage | null) {
     post({ text: value });
   }
 
-  function sendPhoto() {
+  function sendPhoto(index?: number) {
     attached += 1;
-    const image = photo(attached * 2);
+    const image = photo(index ?? attached * 2);
     if (image) post({ image });
+  }
+
+  function sendImage(image: MessageImage) {
+    post({ image });
   }
 
   function retry(message: ChatMessage) {
@@ -162,5 +207,16 @@ export function useChatDemo(photo: (index: number) => MessageImage | null) {
     timers.clear();
   });
 
-  return { messages, typing, draft, send, sendPhoto, retry, remove, loadOlder };
+  return {
+    messages,
+    typing,
+    draft,
+    send,
+    sendPhoto,
+    sendImage,
+    react,
+    retry,
+    remove,
+    loadOlder,
+  };
 }

@@ -919,9 +919,8 @@
       "you": "You",
       "compose": "Message",
       "send": "Send",
-      "attach": "Send a photo",
+      "attach": "Attach",
       "thumbsUp": "Add a thumbs up",
-      "photo": "Photo",
       "photos": "Shared photos",
       "retry": "Tap to retry",
       "latest": "Jump to the latest message",
@@ -960,7 +959,24 @@
         "r2": "Got it, thanks.",
         "r3": "Good work today 💪",
         "r4": "I'll pass by the depot later."
-      }
+      },
+      "attachTitle": "Send",
+      "recent": "Recent photos",
+      "sendPhoto": "Send {name}",
+      "attachOptions": {
+        "gallery": "Gallery",
+        "camera": "Camera",
+        "file": "File",
+        "location": "Location",
+        "contact": "Contact",
+        "poll": "Poll",
+        "event": "Event"
+      },
+      "attachFailed": "Couldn't read {name}",
+      "attachUnavailable": "{label} isn't part of this demo",
+      "react": "React",
+      "messageActions": "Message actions",
+      "reactionCount": "{emoji} from {count} person | {emoji} from {count} people"
     },
     "onboarding": {
       "title": "Welcome tour",
