@@ -19,6 +19,7 @@ export { default as M3DataTable } from "./components/table/M3DataTable.vue";
 export { default as M3DatePicker } from "./components/datetime/M3DatePicker.vue";
 export { default as M3DatePickerPanel } from "./components/datetime/M3DatePickerPanel.vue";
 export { default as M3DateWheel } from "./components/picker/M3DateWheel.vue";
+export { default as M3DayTimeline } from "./components/datetime/M3DayTimeline.vue";
 export { default as M3Dialog } from "./components/dialog/M3Dialog.vue";
 export { default as M3DialogHost } from "./components/dialog/M3DialogHost.vue";
 export { default as M3Divider } from "./components/divider/M3Divider.vue";
@@ -171,6 +172,16 @@ export {
   type IsoDate,
   type YearMonth,
 } from "./utils/calendar.js";
+export {
+  clockMinutes,
+  formatHour,
+  formatMinutes,
+  layoutEvents,
+  minutesOfDay,
+  type PlacedEvent,
+  type TimelineEvent,
+  type TimelineTone,
+} from "./utils/dayTimeline.js";
 export {
   dayPeriodLabels,
   formatIsoTime,

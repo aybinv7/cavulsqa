@@ -18,6 +18,7 @@ export const COMPONENT_NAMES = [
   "M3DatePicker",
   "M3DatePickerPanel",
   "M3DateWheel",
+  "M3DayTimeline",
   "M3Dialog",
   "M3DialogHost",
   "M3Divider",

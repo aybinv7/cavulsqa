@@ -29,6 +29,10 @@ import {
  * Compose's fixed height without an empty band under a five-week month; tapping one selects it
  * and turns to its month.
  *
+ * `marks` puts a dot under days with something on them, and their count in the day's label - the
+ * same contract as `M3WeekStrip`, so an agenda can switch between the two. `month` reports the
+ * month on show whenever it turns, so marks can be computed for just that month.
+ *
  * @see https://m3.material.io/components/date-pickers/specs
  */
 const props = withDefaults(
@@ -43,10 +47,14 @@ const props = withDefaults(
     nextLabel?: string;
     yearLabel?: string;
     outsideDays?: boolean;
+    marks?: Readonly<Record<IsoDate, number>>;
+    markLabel?: (count: number) => string;
   }>(),
   {
     mode: "single",
     outsideDays: true,
+    marks: () => ({}),
+    markLabel: (count: number) => (count === 1 ? "1 item" : `${count} items`),
     previousLabel: "Previous month",
     nextLabel: "Next month",
     yearLabel: "Choose year",
@@ -56,6 +64,8 @@ const props = withDefaults(
 const value = defineModel<IsoDate | null>("value", { default: null });
 const start = defineModel<IsoDate | null>("start", { default: null });
 const end = defineModel<IsoDate | null>("end", { default: null });
+
+const emit = defineEmits<{ month: [month: YearMonth] }>();
 
 const haptics = useHaptics();
 const grid = useTemplateRef<HTMLElement>("grid");
@@ -113,6 +123,7 @@ function showMonth(next: YearMonth) {
       ? "next"
       : "previous";
   visible.value = next;
+  emit("month", next);
 }
 
 function step(delta: number) {
@@ -212,12 +223,14 @@ function weekdayIndex(date: IsoDate): number {
 }
 
 function cellLabel(date: IsoDate): string {
-  return formatIso(date, locale.value || "en", {
+  const full = formatIso(date, locale.value || "en", {
     weekday: "long",
     day: "numeric",
     month: "long",
     year: "numeric",
   });
+  const count = props.marks[date] ?? 0;
+  return count > 0 ? `${full}, ${props.markLabel(count)}` : full;
 }
 
 watch([value, start], () => {
@@ -353,6 +366,11 @@ watch([value, start], () => {
                   @focus="focused = cell.iso"
                 >
                   {{ cell.day }}
+                  <span
+                    v-if="(props.marks[cell.iso] ?? 0) > 0"
+                    class="m3-calendar__mark"
+                    aria-hidden="true"
+                  />
                 </button>
               </div>
             </div>
@@ -528,6 +546,21 @@ watch([value, start], () => {
 .m3-calendar__day:disabled {
   color: color-mix(in srgb, var(--md-sys-color-on-surface) 38%, transparent);
   cursor: default;
+}
+
+.m3-calendar__mark {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: 50%;
+  background: var(--md-sys-color-tertiary);
+}
+
+.m3-calendar__day--selected .m3-calendar__mark {
+  background: var(--md-sys-color-on-primary);
 }
 
 .m3-calendar__day--outside {
