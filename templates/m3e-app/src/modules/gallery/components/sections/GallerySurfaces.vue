@@ -50,7 +50,7 @@
       :key="question"
       :headline="t(`gallery.surfaces.faq.${question}.q`)"
     >
-      <template #leading><i-ms-help-outline-rounded /></template>
+      <template #leading><i-ms-help-outline-rounded class="rtl:-scale-x-100" /></template>
       <template #details>{{ t(`gallery.surfaces.faq.${question}.a`) }}</template>
     </M3ListItem>
   </M3List>

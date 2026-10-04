@@ -1105,7 +1105,8 @@
     "language": "Language",
     "languages": {
       "en": "English",
-      "fr": "Français"
+      "fr": "Français",
+      "ar-DZ": "العربية"
     },
     "unknown": "Unknown"
   },

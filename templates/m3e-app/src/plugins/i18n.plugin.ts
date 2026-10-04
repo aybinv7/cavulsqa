@@ -1,10 +1,15 @@
 import { f7 } from "framework7-vue";
 import { createI18n } from "vue-i18n";
 import { textDirection } from "@/shared/utils/textDirection";
+import ar from "@/locales/ar.json";
 import en from "@/locales/en.json";
 import fr from "@/locales/fr.json";
 
-export const LOCALES = ["en", "fr"] as const;
+/**
+ * Arabic is `ar-DZ`, not `ar`: Algeria writes Latin digits (bare `ar` formats ٠١٢) and its own month
+ * names (جانفي, فيفري ...), and every date and number in the app is formatted with this tag.
+ */
+export const LOCALES = ["en", "fr", "ar-DZ"] as const;
 export type AppLocale = (typeof LOCALES)[number];
 
 const STORAGE_KEY = "app-locale";
@@ -19,18 +24,29 @@ function initialLocale(): AppLocale {
   } catch {
     return "en";
   }
-  const device = navigator.language.split("-")[0];
-  return isLocale(device) ? device : "en";
+  return fromDevice(navigator.language) ?? "en";
 }
+
+/** The app locale for a device language: the same language, whatever its region. */
+export function fromDevice(tag: string): AppLocale | null {
+  const language = tag.split("-")[0]?.toLowerCase();
+  return LOCALES.find((locale) => locale.split("-")[0] === language) ?? null;
+}
+
+const SIX_FORMS = ["zero", "one", "two", "few", "many", "other"] as const;
 
 /**
  * `"{count} line | {count} lines"` picks its form from the language's own plural rules: French
- * counts 0 as singular, English does not. A three-form message is `zero | one | other`.
+ * counts 0 as singular, English does not. A three-form message is `zero | one | other`, and a
+ * six-form one is CLDR's full set, `zero | one | two | few | many | other`, which Arabic needs:
+ * 3 to 10 take a plural, 11 to 99 a singular accusative, 100 the singular again.
  */
-function pluralRule(locale: AppLocale) {
+export function pluralRule(locale: AppLocale) {
   const rules = new Intl.PluralRules(locale);
   return (count: number, forms: number) => {
-    const one = rules.select(count) === "one";
+    const category = rules.select(count);
+    if (forms === 6) return SIX_FORMS.indexOf(category as (typeof SIX_FORMS)[number]);
+    const one = category === "one";
     if (forms === 3) return count === 0 ? 0 : one ? 1 : 2;
     return one ? 0 : 1;
   };
@@ -53,7 +69,7 @@ export const i18n = createI18n({
   legacy: false,
   locale: initialLocale(),
   fallbackLocale: "en",
-  messages: { en, fr },
+  messages: { en, fr, "ar-DZ": ar },
   pluralRules: Object.fromEntries(LOCALES.map((locale) => [locale, pluralRule(locale)])),
 });
 

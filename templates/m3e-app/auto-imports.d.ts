@@ -65,6 +65,7 @@ declare global {
   const formatMobile: typeof import('./src/modules/gallery/composables/fieldFormats').formatMobile
   const formatMoney: typeof import('./src/modules/demo/composables/useOrderStatus').formatMoney
   const framework7Parameters: typeof import('./src/plugins/framework7.plugin').framework7Parameters
+  const fromDevice: typeof import('./src/plugins/i18n.plugin').fromDevice
   const getCurrentInstance: typeof import('vue').getCurrentInstance
   const getCurrentScope: typeof import('vue').getCurrentScope
   const getCurrentWatcher: typeof import('vue').getCurrentWatcher
@@ -118,6 +119,7 @@ declare global {
   const parseThemeSettings: typeof import('./src/shared/utils/theme/themeSettings').parseThemeSettings
   const passwordScore: typeof import('./src/modules/gallery/composables/fieldFormats').passwordScore
   const pausableWatch: typeof import('@vueuse/core').pausableWatch
+  const pluralRule: typeof import('./src/plugins/i18n.plugin').pluralRule
   const provide: typeof import('vue').provide
   const provideLocal: typeof import('@vueuse/core').provideLocal
   const reactify: typeof import('@vueuse/core').reactify
@@ -495,6 +497,7 @@ declare module 'vue' {
     readonly formatMobile: UnwrapRef<typeof import('./src/modules/gallery/composables/fieldFormats')['formatMobile']>
     readonly formatMoney: UnwrapRef<typeof import('./src/modules/demo/composables/useOrderStatus')['formatMoney']>
     readonly framework7Parameters: UnwrapRef<typeof import('./src/plugins/framework7.plugin')['framework7Parameters']>
+    readonly fromDevice: UnwrapRef<typeof import('./src/plugins/i18n.plugin')['fromDevice']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
     readonly getCurrentWatcher: UnwrapRef<typeof import('vue')['getCurrentWatcher']>
@@ -548,6 +551,7 @@ declare module 'vue' {
     readonly parseThemeSettings: UnwrapRef<typeof import('./src/shared/utils/theme/themeSettings')['parseThemeSettings']>
     readonly passwordScore: UnwrapRef<typeof import('./src/modules/gallery/composables/fieldFormats')['passwordScore']>
     readonly pausableWatch: UnwrapRef<typeof import('@vueuse/core')['pausableWatch']>
+    readonly pluralRule: UnwrapRef<typeof import('./src/plugins/i18n.plugin')['pluralRule']>
     readonly provide: UnwrapRef<typeof import('vue')['provide']>
     readonly provideLocal: UnwrapRef<typeof import('@vueuse/core')['provideLocal']>
     readonly reactify: UnwrapRef<typeof import('@vueuse/core')['reactify']>
