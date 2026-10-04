@@ -14,8 +14,9 @@ import {
   type MessageReaction,
   type MessageRow,
   type MessageStatus,
+  type RsvpAnswer,
 } from "../../utils/messages.js";
-import type { MessageAction } from "./types.js";
+import type { MessageAction, MessageCardLabels } from "./types.js";
 
 /**
  * Framework7's messages: a conversation drawn as Material 3 bubbles - the owner's at the end edge
@@ -36,6 +37,9 @@ import type { MessageAction } from "./types.js";
  * next ones. Without either prop the long-press emits `hold` instead, for a menu of your own.
  * Tapping a message's reactions lists who reacted - names come from each reaction's `by` - and
  * the owner's own row takes their reaction off, as `react` with `null`.
+ *
+ * A message can carry a `location` or `contact` card (a tap emits `press`), a `poll` (`vote`, with
+ * `applyVote` for the next state) or an `invite` to answer (`rsvp`, with `applyRsvp`).
  *
  * It renders the newest `windowSize` rows and more, a chunk at a time, as the reader scrolls up
  * toward them - the place they are reading stays put - so a new message costs the same in a
@@ -66,6 +70,7 @@ const props = withDefaults(
     allReactionsLabel?: string;
     removeReactionLabel?: string;
     othersLabel?: (count: number) => string;
+    cardLabels?: Partial<MessageCardLabels>;
     /** How many rows render from the end; more render as the reader scrolls up. */
     windowSize?: number;
   }>(),
@@ -86,6 +91,7 @@ const props = withDefaults(
     allReactionsLabel: "All",
     removeReactionLabel: "Tap to remove",
     othersLabel: (count: number) => (count === 1 ? "1 other" : `${count} others`),
+    cardLabels: () => ({}),
     menuLabel: "Message actions",
     reactionsLabel: (reactions: readonly MessageReaction[]) =>
       reactions
@@ -102,6 +108,8 @@ const emit = defineEmits<{
   retry: [message: ChatMessage];
   react: [message: ChatMessage, emoji: string | null];
   action: [message: ChatMessage, id: string];
+  vote: [message: ChatMessage, optionId: string];
+  rsvp: [message: ChatMessage, answer: RsvpAnswer];
 }>();
 
 defineSlots<{ before?: () => unknown; empty?: () => unknown }>();
@@ -242,6 +250,18 @@ function toggle(key: string | number) {
   revealed.value = revealed.value === key ? null : key;
 }
 
+const CARD_LABELS: MessageCardLabels = {
+  openLocation: "Open location",
+  openContact: "Open contact",
+  pollSingle: "Choose one",
+  pollMultiple: "Choose any",
+  votes: (count) => (count === 1 ? "1 vote" : `${count} votes`),
+  going: "Going",
+  maybe: "Maybe",
+  no: "Can't go",
+};
+const cardLabels = computed<MessageCardLabels>(() => ({ ...CARD_LABELS, ...props.cardLabels }));
+
 const lifts = computed(() => props.reactions.length > 0 || props.actions.length > 0);
 const reactionsOpen = shallowRef(false);
 const reactionsOf = shallowRef<ChatMessage | null>(null);
@@ -296,7 +316,11 @@ function hold(message: ChatMessage, event: MouseEvent) {
           "
           @toggle="toggle(row.key)"
           @hold="hold(row.message, $event)"
+          :card-labels="cardLabels"
+          :locale="props.locale"
           @press="emit('press', row.message)"
+          @vote="emit('vote', row.message, $event)"
+          @rsvp="emit('rsvp', row.message, $event)"
           @retry="emit('retry', row.message)"
           @reactions="showReactions(row.message)"
         />

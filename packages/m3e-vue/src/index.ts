@@ -214,15 +214,24 @@ export type { ChartSeries } from "./components/chart/palette.js";
 export {
   applyReaction,
   ownReaction,
+  applyRsvp,
+  applyVote,
+  pollVotes,
   reactionPeople,
   reactionTotal,
   type ChatMessage,
+  type MessageContact,
+  type MessageInvite,
+  type MessageLocation,
+  type MessagePoll,
+  type PollOption,
+  type RsvpAnswer,
   type MessageImage,
   type MessageReaction,
   type MessageStatus,
   type ReactionPerson,
 } from "./utils/messages.js";
-export type { MessageAction } from "./components/messages/types.js";
+export type { MessageAction, MessageCardLabels } from "./components/messages/types.js";
 export type { AttachOption } from "./components/sheet/attach.js";
 export { sanitizeCode, type CodeAlphabet } from "./utils/codeField.js";
 export { hasEntry, splitEntries } from "./utils/chipField.js";

@@ -28,6 +28,45 @@ export interface ReactionPerson {
   others?: number;
 }
 
+/** A place shared in a conversation. Rendered without map tiles, so it works offline. */
+export interface MessageLocation {
+  lat: number;
+  lng: number;
+  label?: string;
+}
+
+/** A person or business shared as a card. */
+export interface MessageContact {
+  name: string;
+  detail?: string;
+}
+
+export interface PollOption {
+  id: string;
+  label: string;
+  votes: number;
+  /** The owner's own vote. */
+  mine?: boolean;
+}
+
+export interface MessagePoll {
+  question: string;
+  options: readonly PollOption[];
+  /** More than one answer each; otherwise a new vote moves the old one. */
+  multiple?: boolean;
+}
+
+export type RsvpAnswer = "going" | "maybe" | "no";
+
+/** An event to answer. Named `invite` because `MessageEvent` is the DOM's. */
+export interface MessageInvite {
+  title: string;
+  start: Date | string | number;
+  place?: string;
+  answers: Readonly<Record<RsvpAnswer, number>>;
+  mine?: RsvpAnswer;
+}
+
 export interface ChatMessage {
   id: string | number;
   /** True for the device owner's own messages, drawn at the end edge. */
@@ -39,6 +78,10 @@ export interface ChatMessage {
   status?: MessageStatus;
   image?: MessageImage;
   reactions?: readonly MessageReaction[];
+  location?: MessageLocation;
+  contact?: MessageContact;
+  poll?: MessagePoll;
+  invite?: MessageInvite;
 }
 
 export interface DayRow {
@@ -267,4 +310,40 @@ export function reactionPeople(
     if (others > 0) rows.push({ emoji: reaction.emoji, mine: false, others });
   }
   return rows;
+}
+
+/**
+ * The poll after the owner taps `optionId`: tapping their own vote takes it back; in a
+ * single-answer poll a new vote moves the old one.
+ */
+export function applyVote(poll: MessagePoll, optionId: string): MessagePoll {
+  const tapped = poll.options.find((option) => option.id === optionId);
+  if (!tapped) return poll;
+  const retract = Boolean(tapped.mine);
+  return {
+    ...poll,
+    options: poll.options.map((option) => {
+      if (option.id === optionId) {
+        return { ...option, votes: Math.max(0, option.votes + (retract ? -1 : 1)), mine: !retract };
+      }
+      if (!poll.multiple && option.mine && !retract) {
+        return { ...option, votes: Math.max(0, option.votes - 1), mine: false };
+      }
+      return option;
+    }),
+  };
+}
+
+/** The votes cast across every option. */
+export function pollVotes(poll: MessagePoll): number {
+  return poll.options.reduce((sum, option) => sum + option.votes, 0);
+}
+
+/** The invite after the owner answers; answering the same again takes the answer back. */
+export function applyRsvp(invite: MessageInvite, answer: RsvpAnswer): MessageInvite {
+  const answers = { ...invite.answers };
+  if (invite.mine) answers[invite.mine] = Math.max(0, answers[invite.mine] - 1);
+  if (invite.mine === answer) return { ...invite, answers, mine: undefined };
+  answers[answer] += 1;
+  return { ...invite, answers, mine: answer };
 }

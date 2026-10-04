@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import ChatAvatar from "./ChatAvatar.vue";
+import ChatContactCard from "./ChatContactCard.vue";
+import ChatInviteCard from "./ChatInviteCard.vue";
+import ChatLocationCard from "./ChatLocationCard.vue";
+import ChatPollCard from "./ChatPollCard.vue";
 import ChatReactions from "./ChatReactions.vue";
+import type { MessageCardLabels } from "./types.js";
 import M3Glyph from "../icon/M3Glyph.vue";
 import { computed } from "vue";
-import { isJumboEmoji, toDate, type MessageRow } from "../../utils/messages.js";
+import { isJumboEmoji, toDate, type MessageRow, type RsvpAnswer } from "../../utils/messages.js";
 import type { GlyphName } from "../icon/glyphs.js";
 
 const props = defineProps<{
@@ -15,6 +20,8 @@ const props = defineProps<{
   statusLabel: string;
   retryLabel: string;
   reactionsLabel: string;
+  cardLabels: MessageCardLabels;
+  locale?: string;
 }>();
 
 const emit = defineEmits<{
@@ -23,6 +30,8 @@ const emit = defineEmits<{
   press: [];
   retry: [];
   reactions: [];
+  vote: [optionId: string];
+  rsvp: [answer: RsvpAnswer];
 }>();
 
 const STATUS_GLYPH: Record<string, GlyphName> = {
@@ -35,7 +44,14 @@ const STATUS_GLYPH: Record<string, GlyphName> = {
 
 const message = computed(() => props.row.message);
 const failed = computed(() => message.value.sent && message.value.status === "failed");
-const jumbo = computed(() => !message.value.image && isJumboEmoji(message.value.text));
+const card = computed(
+  () =>
+    Boolean(message.value.location || message.value.contact || message.value.poll) ||
+    Boolean(message.value.invite),
+);
+const jumbo = computed(
+  () => !message.value.image && !card.value && isJumboEmoji(message.value.text),
+);
 const status = computed(() => {
   const value = message.value.status;
   if (!message.value.sent || !value) return null;
@@ -86,6 +102,7 @@ const imageStyle = computed(() => {
             'm3-chat-bubble--jumbo': jumbo,
             'm3-chat-bubble--failed': failed,
             'm3-chat-bubble--image': message.image,
+            'm3-chat-bubble--card': card,
           }"
           @click="emit('toggle')"
           @contextmenu.prevent="emit('hold', $event)"
@@ -108,7 +125,39 @@ const imageStyle = computed(() => {
               draggable="false"
             />
           </button>
-          <p v-if="message.text" class="m3-chat-bubble__text">{{ message.text }}</p>
+          <ChatLocationCard
+            v-if="message.location"
+            :location="message.location"
+            :label="props.cardLabels.openLocation"
+            @open="emit('press')"
+          />
+          <ChatContactCard
+            v-else-if="message.contact"
+            :contact="message.contact"
+            :label="props.cardLabels.openContact"
+            @open="emit('press')"
+          />
+          <ChatPollCard
+            v-else-if="message.poll"
+            :poll="message.poll"
+            :hint="
+              message.poll.multiple ? props.cardLabels.pollMultiple : props.cardLabels.pollSingle
+            "
+            :votes-label="props.cardLabels.votes"
+            @vote="emit('vote', $event)"
+          />
+          <ChatInviteCard
+            v-else-if="message.invite"
+            :invite="message.invite"
+            :locale="props.locale"
+            :answer-labels="{
+              going: props.cardLabels.going,
+              maybe: props.cardLabels.maybe,
+              no: props.cardLabels.no,
+            }"
+            @rsvp="emit('rsvp', $event)"
+          />
+          <p v-if="message.text" class="m3-chat-bubble__text" dir="auto">{{ message.text }}</p>
         </div>
         <ChatReactions
           v-if="message.reactions?.length"
@@ -275,6 +324,10 @@ const imageStyle = computed(() => {
   padding: 0 4px;
   font-size: 44px;
   line-height: 1.2;
+}
+
+.m3-chat-bubble--card {
+  width: min(288px, 76vw);
 }
 
 .m3-chat-bubble--image {
