@@ -42,3 +42,14 @@ test("elevation and state tokens are present", () => {
   expect(css).toMatch(/--md-sys-elevation-level3:0 1px 3px 0 color-mix/);
   expect(css).toContain("--md-sys-state-pressed-opacity:0.1;");
 });
+
+test("joined scripts - Arabic and its neighbours - get zero tracking, the rest keep the scale's", () => {
+  const css = systemStylesheet();
+  const block = css.slice(css.indexOf(":root:lang(ar)"));
+  expect(block).toContain("[lang]:lang(fa)");
+  expect(block).toMatch(/--md-sys-typescale-label-large-tracking:\s*0[;}]/);
+  expect(block).toMatch(/--md-sys-typescale-emphasized-body-medium-tracking:\s*0[;}]/);
+  expect(css.slice(0, css.indexOf(":root:lang(ar)"))).toMatch(
+    /--md-sys-typescale-label-large-tracking:\s*0\.0063rem/,
+  );
+});

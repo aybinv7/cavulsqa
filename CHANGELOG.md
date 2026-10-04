@@ -9,6 +9,19 @@ cadence and has its own section.
 
 ## Libraries
 
+### Unreleased
+
+`m3e` and `m3e-vue` changed after 1.3.0 reached npm; bump the libraries (1.4.0 - `m3e` gains an
+export) before the next release.
+
+- **Arabic and other joined scripts get zero tracking.** Letter-spacing pulls apart letters that
+  must join, and the M3 type scale tracks labels and body text. `systemStylesheet` now zeroes every
+  typescale tracking token under `:lang()` for `JOINED_SCRIPT_LANGUAGES` (Arabic, Persian, Urdu,
+  Pashto, Sindhi, Uyghur, Kurdish Sorani, Syriac) - on the root and on any element with its own
+  `lang`, so a switch of language switches it.
+- `M3Chip` ellipsises a label longer than its container instead of overflowing it; under
+  right-to-left the overflow ran past the card's start edge.
+
 ### 1.3.0
 
 **New packages: `@cavulsqa/m3e` and `@cavulsqa/m3e-vue`** - Material 3 Expressive, extracted from the
@@ -281,6 +294,13 @@ menu; `f7-app` stays the default.
 - The document's `lang` and `dir` follow the app's locale from the first paint (they were only set
   on a language change), and Framework7's own right-to-left flag follows them, so a right-to-left
   locale needs nothing but its translation.
+- **Arabic (`ar-DZ`).** Every string, in Modern Standard Arabic for an Algerian audience: Latin
+  digits and the Algerian month names (جانفي، فيفري ...) come from the `ar-DZ` tag, plurals use
+  Arabic's six forms (`zero | one | two | few | many | other`, which the plural rule now
+  supports), and names, references and codes inserted into a sentence are wrapped in Unicode
+  isolates so a Latin value cannot scramble the line. A device set to any Arabic opens in it. A
+  test keeps every locale's keys and placeholders in step with English. Language names are shown
+  in their own language. The translation is AI-assisted and needs a native speaker's review.
 - Generated apps depend on the 1.3.0 libraries.
 
 ### 2.9.3

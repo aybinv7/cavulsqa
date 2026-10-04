@@ -119,6 +119,7 @@ export { TYPESCALE, type TypeStyle, type TypeToken } from "./tokens/typescale.js
 export { ELEVATION, elevationShadow, type ElevationLevel } from "./tokens/elevation.js";
 export { STATE_LAYER, type StateToken } from "./tokens/state.js";
 export {
+  JOINED_SCRIPT_LANGUAGES,
   colorStylesheet,
   systemStylesheet,
   type ColorStylesheetOptions,

@@ -73,10 +73,17 @@ export interface SystemStylesheetOptions {
 const DEFAULT_TYPEFACE = `"Google Sans Flex", "Google Sans", Roboto, "Noto Sans", system-ui, sans-serif`;
 
 /**
+ * Languages written in a joined (cursive) script. Letter-spacing pulls their letters apart and
+ * breaks the joins, so the type scale's tracking is zero for them, whatever the style.
+ */
+export const JOINED_SCRIPT_LANGUAGES = ["ar", "fa", "ur", "ps", "sd", "ug", "ckb", "syr"] as const;
+
+/**
  * Every static M3 Expressive token as CSS custom properties: shape, type scale, motion, elevation
  * and state layers. Spatial springs become `linear()` curves that keep their overshoot; under
  * `prefers-reduced-motion` they collapse to 1 ms (never 0, which suppresses `transitionend`) while
  * effects - colour and opacity - keep their timing, since they carry meaning without travel.
+ * Text in a joined script (`JOINED_SCRIPT_LANGUAGES`, by `lang`) gets zero tracking.
  */
 export function systemStylesheet(options: SystemStylesheetOptions = {}): string {
   const selector = options.selector ?? ":root";
@@ -98,6 +105,16 @@ export function systemStylesheet(options: SystemStylesheetOptions = {}): string 
     tokens[`--md-sys-typescale-emphasized-${kebab(name)}-weight`] = String(style.emphasizedWeight);
     tokens[`--md-sys-typescale-emphasized-${kebab(name)}-tracking`] = rem(style.emphasizedTracking);
   }
+
+  const untracked: Record<string, string> = {};
+  for (const name of Object.keys(TYPESCALE)) {
+    untracked[`--md-sys-typescale-${kebab(name)}-tracking`] = "0";
+    untracked[`--md-sys-typescale-emphasized-${kebab(name)}-tracking`] = "0";
+  }
+  const joined = JOINED_SCRIPT_LANGUAGES.flatMap((language) => [
+    `${selector}:lang(${language})`,
+    `[lang]:lang(${language})`,
+  ]).join(",");
 
   const scheme = MOTION_SCHEMES[options.motion ?? "expressive"];
   const reduced: Record<string, string> = {};
@@ -126,5 +143,5 @@ export function systemStylesheet(options: SystemStylesheetOptions = {}): string 
   for (const [name, value] of Object.entries(STATE_LAYER))
     tokens[`--md-sys-state-${kebab(name)}-opacity`] = String(value);
 
-  return `${block(selector, tokens)}@media (prefers-reduced-motion: reduce){${block(selector, reduced)}}`;
+  return `${block(selector, tokens)}${block(joined, untracked)}@media (prefers-reduced-motion: reduce){${block(selector, reduced)}}`;
 }

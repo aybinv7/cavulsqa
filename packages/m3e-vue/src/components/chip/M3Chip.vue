@@ -84,6 +84,7 @@ function onClick(event: MouseEvent) {
 .m3-chip {
   display: inline-flex;
   flex: none;
+  max-width: 100%;
   align-items: center;
   height: 32px;
   border-radius: 8px;
@@ -127,6 +128,16 @@ function onClick(event: MouseEvent) {
   letter-spacing: var(--md-sys-typescale-label-large-tracking);
   white-space: nowrap;
   cursor: pointer;
+}
+
+.m3-chip__action {
+  min-width: 0;
+}
+
+.m3-chip__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .m3-chip:has(.m3-chip__icon) .m3-chip__action,
