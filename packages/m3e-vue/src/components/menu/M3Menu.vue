@@ -37,7 +37,11 @@ const SUBMENU_GAP = 2;
 const parent = useParentMenu();
 const children = new Set<SubmenuHandle>();
 
-useOverlay({ open, dismissible: true, onClose: () => (open.value = false) });
+const { layer: overlayLayer } = useOverlay({
+  open,
+  dismissible: true,
+  onClose: () => (open.value = false),
+});
 
 function contains(node: Node): boolean {
   if (panel.value?.contains(node)) return true;
@@ -173,11 +177,14 @@ onScopeDispose(() => {
         :class="[`m3-menu--${props.variant}`, `m3-menu--from-${position.origin}`]"
         role="menu"
         :aria-label="props.label"
-        :style="{
-          top: `${position.top}px`,
-          left: `${position.left}px`,
-          maxHeight: `${position.maxHeight}px`,
-        }"
+        :style="[
+          overlayLayer,
+          {
+            top: `${position.top}px`,
+            left: `${position.left}px`,
+            maxHeight: `${position.maxHeight}px`,
+          },
+        ]"
         @keydown="onKeydown"
       >
         <slot />

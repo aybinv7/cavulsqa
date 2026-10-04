@@ -87,7 +87,7 @@ const panelProps = computed(() => ({
   locale: locale.value,
 }));
 
-useOverlay({
+const { layer: overlayLayer } = useOverlay({
   open: computed(() => open.value && dialog.value),
   dismissible: true,
   onClose: () => (open.value = false),
@@ -132,7 +132,7 @@ function confirm() {
   </M3BottomSheet>
   <Teleport v-else :to="props.teleport">
     <Transition name="m3-picker" @after-enter="settled = true" @before-leave="settled = false">
-      <div v-if="open" class="m3-picker-layer">
+      <div v-if="open" class="m3-picker-layer" :style="overlayLayer">
         <div class="m3-picker-layer__scrim" aria-hidden="true" @click="open = false" />
         <div
           ref="panel"

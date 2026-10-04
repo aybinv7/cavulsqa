@@ -98,7 +98,7 @@ watch(
   { immediate: true },
 );
 
-useOverlay({ open, dismissible: true, onClose: () => close() });
+const { layer: overlayLayer } = useOverlay({ open, dismissible: true, onClose: () => close() });
 
 function anchor(): HTMLElement | null {
   return field.value?.querySelector<HTMLElement>(".m3-text-field__container") ?? null;
@@ -318,12 +318,15 @@ onScopeDispose(() => {
         ref="panel"
         class="m3-exposed-dropdown__panel"
         :class="`m3-exposed-dropdown__panel--from-${position.origin}`"
-        :style="{
-          top: `${position.top}px`,
-          left: `${position.left}px`,
-          width: `${position.width}px`,
-          maxHeight: `${position.maxHeight}px`,
-        }"
+        :style="[
+          overlayLayer,
+          {
+            top: `${position.top}px`,
+            left: `${position.left}px`,
+            width: `${position.width}px`,
+            maxHeight: `${position.maxHeight}px`,
+          },
+        ]"
       >
         <M3LinearProgress
           v-if="props.loading"

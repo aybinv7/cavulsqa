@@ -27,7 +27,11 @@ const panel = useTemplateRef<HTMLElement>("panel");
 const settled = shallowRef(false);
 const headlineId = useId();
 
-useOverlay({ open, dismissible: () => props.dismissible, onClose: () => (open.value = false) });
+const { layer: overlayLayer } = useOverlay({
+  open,
+  dismissible: () => props.dismissible,
+  onClose: () => (open.value = false),
+});
 useFocusTrap(panel, settled);
 
 function onScrim() {
@@ -43,7 +47,7 @@ function onScrim() {
       @before-leave="settled = false"
       @after-leave="emit('closed')"
     >
-      <div v-if="open" class="m3-dialog-layer">
+      <div v-if="open" class="m3-dialog-layer" :style="overlayLayer">
         <div class="m3-dialog-layer__scrim" aria-hidden="true" @click="onScrim" />
         <div
           ref="panel"

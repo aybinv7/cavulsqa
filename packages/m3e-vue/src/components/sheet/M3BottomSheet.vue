@@ -51,7 +51,11 @@ let animation: SpringAnimation | null = null;
 let releaseVelocity = 0;
 let pastThreshold = false;
 
-useOverlay({ open, dismissible: () => props.dismissible, onClose: () => (open.value = false) });
+const { layer: overlayLayer } = useOverlay({
+  open,
+  dismissible: () => props.dismissible,
+  onClose: () => (open.value = false),
+});
 useFocusTrap(sheet, settledOpen);
 
 function measure() {
@@ -145,7 +149,7 @@ onBeforeUnmount(() => animation?.stop());
 
 <template>
   <Teleport :to="props.teleport">
-    <div v-if="rendered" class="m3-sheet-layer">
+    <div v-if="rendered" class="m3-sheet-layer" :style="overlayLayer">
       <div ref="scrim" class="m3-sheet-layer__scrim" aria-hidden="true" @click="onScrim" />
       <section
         ref="sheet"

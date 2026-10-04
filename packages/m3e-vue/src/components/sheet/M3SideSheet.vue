@@ -31,7 +31,11 @@ const panel = useTemplateRef<HTMLElement>("panel");
 const settled = shallowRef(false);
 const titleId = useId();
 
-useOverlay({ open, dismissible: () => props.dismissible, onClose: () => (open.value = false) });
+const { layer: overlayLayer } = useOverlay({
+  open,
+  dismissible: () => props.dismissible,
+  onClose: () => (open.value = false),
+});
 useFocusTrap(panel, settled);
 </script>
 
@@ -43,7 +47,12 @@ useFocusTrap(panel, settled);
       @before-leave="settled = false"
       @after-leave="emit('closed')"
     >
-      <div v-if="open" class="m3-side-sheet-layer" :class="`m3-side-sheet-layer--${props.side}`">
+      <div
+        v-if="open"
+        class="m3-side-sheet-layer"
+        :class="`m3-side-sheet-layer--${props.side}`"
+        :style="overlayLayer"
+      >
         <div
           class="m3-side-sheet-layer__scrim"
           aria-hidden="true"

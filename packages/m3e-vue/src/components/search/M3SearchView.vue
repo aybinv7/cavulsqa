@@ -53,7 +53,11 @@ let headerRestTop = 0;
 
 const hasQuery = computed(() => query.value.length > 0);
 
-useOverlay({ open: expanded, dismissible: true, onClose: () => (expanded.value = false) });
+const { layer: overlayLayer } = useOverlay({
+  open: expanded,
+  dismissible: true,
+  onClose: () => (expanded.value = false),
+});
 
 function measure() {
   const rect = bar.value?.getBoundingClientRect();
@@ -174,6 +178,7 @@ onBeforeUnmount(() => animation?.stop());
       :aria-labelledby="titleId"
       :aria-hidden="!visible || undefined"
       :inert="!visible"
+      :style="overlayLayer"
     >
       <div ref="surface" class="m3-search-view__surface" />
       <form

@@ -53,7 +53,11 @@ const GAP = 16;
 const viewport = (): Size => ({ width: width.value || 1, height: height.value || 1 });
 const photo = computed(() => props.photos[current.value]);
 
-useOverlay({ open, dismissible: true, onClose: () => (open.value = false) });
+const { layer: overlayLayer } = useOverlay({
+  open,
+  dismissible: true,
+  onClose: () => (open.value = false),
+});
 useFocusTrap(layer, open);
 
 function naturalOf(position: number): Size {
@@ -140,6 +144,7 @@ watch([width, height], () => {
         aria-modal="true"
         :aria-label="props.label"
         tabindex="-1"
+        :style="overlayLayer"
       >
         <div ref="backdrop" class="m3-photo-browser__backdrop" aria-hidden="true" />
         <div
