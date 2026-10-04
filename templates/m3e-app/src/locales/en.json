@@ -12,7 +12,8 @@
     "collapse": "Collapse navigation",
     "dismiss": "Dismiss",
     "routeFailed": "This page could not open",
-    "reload": "Reload"
+    "reload": "Reload",
+    "notification": "Notification"
   },
   "home": {
     "title": "Overview",
@@ -415,7 +416,18 @@
       "richTitle": "Seed colour",
       "richText": "Every colour in the app is generated from this one, in light and dark.",
       "whatsThis": "What's this?",
-      "gotIt": "Got it"
+      "gotIt": "Got it",
+      "notification": "In-app notification",
+      "notificationNote": "Framework7's notification: drops in from the top, opens on tap, flies away when swiped sideways or up, and pauses while touched.",
+      "notifyOrder": "New order",
+      "notifySync": "Sync done",
+      "ordersSource": "Orders",
+      "syncSource": "Sync",
+      "now": "now",
+      "orderTitle": "New order from Oran Market",
+      "orderText": "SO-1024 · 12 lines · 48,300 DA, to deliver tomorrow morning.",
+      "orderOpened": "Opened SO-1024",
+      "syncTitle": "Everything is up to date"
     },
     "selection": {
       "stepper": "Stepper",

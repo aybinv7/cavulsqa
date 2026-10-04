@@ -95,6 +95,18 @@
     </M3Menu>
   </GalleryBlock>
 
+  <GalleryBlock
+    :title="t('gallery.overlays.notification')"
+    :note="t('gallery.overlays.notificationNote')"
+  >
+    <M3Button variant="tonal" @click="notifyOrder">{{
+      t("gallery.overlays.notifyOrder")
+    }}</M3Button>
+    <M3Button variant="outlined" @click="notifySync">{{
+      t("gallery.overlays.notifySync")
+    }}</M3Button>
+  </GalleryBlock>
+
   <GalleryBlock :title="t('gallery.overlays.snackbar')" :note="t('gallery.overlays.snackbarNote')">
     <M3Button variant="tonal" @click="archive">{{ t("gallery.overlays.archive") }}</M3Button>
   </GalleryBlock>
@@ -184,7 +196,9 @@
 <script setup lang="ts">
 import type { SheetDetent } from "@cavulsqa/m3e-vue";
 import { markRaw } from "vue";
+import CloudDoneIcon from "~icons/material-symbols/cloud-done-outline-rounded";
 import ContentCopyIcon from "~icons/material-symbols/content-copy-outline-rounded";
+import ShoppingIcon from "~icons/material-symbols/shopping-bag-outline-rounded";
 import DeleteIcon from "~icons/material-symbols/delete-outline-rounded";
 import EditIcon from "~icons/material-symbols/edit-outline-rounded";
 import ShareIcon from "~icons/material-symbols/share-outline-rounded";
@@ -195,6 +209,7 @@ const { t } = useI18n();
 const snackbar = useSnackbar();
 const dialog = useDialog();
 const actionSheet = useActionSheet();
+const notification = useNotification();
 
 const ORDERS = ["recent", "name", "amount"] as const;
 const DESTINATIONS = ["inbox", "starred", "saved"] as const;
@@ -211,6 +226,27 @@ const menuAnchor = useTemplateRef<HTMLElement>("menuAnchor");
 
 function toggleStandard() {
   standardDetent.value = standardDetent.value === "hidden" ? "peek" : "hidden";
+}
+
+async function notifyOrder() {
+  const result = await notification.show({
+    source: t("gallery.overlays.ordersSource"),
+    meta: t("gallery.overlays.now"),
+    title: t("gallery.overlays.orderTitle"),
+    text: t("gallery.overlays.orderText"),
+    icon: markRaw(ShoppingIcon),
+  });
+  if (result === "opened") void snackbar.show(t("gallery.overlays.orderOpened"));
+}
+
+function notifySync() {
+  void notification.show({
+    source: t("gallery.overlays.syncSource"),
+    meta: t("gallery.overlays.now"),
+    title: t("gallery.overlays.syncTitle"),
+    icon: markRaw(CloudDoneIcon),
+    duration: 3000,
+  });
 }
 
 async function openActions() {

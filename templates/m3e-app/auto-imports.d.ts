@@ -259,6 +259,7 @@ declare global {
   const useNavigationVisibility: typeof import('./src/shared/composables/navigation/useNavigationVisibility').useNavigationVisibility
   const useNavigatorLanguage: typeof import('@vueuse/core').useNavigatorLanguage
   const useNetwork: typeof import('@vueuse/core').useNetwork
+  const useNotification: typeof import('@cavulsqa/m3e-vue').useNotification
   const useNow: typeof import('@vueuse/core').useNow
   const useObjectUrl: typeof import('@vueuse/core').useObjectUrl
   const useOffsetPagination: typeof import('@vueuse/core').useOffsetPagination
@@ -650,6 +651,7 @@ declare module 'vue' {
     readonly useNavigationVisibility: UnwrapRef<typeof import('./src/shared/composables/navigation/useNavigationVisibility')['useNavigationVisibility']>
     readonly useNavigatorLanguage: UnwrapRef<typeof import('@vueuse/core')['useNavigatorLanguage']>
     readonly useNetwork: UnwrapRef<typeof import('@vueuse/core')['useNetwork']>
+    readonly useNotification: UnwrapRef<typeof import('@cavulsqa/m3e-vue')['useNotification']>
     readonly useNow: UnwrapRef<typeof import('@vueuse/core')['useNow']>
     readonly useObjectUrl: UnwrapRef<typeof import('@vueuse/core')['useObjectUrl']>
     readonly useOffsetPagination: UnwrapRef<typeof import('@vueuse/core')['useOffsetPagination']>

@@ -142,6 +142,7 @@ declare module 'vue' {
     M3NavigationBar: typeof import('@cavulsqa/m3e-vue')['M3NavigationBar']
     M3NavigationItem: typeof import('@cavulsqa/m3e-vue')['M3NavigationItem']
     M3NavigationRail: typeof import('@cavulsqa/m3e-vue')['M3NavigationRail']
+    M3NotificationHost: typeof import('@cavulsqa/m3e-vue')['M3NotificationHost']
     M3PullToRefresh: typeof import('@cavulsqa/m3e-vue')['M3PullToRefresh']
     M3Radio: typeof import('@cavulsqa/m3e-vue')['M3Radio']
     M3RangeSlider: typeof import('@cavulsqa/m3e-vue')['M3RangeSlider']

@@ -76,6 +76,7 @@ export default defineConfig(({ mode }) => ({
         {
           "@cavulsqa/m3e-vue": [
             "useSnackbar",
+            "useNotification",
             "useDialog",
             "useActionSheet",
             "useHaptics",

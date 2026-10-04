@@ -105,6 +105,11 @@ level deep on phones. → menus/specs
 `dismissed` | `timeout`. One action max, never for errors that need a decision. Undo is the classic.
 → snackbar/specs
 
+**In-app notification** - `await useNotification().show({ title, text, source, meta, icon, duration })`
+resolves `opened` | `dismissed` | `timeout` | `replaced`. Framework7's notification: a banner from the
+top for something that happened elsewhere (a new order, a finished sync) that the person may want
+to open; a snackbar is for feedback on what they just did. One at a time - a new one replaces it.
+
 **`M3SideSheet`** - `v-model:open`, `side` start | end, `title`; filters and secondary detail beside
 the content. **`M3ModalNavigationRail`** - the expressive replacement for the navigation drawer;
 closes itself once a destination is chosen. → side-sheets/specs, navigation-rail/specs

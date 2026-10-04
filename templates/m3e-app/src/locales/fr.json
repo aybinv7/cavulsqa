@@ -12,7 +12,8 @@
     "collapse": "Replier la navigation",
     "dismiss": "Fermer",
     "routeFailed": "Cette page n'a pas pu s'ouvrir",
-    "reload": "Recharger"
+    "reload": "Recharger",
+    "notification": "Notification"
   },
   "home": {
     "title": "Aperçu",
@@ -415,7 +416,18 @@
       "richTitle": "Couleur de base",
       "richText": "Toutes les couleurs de l'app sont générées à partir de celle-ci, en clair et en sombre.",
       "whatsThis": "Qu'est-ce que c'est ?",
-      "gotIt": "Compris"
+      "gotIt": "Compris",
+      "notification": "Notification dans l'app",
+      "notificationNote": "La notification de Framework7 : elle tombe du haut, s'ouvre au toucher, s'envole d'un glissement de côté ou vers le haut, et s'arrête tant qu'on la touche.",
+      "notifyOrder": "Nouvelle commande",
+      "notifySync": "Synchro terminée",
+      "ordersSource": "Commandes",
+      "syncSource": "Synchro",
+      "now": "maintenant",
+      "orderTitle": "Nouvelle commande d'Oran Market",
+      "orderText": "SO-1024 · 12 lignes · 48 300 DA, à livrer demain matin.",
+      "orderOpened": "SO-1024 ouverte",
+      "syncTitle": "Tout est à jour"
     },
     "selection": {
       "stepper": "Compteur",

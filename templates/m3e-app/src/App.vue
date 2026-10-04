@@ -55,6 +55,7 @@
     </M3NavigationBar>
 
     <M3SnackbarHost :close-label="t('shell.dismiss')" />
+    <M3NotificationHost :close-label="t('shell.dismiss')" :label="t('shell.notification')" />
     <M3DialogHost />
     <M3ActionSheetHost />
   </F7App>
