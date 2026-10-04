@@ -16,7 +16,8 @@
         clickable
         :headline="t(feature.titleKey)"
         :supporting="t(feature.subtitleKey)"
-        @click="f7router.navigate(`/home/feature/${feature.id}/`)"
+        :trailing-text="transitionName(feature)"
+        @click="openFeature(f7router, feature)"
       >
         <template #leading>
           <M3Shape :shape="feature.shape" class="size-10" :class="TONE_CLASSES[feature.tone]">
@@ -33,11 +34,13 @@
 import type { Router } from "framework7/types";
 import HomeHero from "@/modules/home/components/HomeHero.vue";
 import { features } from "@/modules/home/composables/useHomeFeatures";
+import { transitionName, useOpenFeature } from "@/modules/home/composables/useOpenFeature";
 import { TONE_CLASSES } from "@/shared/utils/tone";
 
 const { t } = useI18n();
 defineProps<{ f7router: Router.Router }>();
 const tabs = useActiveTab();
+const openFeature = useOpenFeature();
 function openStudio() {
   tabs.open("settings", "/settings/studio/");
 }

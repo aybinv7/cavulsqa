@@ -13,7 +13,8 @@
       <M3List variant="segmented" inset>
         <M3ListItem
           :headline="t('detail.transition')"
-          :supporting="t('detail.transitionNote')"
+          :supporting="t('detail.transitionNote', { name: transitionName(feature) })"
+          :trailing-text="transitionName(feature)"
           multiline
         >
           <template #leading><i-ms-swipe-rounded /></template>
@@ -46,10 +47,13 @@
 <script setup lang="ts">
 import type { Router } from "framework7/types";
 import { features, findFeature } from "@/modules/home/composables/useHomeFeatures";
+import { transitionName, useOpenFeature } from "@/modules/home/composables/useOpenFeature";
 import { TONE_CLASSES } from "@/shared/utils/tone";
 
 const { t } = useI18n();
 const props = defineProps<{ f7route: Router.Route; f7router: Router.Router }>();
+
+const openFeature = useOpenFeature();
 
 const feature = computed(() => findFeature(String(props.f7route.params.id ?? "")));
 
@@ -57,6 +61,6 @@ const feature = computed(() => findFeature(String(props.f7route.params.id ?? "")
 function openNext() {
   const index = features.findIndex((entry) => entry.id === feature.value?.id);
   const next = features[(index + 1) % features.length];
-  if (next) props.f7router.navigate(`/home/feature/${next.id}/`);
+  if (next) openFeature(props.f7router, next);
 }
 </script>

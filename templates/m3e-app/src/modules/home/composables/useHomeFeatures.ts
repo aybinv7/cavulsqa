@@ -10,6 +10,20 @@ import ShapesIcon from "~icons/material-symbols/shapes-outline-rounded";
 import WidgetsIcon from "~icons/material-symbols/widgets-outline-rounded";
 import type { Tone } from "@/shared/utils/tone";
 
+/**
+ * Framework7's own page transitions, one per feature so each push looks different. They ship in
+ * Framework7's core stylesheet, and Framework7 replays the one a page opened with when it goes back.
+ */
+export type PageTransition =
+  | "f7-circle"
+  | "f7-cover"
+  | "f7-cover-v"
+  | "f7-dive"
+  | "f7-fade"
+  | "f7-flip"
+  | "f7-parallax"
+  | "f7-push";
+
 export interface HomeFeature {
   id: string;
   icon: Component;
@@ -18,6 +32,7 @@ export interface HomeFeature {
   titleKey: string;
   subtitleKey: string;
   textKey: string;
+  transition: PageTransition;
 }
 
 /**
@@ -34,6 +49,7 @@ export const features: readonly HomeFeature[] = [
     titleKey: "features.expressive.title",
     subtitleKey: "features.expressive.subtitle",
     textKey: "features.expressive.text",
+    transition: "f7-cover",
   },
   {
     id: "color",
@@ -43,6 +59,7 @@ export const features: readonly HomeFeature[] = [
     titleKey: "features.color.title",
     subtitleKey: "features.color.subtitle",
     textKey: "features.color.text",
+    transition: "f7-circle",
   },
   {
     id: "shell",
@@ -52,6 +69,7 @@ export const features: readonly HomeFeature[] = [
     titleKey: "features.shell.title",
     subtitleKey: "features.shell.subtitle",
     textKey: "features.shell.text",
+    transition: "f7-parallax",
   },
   {
     id: "sqlite",
@@ -61,6 +79,7 @@ export const features: readonly HomeFeature[] = [
     titleKey: "features.sqlite.title",
     subtitleKey: "features.sqlite.subtitle",
     textKey: "features.sqlite.text",
+    transition: "f7-push",
   },
   {
     id: "reactive",
@@ -70,6 +89,7 @@ export const features: readonly HomeFeature[] = [
     titleKey: "features.reactive.title",
     subtitleKey: "features.reactive.subtitle",
     textKey: "features.reactive.text",
+    transition: "f7-dive",
   },
   {
     id: "back",
@@ -79,6 +99,7 @@ export const features: readonly HomeFeature[] = [
     titleKey: "features.back.title",
     subtitleKey: "features.back.subtitle",
     textKey: "features.back.text",
+    transition: "f7-flip",
   },
   {
     id: "keyboard",
@@ -88,6 +109,7 @@ export const features: readonly HomeFeature[] = [
     titleKey: "features.keyboard.title",
     subtitleKey: "features.keyboard.subtitle",
     textKey: "features.keyboard.text",
+    transition: "f7-fade",
   },
   {
     id: "metrics",
@@ -97,6 +119,7 @@ export const features: readonly HomeFeature[] = [
     titleKey: "features.metrics.title",
     subtitleKey: "features.metrics.subtitle",
     textKey: "features.metrics.text",
+    transition: "f7-cover-v",
   },
 ];
 

@@ -170,6 +170,7 @@ declare global {
   const toRef: typeof import('vue').toRef
   const toRefs: typeof import('vue').toRefs
   const toValue: typeof import('vue').toValue
+  const transitionName: typeof import('./src/modules/home/composables/useOpenFeature').transitionName
   const triggerRef: typeof import('vue').triggerRef
   const tryOnBeforeMount: typeof import('@vueuse/core').tryOnBeforeMount
   const tryOnBeforeUnmount: typeof import('@vueuse/core').tryOnBeforeUnmount
@@ -299,6 +300,7 @@ declare global {
   const useObjectUrl: typeof import('@vueuse/core').useObjectUrl
   const useOffsetPagination: typeof import('@vueuse/core').useOffsetPagination
   const useOnline: typeof import('@vueuse/core').useOnline
+  const useOpenFeature: typeof import('./src/modules/home/composables/useOpenFeature').useOpenFeature
   const usePageLeave: typeof import('@vueuse/core').usePageLeave
   const useParallax: typeof import('@vueuse/core').useParallax
   const useParentElement: typeof import('@vueuse/core').useParentElement
@@ -442,6 +444,9 @@ declare global {
   export type { OrderStatus, Order } from './src/modules/gallery/composables/demoOrders'
   import('./src/modules/gallery/composables/demoOrders')
   // @ts-ignore
+  export type { StoryFact, FeaturedStory } from './src/modules/gallery/composables/featuredStories'
+  import('./src/modules/gallery/composables/featuredStories')
+  // @ts-ignore
   export type { VisitState, Visit } from './src/modules/gallery/composables/routePlan'
   import('./src/modules/gallery/composables/routePlan')
   // @ts-ignore
@@ -451,7 +456,7 @@ declare global {
   export type { GallerySection } from './src/modules/gallery/composables/useGallerySections'
   import('./src/modules/gallery/composables/useGallerySections')
   // @ts-ignore
-  export type { HomeFeature } from './src/modules/home/composables/useHomeFeatures'
+  export type { PageTransition, HomeFeature } from './src/modules/home/composables/useHomeFeatures'
   import('./src/modules/home/composables/useHomeFeatures')
 }
 
@@ -512,9 +517,11 @@ declare module 'vue' {
     readonly extendRef: UnwrapRef<typeof import('@vueuse/core')['extendRef']>
     readonly f7: UnwrapRef<typeof import('framework7-vue')['f7']>
     readonly f7ready: UnwrapRef<typeof import('framework7-vue')['f7ready']>
+    readonly featuredStories: UnwrapRef<typeof import('./src/modules/gallery/composables/featuredStories')['featuredStories']>
     readonly features: UnwrapRef<typeof import('./src/modules/home/composables/useHomeFeatures')['features']>
     readonly findFeature: UnwrapRef<typeof import('./src/modules/home/composables/useHomeFeatures')['findFeature']>
     readonly findSection: UnwrapRef<typeof import('./src/modules/gallery/composables/useGallerySections')['findSection']>
+    readonly findStory: UnwrapRef<typeof import('./src/modules/gallery/composables/featuredStories')['findStory']>
     readonly formatMobile: UnwrapRef<typeof import('./src/modules/gallery/composables/fieldFormats')['formatMobile']>
     readonly formatMoney: UnwrapRef<typeof import('./src/modules/demo/composables/useOrderStatus')['formatMoney']>
     readonly framework7Parameters: UnwrapRef<typeof import('./src/plugins/framework7.plugin')['framework7Parameters']>

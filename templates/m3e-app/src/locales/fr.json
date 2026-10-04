@@ -32,8 +32,8 @@
   },
   "detail": {
     "thisScreen": "Cet écran",
-    "transition": "Transition à axe partagé",
-    "transitionNote": "La page est arrivée sur le ressort spatial lent en passant en fondu sur la précédente. Le retour la joue en miroir.",
+    "transition": "Transition de page",
+    "transitionNote": "Framework7 a ouvert cette page avec {name} ; le retour la joue à l'envers. Chaque fonctionnalité de l'accueil a la sienne.",
     "appBar": "Barre d'application moyenne flexible",
     "appBarNote": "Faites défiler : le grand titre part et la barre le reprend, en surface-container quand le contenu passe dessous.",
     "nesting": "Imbriqué dans son onglet",

@@ -325,8 +325,10 @@ menu; `f7-app` stays the default.
   in their own language. The translation is AI-assisted and needs a native speaker's review.
 - A card expands into its page as one surface (a container transform): its corners and colour grow
   into the page and shrink back into the same card on back. The gallery's Surfaces section
-  demonstrates it with three cards; the demo's orders and the order search open an order with it,
-  and the rest of the app keeps the standard push.
+  demonstrates it with three cards; the demo's orders and the order search open an order with it.
+- Each feature on Home opens with its own Framework7 page transition (circle, cover, vertical cover,
+  dive, fade, flip, parallax, push), named on its row and on the page it opens; back plays it in
+  reverse. Under reduced motion they fall back to the app's cross-fade.
 - The chat demo names who reacted, and the agenda's day view swipes to the previous and next day.
 - The chat's attach sheet sends a location, a contact, a poll or an event. Location asks the
   device (the web view's own geolocation) and, when that fails, says why and offers the depot;

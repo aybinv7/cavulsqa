@@ -32,8 +32,8 @@
   },
   "detail": {
     "thisScreen": "This screen",
-    "transition": "Shared-axis transition",
-    "transitionNote": "The page slid in on the slow spatial spring and faded through the one before it. Back plays it mirrored.",
+    "transition": "Page transition",
+    "transitionNote": "Framework7 opened this page with {name}; back plays it in reverse. Every feature on Home has its own.",
     "appBar": "Medium flexible app bar",
     "appBarNote": "Scroll: the big title leaves and the bar takes it, turning surface-container as content passes beneath.",
     "nesting": "Nested in its tab",
