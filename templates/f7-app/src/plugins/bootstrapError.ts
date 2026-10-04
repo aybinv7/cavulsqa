@@ -3,6 +3,7 @@ import {
   webviewLikelyTooOld,
   webviewVersion,
 } from "@/shared/database/storage";
+import { hideSplashScreen } from "@/plugins/capacitor/useSplashScreen";
 
 /**
  * The screen shown when the app cannot start, which in practice means the database did not open.
@@ -15,6 +16,7 @@ import {
  * nothing they could act on.
  */
 export function renderBootstrapError(error: unknown): void {
+  hideSplashScreen();
   const root = document.getElementById("app");
   if (!root) return;
 
