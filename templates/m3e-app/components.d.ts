@@ -124,6 +124,7 @@ declare module 'vue' {
     M3DialogHost: typeof import('@cavulsqa/m3e-vue')['M3DialogHost']
     M3Divider: typeof import('@cavulsqa/m3e-vue')['M3Divider']
     M3DockedToolbar: typeof import('@cavulsqa/m3e-vue')['M3DockedToolbar']
+    M3ExposedDropdown: typeof import('@cavulsqa/m3e-vue')['M3ExposedDropdown']
     M3Fab: typeof import('@cavulsqa/m3e-vue')['M3Fab']
     M3FabMenu: typeof import('@cavulsqa/m3e-vue')['M3FabMenu']
     M3FabMenuItem: typeof import('@cavulsqa/m3e-vue')['M3FabMenuItem']

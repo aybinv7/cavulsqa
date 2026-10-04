@@ -482,7 +482,19 @@
       "searchView": "Vue de recherche",
       "searchViewNote": "La barre s’ouvre en vue plein écran sur un seul ressort : recherches récentes d’abord, puis résultats à la frappe. Retour la ferme.",
       "searchCustomers": "Rechercher des clients",
-      "noMatches": "Aucun client ne correspond"
+      "noMatches": "Aucun client ne correspond",
+      "dropdown": "Menu déroulant",
+      "dropdownNote": "Une liste de choix, et l'autocomplétion de Framework7 : tapez pour filtrer les 58 wilayas - accents et casse n'y font rien - sans quitter le champ.",
+      "status": "Statut",
+      "statuses": {
+        "draft": "Brouillon",
+        "confirmed": "Confirmée",
+        "delivered": "Livrée",
+        "cancelled": "Annulée"
+      },
+      "wilaya": "Wilaya",
+      "wilayaHint": "Essayez « bej » ou « setif »",
+      "results": "Aucun résultat | {count} résultat | {count} résultats"
     },
     "carousels": {
       "multiBrowse": "Multi-navigation",

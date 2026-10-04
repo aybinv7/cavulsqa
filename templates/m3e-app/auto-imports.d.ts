@@ -18,6 +18,8 @@ declare global {
   const ORDER_STATUSES: typeof import('./src/modules/demo/composables/useOrderStatus').ORDER_STATUSES
   const STATUS_LOOK: typeof import('./src/modules/demo/composables/useOrderStatus').STATUS_LOOK
   const TONE_CLASSES: typeof import('./src/shared/utils/tone').TONE_CLASSES
+  const WILAYAS: typeof import('./src/modules/gallery/composables/wilayas').WILAYAS
+  const WILAYA_OPTIONS: typeof import('./src/modules/gallery/composables/wilayas').WILAYA_OPTIONS
   const asyncComputed: typeof import('@vueuse/core').asyncComputed
   const autoResetRef: typeof import('@vueuse/core').autoResetRef
   const computed: typeof import('vue').computed
@@ -413,6 +415,8 @@ declare module 'vue' {
     readonly ORDER_STATUSES: UnwrapRef<typeof import('./src/modules/demo/composables/useOrderStatus')['ORDER_STATUSES']>
     readonly STATUS_LOOK: UnwrapRef<typeof import('./src/modules/demo/composables/useOrderStatus')['STATUS_LOOK']>
     readonly TONE_CLASSES: UnwrapRef<typeof import('./src/shared/utils/tone')['TONE_CLASSES']>
+    readonly WILAYAS: UnwrapRef<typeof import('./src/modules/gallery/composables/wilayas')['WILAYAS']>
+    readonly WILAYA_OPTIONS: UnwrapRef<typeof import('./src/modules/gallery/composables/wilayas')['WILAYA_OPTIONS']>
     readonly asyncComputed: UnwrapRef<typeof import('@vueuse/core')['asyncComputed']>
     readonly autoResetRef: UnwrapRef<typeof import('@vueuse/core')['autoResetRef']>
     readonly computed: UnwrapRef<typeof import('vue')['computed']>

@@ -482,7 +482,19 @@
       "searchView": "Search view",
       "searchViewNote": "The bar opens into a full-screen view on one spring: recent searches first, then matches as you type. Back closes it.",
       "searchCustomers": "Search customers",
-      "noMatches": "No customer matches"
+      "noMatches": "No customer matches",
+      "dropdown": "Exposed dropdown",
+      "dropdownNote": "A select, and Framework7's autocomplete: type to filter the 58 wilayas - accents and case do not matter - while focus stays in the field.",
+      "status": "Status",
+      "statuses": {
+        "draft": "Draft",
+        "confirmed": "Confirmed",
+        "delivered": "Delivered",
+        "cancelled": "Cancelled"
+      },
+      "wilaya": "Wilaya",
+      "wilayaHint": "Try \"bej\" or \"setif\"",
+      "results": "No results | {count} result | {count} results"
     },
     "carousels": {
       "multiBrowse": "Multi-browse",

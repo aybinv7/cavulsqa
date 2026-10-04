@@ -173,7 +173,12 @@ and speeds up across wide ranges. Use a slider when the exact value matters less
 **`M3Chip`** - `kind` assist | filter (`v-model:selected`) | input
 (`removable`) | suggestion. **`M3TextField`** - `variant` filled (default) | outlined, `supporting`,
 `error`, `maxlength` counter, `prefix`/`suffix`, `multiline`, `#leading`/`#trailing`; native
-attributes pass through. **`M3SearchBar`** - `v-model`, `@search`, `#leading`/`#trailing`, for
+attributes pass through. **`M3ExposedDropdown`** - Compose's exposed dropdown menu: `options`
+(`{ value, label, supporting?, disabled? }`), `v-model`, `label`; read-only it is a select (arrow
+keys, type-ahead), `editable` makes it Framework7's autocomplete (accent- and case-insensitive
+filter, bolded match, `limit`). For a remote source, `:filter="false"` + `v-model:query` +
+`loading`. Use it over radios past ~5 options, and over an action sheet when the field sits in a
+form. **`M3SearchBar`** - `v-model`, `@search`, `#leading`/`#trailing`, for
 filtering what is already on screen. **`M3SearchView`** - the bar that opens into a full-screen
 view (`v-model`, `v-model:expanded`, `placeholder`; results in the default slot with `{ query }`,
 recent searches when the query is empty); use it for searching a whole data set.

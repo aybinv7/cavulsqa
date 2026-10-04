@@ -58,6 +58,30 @@
     </M3SearchBar>
   </GalleryBlock>
 
+  <GalleryBlock
+    :title="t('gallery.inputs.dropdown')"
+    :note="t('gallery.inputs.dropdownNote')"
+    stack
+  >
+    <M3ExposedDropdown
+      v-model="status"
+      :label="t('gallery.inputs.status')"
+      :options="statusOptions"
+    />
+    <M3ExposedDropdown
+      v-model="wilaya"
+      editable
+      variant="outlined"
+      :label="t('gallery.inputs.wilaya')"
+      :supporting="t('gallery.inputs.wilayaHint')"
+      :options="WILAYA_OPTIONS"
+      :no-results-text="t('gallery.inputs.noMatches')"
+      :results-text="resultsText"
+    >
+      <template #leading><i-ms-location-on-outline-rounded /></template>
+    </M3ExposedDropdown>
+  </GalleryBlock>
+
   <GalleryBlock :title="t('gallery.inputs.filled')" :note="t('gallery.inputs.filledNote')" stack>
     <M3TextField
       v-model="name"
@@ -101,6 +125,7 @@
 
 <script setup lang="ts">
 import GalleryBlock from "@/modules/gallery/components/GalleryBlock.vue";
+import { WILAYA_OPTIONS } from "@/modules/gallery/composables/wilayas";
 
 const { t } = useI18n();
 const query = ref("");
@@ -120,6 +145,17 @@ const matches = (term: string) => {
   const needle = term.trim().toLocaleLowerCase();
   return CUSTOMERS.filter((customer) => customer.toLocaleLowerCase().includes(needle));
 };
+const STATUSES = ["draft", "confirmed", "delivered", "cancelled"] as const;
+const status = ref<(typeof STATUSES)[number] | null>("confirmed");
+const wilaya = ref<number | null>(31);
+const statusOptions = computed(() =>
+  STATUSES.map((value) => ({
+    value,
+    label: t(`gallery.inputs.statuses.${value}`),
+    disabled: value === "cancelled",
+  })),
+);
+const resultsText = (count: number) => t("gallery.inputs.results", { count }, count);
 const name = ref("");
 const amount = ref("12,5x");
 const email = ref("");
