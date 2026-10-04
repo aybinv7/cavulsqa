@@ -38,6 +38,7 @@ export { default as M3NavigationBar } from "./components/navigation/M3Navigation
 export { default as M3NavigationItem } from "./components/navigation/M3NavigationItem.vue";
 export { default as M3NavigationRail } from "./components/navigation/M3NavigationRail.vue";
 export { default as M3NotificationHost } from "./components/snackbar/M3NotificationHost.vue";
+export { default as M3PhotoBrowser } from "./components/photo/M3PhotoBrowser.vue";
 export { default as M3PullToRefresh } from "./components/progress/M3PullToRefresh.vue";
 export { default as M3Radio } from "./components/selection/M3Radio.vue";
 export { default as M3RangeSlider } from "./components/slider/M3RangeSlider.vue";
@@ -151,3 +152,4 @@ export type { WheelColumn, WheelOption, WheelValue } from "./components/picker/t
 export type { DatePickerMode, TimePickerMode } from "./components/datetime/types.js";
 export type { SheetDetent } from "./utils/detents.js";
 export { moveItem } from "./utils/sortable.js";
+export type { PhotoItem } from "./components/photo/types.js";
