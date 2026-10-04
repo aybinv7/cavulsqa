@@ -40,6 +40,21 @@
     </M3ListItem>
   </M3List>
 
+  <SectionHeader :title="t('gallery.surfaces.accordion')" />
+  <p class="type-body-small m-0 px-8 pb-3 text-on-surface-variant">
+    {{ t("gallery.surfaces.accordionNote") }}
+  </p>
+  <M3List variant="segmented" inset accordion>
+    <M3ListItem
+      v-for="question in QUESTIONS"
+      :key="question"
+      :headline="t(`gallery.surfaces.faq.${question}.q`)"
+    >
+      <template #leading><i-ms-help-outline-rounded /></template>
+      <template #details>{{ t(`gallery.surfaces.faq.${question}.a`) }}</template>
+    </M3ListItem>
+  </M3List>
+
   <SectionHeader :title="t('gallery.surfaces.standard')" />
   <M3List variant="standard">
     <M3ListItem :headline="t('gallery.surfaces.wifi')" :supporting="t('gallery.surfaces.wifiText')">
@@ -57,6 +72,7 @@ const { t } = useI18n();
 const snackbar = useSnackbar();
 const CARDS = ["elevated", "filled", "outlined"] as const;
 const ITEMS = ["inbox", "drafts", "archive"] as const;
+const QUESTIONS = ["offline", "sync", "storage", "export"] as const;
 
 const selected = ref<(typeof ITEMS)[number]>("inbox");
 const wifi = ref(true);

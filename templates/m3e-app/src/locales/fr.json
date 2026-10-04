@@ -527,7 +527,27 @@
       "standard": "Liste standard",
       "wifi": "Wi-Fi",
       "wifiText": "Connecté à Bureau",
-      "storage": "Stockage utilisé"
+      "storage": "Stockage utilisé",
+      "accordion": "Éléments dépliables",
+      "accordionNote": "La liste accordéon de Framework7 : un seul élément ouvert à la fois, qui sort de la série en carte à part.",
+      "faq": {
+        "offline": {
+          "q": "Ça marche hors ligne ?",
+          "a": "Oui. Chaque écran lit la base de l'appareil : une connexion perdue ne change rien à ce que vous voyez."
+        },
+        "sync": {
+          "q": "Quand mes données se synchronisent-elles ?",
+          "a": "Ce modèle n'a pas de serveur. Ajoutez-en un et il synchronise vers la base locale ; les écrans ne lisent que la copie locale."
+        },
+        "storage": {
+          "q": "Où la base est-elle stockée ?",
+          "a": "Dans le stockage privé de l'app, via SQLite compilé en WebAssembly - le même moteur dans le navigateur et sur le téléphone."
+        },
+        "export": {
+          "q": "Puis-je exporter mes commandes ?",
+          "a": "Pas encore dans le modèle - une fonction de dépôt sur la table des commandes suffit."
+        }
+      }
     },
     "pickers": {
       "modal": "Sélecteur de date modal",

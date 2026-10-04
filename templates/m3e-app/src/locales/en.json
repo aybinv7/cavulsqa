@@ -527,7 +527,27 @@
       "standard": "Standard list",
       "wifi": "Wi-Fi",
       "wifiText": "Connected to Office",
-      "storage": "Storage used"
+      "storage": "Storage used",
+      "accordion": "Expandable items",
+      "accordionNote": "Framework7's accordion list: one item open at a time, stepping out of the run as its own card.",
+      "faq": {
+        "offline": {
+          "q": "Does it work offline?",
+          "a": "Yes. Every screen reads the database on the device, so a lost connection changes nothing you can see."
+        },
+        "sync": {
+          "q": "When does my data sync?",
+          "a": "This template has no server. Add one and it syncs into the local database; screens keep reading only the local copy."
+        },
+        "storage": {
+          "q": "Where is the database kept?",
+          "a": "In the app's private storage, through SQLite compiled to WebAssembly - the same engine in the browser and on the phone."
+        },
+        "export": {
+          "q": "Can I export my orders?",
+          "a": "Not yet in the template - a repository function over the orders table is all it takes."
+        }
+      }
     },
     "pickers": {
       "modal": "Modal date picker",

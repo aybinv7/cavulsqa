@@ -70,6 +70,7 @@ declare module 'vue' {
     IMsFormatBoldRounded: typeof import('~icons/material-symbols/format-bold-rounded')['default']
     IMsFormatItalicRounded: typeof import('~icons/material-symbols/format-italic-rounded')['default']
     IMsFormatUnderlinedRounded: typeof import('~icons/material-symbols/format-underlined-rounded')['default']
+    IMsHelpOutlineRounded: typeof import('~icons/material-symbols/help-outline-rounded')['default']
     IMsHistoryRounded: typeof import('~icons/material-symbols/history-rounded')['default']
     IMsHomeOutlineRounded: typeof import('~icons/material-symbols/home-outline-rounded')['default']
     IMsHomeRounded: typeof import('~icons/material-symbols/home-rounded')['default']

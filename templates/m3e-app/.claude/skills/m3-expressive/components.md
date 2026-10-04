@@ -58,7 +58,9 @@ standard. Items: `headline`, `supporting`, `overline`, `trailingText`, `multilin
 (decoration), `#action` (a control with its own target). Swipe actions: `M3SwipeAction` buttons
 (`label`, `tone`, `@click`) in `#swipe-start` / `#swipe-end`; `swipe-full="end"` arms the outermost
 action past half the row (deletes, archives - pair with an undo snackbar), `v-model:swiped` reads
-the open side. One row open at a time; a tap outside closes it. → lists/specs
+the open side. One row open at a time; a tap outside closes it. Expandable items: put the hidden
+content in `#details` (`v-model:expanded`); `M3List accordion` keeps one open, as Framework7's
+accordion list does - FAQs, settings groups, order lines. → lists/specs
 
 **`M3Carousel`** - Compose's carousel, keyline for keyline: `items`, `label`, `variant`
 multi-browse (default; browsing many items - photos, products) | hero (one featured item at a time;
