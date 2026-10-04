@@ -54,6 +54,7 @@ export const COMPONENT_NAMES = [
   "M3SkeletonBlock",
   "M3SkeletonText",
   "M3Slider",
+  "M3SmartSelect",
   "M3SnackbarHost",
   "M3SplitButton",
   "M3StandardBottomSheet",

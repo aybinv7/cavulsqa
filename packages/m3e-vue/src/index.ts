@@ -55,6 +55,7 @@ export { default as M3Skeleton } from "./components/skeleton/M3Skeleton.vue";
 export { default as M3SkeletonBlock } from "./components/skeleton/M3SkeletonBlock.vue";
 export { default as M3SkeletonText } from "./components/skeleton/M3SkeletonText.vue";
 export { default as M3Slider } from "./components/slider/M3Slider.vue";
+export { default as M3SmartSelect } from "./components/selection/M3SmartSelect.vue";
 export { default as M3SnackbarHost } from "./components/snackbar/M3SnackbarHost.vue";
 export { default as M3SplitButton } from "./components/button/M3SplitButton.vue";
 export { default as M3StandardBottomSheet } from "./components/sheet/M3StandardBottomSheet.vue";
