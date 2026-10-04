@@ -54,6 +54,7 @@ declare module 'vue' {
     IMsBookmarkOutlineRounded: typeof import('~icons/material-symbols/bookmark-outline-rounded')['default']
     IMsBookmarkRounded: typeof import('~icons/material-symbols/bookmark-rounded')['default']
     IMsCalendarTodayOutlineRounded: typeof import('~icons/material-symbols/calendar-today-outline-rounded')['default']
+    IMsCategoryOutlineRounded: typeof import('~icons/material-symbols/category-outline-rounded')['default']
     IMsCheckRounded: typeof import('~icons/material-symbols/check-rounded')['default']
     IMsChevronRightRounded: typeof import('~icons/material-symbols/chevron-right-rounded')['default']
     IMsContrastRounded: typeof import('~icons/material-symbols/contrast-rounded')['default']

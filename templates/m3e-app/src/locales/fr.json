@@ -363,7 +363,13 @@
       "deleted": "Supprimée",
       "kept": "Conservée",
       "menu": "Menus",
-      "menuNote": "Menus expressifs en segments ; l'élément choisi prend le conteneur tertiaire.",
+      "menuNote": "Menus expressifs en segments ; l'élément choisi prend le conteneur tertiaire, et Grouper par ouvre un sous-menu.",
+      "groupBy": "Grouper par",
+      "groups": {
+        "none": "Aucun",
+        "customer": "Client",
+        "status": "Statut"
+      },
       "sort": "Trier par",
       "sortBy": "Tri : {order}",
       "orders": {

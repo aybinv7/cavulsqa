@@ -363,7 +363,13 @@
       "deleted": "Deleted",
       "kept": "Kept",
       "menu": "Menus",
-      "menuNote": "Expressive menus in segments; the selected item takes the tertiary container.",
+      "menuNote": "Expressive menus in segments; the selected item takes the tertiary container, and Group by cascades into a submenu.",
+      "groupBy": "Group by",
+      "groups": {
+        "none": "None",
+        "customer": "Customer",
+        "status": "Status"
+      },
       "sort": "Sort by",
       "sortBy": "Sort: {order}",
       "orders": {

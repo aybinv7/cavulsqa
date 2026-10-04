@@ -61,6 +61,22 @@
       </M3MenuGroup>
       <M3MenuGroup>
         <M3MenuItem
+          :label="t('gallery.overlays.groupBy')"
+          :supporting="t(`gallery.overlays.groups.${groupBy}`)"
+        >
+          <template #icon><i-ms-category-outline-rounded /></template>
+          <template #submenu>
+            <M3MenuItem
+              v-for="group in GROUPS"
+              :key="group"
+              checkable
+              :selected="groupBy === group"
+              :label="t(`gallery.overlays.groups.${group}`)"
+              @select="groupBy = group"
+            />
+          </template>
+        </M3MenuItem>
+        <M3MenuItem
           :label="t('gallery.overlays.reset')"
           tone="destructive"
           @select="sort = 'recent'"
@@ -151,12 +167,14 @@ const actionSheet = useActionSheet();
 
 const ORDERS = ["recent", "name", "amount"] as const;
 const DESTINATIONS = ["inbox", "starred", "saved"] as const;
+const GROUPS = ["none", "customer", "status"] as const;
 const sideOpen = ref(false);
 const railOpen = ref(false);
 const destination = ref<string>("inbox");
 const sheetOpen = ref(false);
 const menuOpen = ref(false);
 const sort = ref<(typeof ORDERS)[number]>("recent");
+const groupBy = ref<(typeof GROUPS)[number]>("none");
 const menuAnchor = useTemplateRef<HTMLElement>("menuAnchor");
 
 async function openActions() {

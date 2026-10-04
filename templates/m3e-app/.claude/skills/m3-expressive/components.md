@@ -55,7 +55,10 @@ status bar keeps taps for its shade); nav-bar reselect does the same. → app-ba
 **`M3List` + `M3ListItem`** - `variant` segmented (default; each row its own surface, 2dp apart) or
 standard. Items: `headline`, `supporting`, `overline`, `trailingText`, `multiline`, `clickable` or
 `href`, `selected`, `tone="destructive"`; slots `#leading` (icon, `M3Shape` avatar 40dp), `#trailing`
-(decoration), `#action` (a control with its own target). → lists/specs
+(decoration), `#action` (a control with its own target). Swipe actions: `M3SwipeAction` buttons
+(`label`, `tone`, `@click`) in `#swipe-start` / `#swipe-end`; `swipe-full="end"` arms the outermost
+action past half the row (deletes, archives - pair with an undo snackbar), `v-model:swiped` reads
+the open side. One row open at a time; a tap outside closes it. → lists/specs
 
 **`M3Card`** - `variant` elevated | filled | outlined; `clickable` makes the whole card one target -
 then put no other buttons inside. → cards/specs
@@ -78,7 +81,9 @@ confirmations, required choices. `destructive` paints the confirm action; `icon`
 
 **`M3Menu` + `M3MenuItem` + `M3MenuGroup`** - anchored to an element ref (`:anchor`), `variant`
 standard | vibrant; groups give the expressive segmented look. `checkable` for single/multi select.
-→ menus/specs
+A `#submenu` slot of items makes a cascading item (trailing arrow; opens beside it on tap, hover or
+the arrow key); choosing inside closes the whole chain, Back closes the submenu alone. Keep it one
+level deep on phones. → menus/specs
 
 **Snackbar** - `await useSnackbar().show({ message, action, duration })` resolves `action` |
 `dismissed` | `timeout`. One action max, never for errors that need a decision. Undo is the classic.
@@ -137,10 +142,14 @@ on), `thickness`; circular takes `gauge` and a centred slot. Linear sits 4dp in 
 **`M3Switch`** (`icons`, `bothIcons`) for an instant on/off; **`M3Checkbox`** for items in a list
 or a form submitted later; **`M3Radio`** (`v-model` + `value`) for one of few visible options - more
 than ~5, use an action sheet. **`M3Slider`** - `size` xs..xl, `step`, `ticks`, `#icon` from m, `format`
-for the value bubble. **`M3Chip`** - `kind` assist | filter (`v-model:selected`) | input
+for the value bubble. **`M3RangeSlider`** - `v-model:start` / `v-model:end`, `startLabel` /
+`endLabel` (each handle is its own slider), `minDistance` keeps them apart. **`M3Chip`** - `kind` assist | filter (`v-model:selected`) | input
 (`removable`) | suggestion. **`M3TextField`** - `variant` filled (default) | outlined, `supporting`,
 `error`, `maxlength` counter, `prefix`/`suffix`, `multiline`, `#leading`/`#trailing`; native
-attributes pass through. **`M3SearchBar`** - `v-model`, `@search`, `#leading`/`#trailing`.
+attributes pass through. **`M3SearchBar`** - `v-model`, `@search`, `#leading`/`#trailing`, for
+filtering what is already on screen. **`M3SearchView`** - the bar that opens into a full-screen
+view (`v-model`, `v-model:expanded`, `placeholder`; results in the default slot with `{ query }`,
+recent searches when the query is empty); use it for searching a whole data set.
 → switch, checkbox, radio-button, sliders, chips, text-fields, search /specs
 
 ## Shape and decoration
