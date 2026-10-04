@@ -3,6 +3,8 @@ const WINDOW_MS = 100;
 /**
  * Release velocity from the last 100 ms of samples, in px per second. A single last-two-points
  * difference is noise on a phone; a short window is what Android's VelocityTracker approximates.
+ * Pass the event's `timeStamp`: a handler that runs late after a slow frame would otherwise stamp
+ * the last sample late and read a fast flick as a slow drag.
  */
 export function createVelocityTracker() {
   const samples: Array<{ t: number; y: number }> = [];

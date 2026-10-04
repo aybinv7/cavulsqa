@@ -37,7 +37,7 @@ export function useSheetGesture(options: SheetGestureOptions) {
   let fromHandle = false;
   let offset = 0;
 
-  const begin = (y: number, target: EventTarget | null) => {
+  const begin = (y: number, target: EventTarget | null, time: number) => {
     const sheet = options.sheet.value;
     if (!sheet || !options.enabled()) return;
     if (target instanceof Element && target.closest("[data-sheet-ignore]")) return;
@@ -47,10 +47,10 @@ export function useSheetGesture(options: SheetGestureOptions) {
     fromHandle = target instanceof Element && target.closest("[data-sheet-handle]") !== null;
     startY = y;
     tracker.reset();
-    tracker.add(y);
+    tracker.add(y, time);
   };
 
-  const move = (y: number): boolean => {
+  const move = (y: number, time: number): boolean => {
     if (!tracking || blocked) return false;
     const dy = y - startY;
     if (!dragging) {
@@ -63,7 +63,7 @@ export function useSheetGesture(options: SheetGestureOptions) {
       base = options.onDragStart();
       startY = y;
     }
-    tracker.add(y);
+    tracker.add(y, time);
     const raw = base + (y - startY);
     offset = Math.max(0, raw);
     options.onDrag(offset);
@@ -76,18 +76,20 @@ export function useSheetGesture(options: SheetGestureOptions) {
     dragging = false;
   };
 
-  const onTouchStart = (event: TouchEvent) => begin(event.touches[0]!.clientY, event.target);
+  const onTouchStart = (event: TouchEvent) =>
+    begin(event.touches[0]!.clientY, event.target, event.timeStamp);
   const onTouchMove = (event: TouchEvent) => {
     if (event.touches.length !== 1) return;
-    if (move(event.touches[0]!.clientY) && event.cancelable) event.preventDefault();
+    if (move(event.touches[0]!.clientY, event.timeStamp) && event.cancelable)
+      event.preventDefault();
   };
   const onPointerDown = (event: PointerEvent) => {
     if (event.pointerType !== "mouse" || event.button !== 0) return;
-    begin(event.clientY, event.target);
+    begin(event.clientY, event.target, event.timeStamp);
     window.addEventListener("pointermove", onPointerMove);
     window.addEventListener("pointerup", onPointerUp, { once: true });
   };
-  const onPointerMove = (event: PointerEvent) => move(event.clientY);
+  const onPointerMove = (event: PointerEvent) => move(event.clientY, event.timeStamp);
   const onPointerUp = () => {
     window.removeEventListener("pointermove", onPointerMove);
     end();

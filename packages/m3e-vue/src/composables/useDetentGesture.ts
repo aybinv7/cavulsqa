@@ -36,7 +36,7 @@ export function useDetentGesture(options: DetentGestureOptions) {
   let fromHandle = false;
   let scrolled = false;
 
-  const begin = (x: number, y: number, target: EventTarget | null) => {
+  const begin = (x: number, y: number, target: EventTarget | null, time: number) => {
     const sheet = options.sheet.value;
     if (!sheet || !options.enabled()) return;
     if (target instanceof Element && target.closest("[data-sheet-ignore]")) return;
@@ -47,7 +47,7 @@ export function useDetentGesture(options: DetentGestureOptions) {
     startX = x;
     startY = y;
     tracker.reset();
-    tracker.add(y);
+    tracker.add(y, time);
   };
 
   const claims = (dy: number) => {
@@ -55,7 +55,7 @@ export function useDetentGesture(options: DetentGestureOptions) {
     return dy > 0 && !scrolled;
   };
 
-  const move = (x: number, y: number): boolean => {
+  const move = (x: number, y: number, time: number): boolean => {
     if (!tracking) return false;
     const dy = y - startY;
     if (!dragging) {
@@ -69,7 +69,7 @@ export function useDetentGesture(options: DetentGestureOptions) {
       from = base;
       startY = y;
     }
-    tracker.add(y);
+    tracker.add(y, time);
     const { min, max } = options.bounds();
     offset = Math.min(max, Math.max(min, base + (y - startY)));
     options.onDrag(offset);
@@ -84,21 +84,24 @@ export function useDetentGesture(options: DetentGestureOptions) {
 
   const onTouchStart = (event: TouchEvent) => {
     const touch = event.touches[0]!;
-    begin(touch.clientX, touch.clientY, event.target);
+    begin(touch.clientX, touch.clientY, event.target, event.timeStamp);
   };
   const onTouchMove = (event: TouchEvent) => {
     if (event.touches.length !== 1) return;
     const touch = event.touches[0]!;
-    if (move(touch.clientX, touch.clientY) && event.cancelable) event.preventDefault();
+    if (move(touch.clientX, touch.clientY, event.timeStamp) && event.cancelable) {
+      event.preventDefault();
+    }
   };
-  const onPointerMove = (event: PointerEvent) => move(event.clientX, event.clientY);
+  const onPointerMove = (event: PointerEvent) =>
+    move(event.clientX, event.clientY, event.timeStamp);
   const onPointerUp = () => {
     window.removeEventListener("pointermove", onPointerMove);
     end();
   };
   const onPointerDown = (event: PointerEvent) => {
     if (event.pointerType !== "mouse" || event.button !== 0) return;
-    begin(event.clientX, event.clientY, event.target);
+    begin(event.clientX, event.clientY, event.target, event.timeStamp);
     window.addEventListener("pointermove", onPointerMove);
     window.addEventListener("pointerup", onPointerUp, { once: true });
   };

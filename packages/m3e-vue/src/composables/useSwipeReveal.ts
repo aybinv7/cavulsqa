@@ -64,7 +64,7 @@ export function useSwipeReveal(options: SwipeRevealOptions) {
       tracker.reset();
     }
     const moved = (event.clientX - startX) * sign;
-    tracker.add(event.clientX * sign);
+    tracker.add(event.clientX * sign, event.timeStamp);
     offset = base + moved;
     options.onMove(offset);
   }
