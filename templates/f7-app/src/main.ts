@@ -9,6 +9,7 @@ import "./assets/css/app.css";
 import App from "./App.vue";
 import { i18n } from "./plugins/i18n.plugin";
 import { renderBootstrapError } from "./plugins/bootstrapError";
+import { recorderPlugin } from "./plugins/recorder.plugin";
 import { seedPlugin } from "./plugins/seed.plugin";
 import { sqlitePlugin } from "./plugins/sqlite.plugin";
 
@@ -30,6 +31,8 @@ async function bootstrap(): Promise<void> {
     renderBootstrapError(error);
     return;
   }
+
+  void recorderPlugin();
 
   // Components arrive through Framework7VueResolver, so nothing is registered by hand.
   const app = createApp(App);

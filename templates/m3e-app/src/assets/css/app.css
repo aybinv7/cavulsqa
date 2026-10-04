@@ -1,0 +1,18 @@
+/*
+ * Cascade layers decide every conflict here, not specificity and not `!important`. Framework7's
+ * stylesheet is the lowest layer, so nothing it ships can override a component or a utility; the
+ * M3 components sit in `components` (imported from `m3e.css`), below Tailwind's utilities, so a
+ * utility on a component wins.
+ */
+@layer framework7, theme, base, components, utilities;
+
+@import "framework7/css" layer(framework7);
+@import "framework7/components/tabs/css" layer(framework7);
+@import "tailwindcss";
+
+@import "./theme/tailwind.css";
+@import "./theme/framework7.css";
+@import "./base.css";
+@import "./layout/shell.css";
+@import "./layout/transitions.css";
+@import "./layout/container-transform.css";

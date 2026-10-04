@@ -28,6 +28,8 @@ catalog:
   "@sqlite.org/sqlite-wasm": 3.53.0-build1
   wa-sqlite: ^1.0.0
   framework7-vue: ^9.1.2
+  fflate: ^0.8.2
+  rrweb: 2.0.0-alpha.4
 overrides:
   vite: "catalog:"
 peerDependencyRules:

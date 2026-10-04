@@ -3,16 +3,21 @@
 Everything under `packages/` publishes to npm under the `@cavulsqa` scope. Anything marked
 `private: true` is skipped.
 
-| Package                  | What it is                                    |
-| ------------------------ | --------------------------------------------- |
-| `@cavulsqa/mobile-db`    | OPFS SQLite persistence for Kysely.           |
-| `@cavulsqa/reactive-db`  | Framework-agnostic reactive query primitives. |
-| `@cavulsqa/reactive-vue` | Vue bindings for reactive-db.                 |
+| Package                  | What it is                                                |
+| ------------------------ | --------------------------------------------------------- |
+| `@cavulsqa/mobile-db`    | OPFS SQLite persistence for Kysely.                       |
+| `@cavulsqa/reactive-db`  | Framework-agnostic reactive query primitives.             |
+| `@cavulsqa/reactive-vue` | Vue bindings for reactive-db.                             |
+| `@cavulsqa/repository`   | Per-table data access over a stable row identity.         |
+| `@cavulsqa/m3e`          | Material 3 Expressive colour, shapes, motion, tokens.     |
+| `@cavulsqa/m3e-vue`      | The `M3*` Vue components and overlay services.            |
+| `@cavulsqa/recorder`     | In-app field recorder producing Capubridge `.capu` files. |
 
 ## One version for the libraries
 
-`mobile-db`, `reactive-db` and `reactive-vue` release together at the same version. A bump moves all
-three even where nothing in one of them changed.
+Every library releases together at the same version - `mobile-db`, `reactive-db`, `reactive-vue`,
+`repository`, `m3e`, `m3e-vue` and `recorder`. A bump moves all of them even where nothing in one of
+them changed; `tests/libraryVersions.test.mjs` in `create` fails when they drift.
 
 That is not tidiness. Under `0.x` a caret range pins the minor - `^0.3.0` refuses `0.4.0` - so every
 release was already a wall a consumer had to climb, and climbing it meant moving all three anyway

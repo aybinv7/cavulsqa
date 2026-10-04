@@ -1,0 +1,66 @@
+{
+  "name": "@cavulsqa/m3e-vue",
+  "version": "1.4.0",
+  "description": "Material 3 Expressive components for Vue 3: wavy progress, the shape-morphing loading indicator, spring-driven sheets, button groups, flexible navigation, expressive lists and menus, built on @cavulsqa/m3e.",
+  "keywords": [
+    "capacitor",
+    "components",
+    "material-3",
+    "material-expressive",
+    "vue",
+    "vue3"
+  ],
+  "homepage": "https://github.com/aybinv7/cavulsqa/tree/main/packages/m3e-vue#readme",
+  "bugs": {
+    "url": "https://github.com/aybinv7/cavulsqa/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aybinv7/cavulsqa.git",
+    "directory": "packages/m3e-vue"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "exports": {
+    ".": "./dist/index.js",
+    "./resolver": "./dist/resolver.js",
+    "./package.json": "./package.json",
+    "./style.css": "./dist/style.css"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "dev": "vp pack --watch",
+    "test": "vp test",
+    "check": "vp check",
+    "type-check": "vue-tsc --noEmit",
+    "prepublishOnly": "vp run build",
+    "sync": "node scripts/syncComponents.mjs"
+  },
+  "dependencies": {
+    "@cavulsqa/m3e": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@vue/test-utils": "^2.4.6",
+    "bumpp": "^11.1.0",
+    "happy-dom": "catalog:",
+    "typescript": "catalog:",
+    "unplugin-vue": "^7.0.0",
+    "vite": "catalog:",
+    "vite-plus": "catalog:",
+    "vue": "catalog:",
+    "vue-tsc": "^3.2.4"
+  },
+  "peerDependencies": {
+    "vue": "^3.5.0"
+  }
+}

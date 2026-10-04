@@ -98,6 +98,8 @@ declare global {
   const reactiveOmit: typeof import('@vueuse/core').reactiveOmit
   const reactivePick: typeof import('@vueuse/core').reactivePick
   const readonly: typeof import('vue').readonly
+  const recorderDiagnostics: typeof import('./src/plugins/recorder.plugin').recorderDiagnostics
+  const recorderPlugin: typeof import('./src/plugins/recorder.plugin').recorderPlugin
   const ref: typeof import('vue').ref
   const refAutoReset: typeof import('@vueuse/core').refAutoReset
   const refDebounced: typeof import('@vueuse/core').refDebounced
@@ -106,6 +108,7 @@ declare global {
   const refThrottled: typeof import('@vueuse/core').refThrottled
   const refWithControl: typeof import('@vueuse/core').refWithControl
   const renderBootstrapError: typeof import('./src/plugins/bootstrapError').renderBootstrapError
+  const reportProblem: typeof import('./src/plugins/recorder.plugin').reportProblem
   const request: typeof import('framework7/lite').request
   const resolveComponent: typeof import('vue').resolveComponent
   const seedPlugin: typeof import('./src/plugins/seed.plugin').seedPlugin
@@ -341,6 +344,9 @@ declare global {
   export type { TabbarVisibility } from './src/shared/composables/useTabbarVisibility'
   import('./src/shared/composables/useTabbarVisibility')
   // @ts-ignore
+  export type { RecorderBackend, RecorderDiagnostics } from './src/plugins/recorder.plugin'
+  import('./src/plugins/recorder.plugin')
+  // @ts-ignore
   export type { CaseComparison } from './src/modules/demo/composables/useBenchmark'
   import('./src/modules/demo/composables/useBenchmark')
   // @ts-ignore
@@ -446,6 +452,8 @@ declare module 'vue' {
     readonly reactiveOmit: UnwrapRef<typeof import('@vueuse/core')['reactiveOmit']>
     readonly reactivePick: UnwrapRef<typeof import('@vueuse/core')['reactivePick']>
     readonly readonly: UnwrapRef<typeof import('vue')['readonly']>
+    readonly recorderDiagnostics: UnwrapRef<typeof import('./src/plugins/recorder.plugin')['recorderDiagnostics']>
+    readonly recorderPlugin: UnwrapRef<typeof import('./src/plugins/recorder.plugin')['recorderPlugin']>
     readonly ref: UnwrapRef<typeof import('vue')['ref']>
     readonly refAutoReset: UnwrapRef<typeof import('@vueuse/core')['refAutoReset']>
     readonly refDebounced: UnwrapRef<typeof import('@vueuse/core')['refDebounced']>
@@ -454,6 +462,7 @@ declare module 'vue' {
     readonly refThrottled: UnwrapRef<typeof import('@vueuse/core')['refThrottled']>
     readonly refWithControl: UnwrapRef<typeof import('@vueuse/core')['refWithControl']>
     readonly renderBootstrapError: UnwrapRef<typeof import('./src/plugins/bootstrapError')['renderBootstrapError']>
+    readonly reportProblem: UnwrapRef<typeof import('./src/plugins/recorder.plugin')['reportProblem']>
     readonly request: UnwrapRef<typeof import('framework7/lite')['request']>
     readonly resolveComponent: UnwrapRef<typeof import('vue')['resolveComponent']>
     readonly seedPlugin: UnwrapRef<typeof import('./src/plugins/seed.plugin')['seedPlugin']>

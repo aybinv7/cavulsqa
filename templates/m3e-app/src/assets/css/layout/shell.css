@@ -1,0 +1,69 @@
+/*
+ * The shell: the views fill the window; the compact navigation bar floats over their bottom edge,
+ * or, from 600dp, the navigation rail sits beside them. Pages never measure either - they read
+ * `--app-nav-offset`, which the shell sets to the bar's height while it is on screen.
+ */
+@layer base {
+  :root {
+    --app-nav-offset: 0px;
+    --app-bottom-inset: calc(var(--app-nav-offset) + env(safe-area-inset-bottom));
+  }
+
+  /*
+   * The root is Framework7's own element: `F7App` renders `.framework7-root` and passes no class
+   * through, so a class on `<F7App>` styles nothing. Without the row, the rail stacks above the
+   * views and pushes every page below a landscape screen.
+   */
+  .framework7-root {
+    display: flex;
+    background: var(--md-sys-color-surface);
+  }
+
+  .app-shell__rail {
+    position: relative;
+    z-index: 5001;
+    flex: none;
+  }
+
+  .app-shell__views {
+    position: relative;
+    flex: 1 1 auto;
+    box-sizing: border-box;
+    min-width: 0;
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /*
+   * Material's hide-on-scroll timing: the bar enters in 225ms decelerating and leaves in 175ms
+   * accelerating, so it gets out of the way faster than it comes back.
+   */
+  .app-shell__bar {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 5001;
+    transition: transform 225ms var(--md-sys-motion-easing-emphasized-decelerate);
+  }
+
+  .app-shell__bar--hidden {
+    transform: translateY(calc(100% + 1px));
+    transition: transform 175ms var(--md-sys-motion-easing-emphasized-accelerate);
+  }
+
+  .page-content {
+    padding-bottom: calc(var(--app-bottom-inset) + 24px);
+    scroll-padding-bottom: calc(var(--app-bottom-inset) + 24px);
+    overscroll-behavior-y: contain;
+  }
+
+  .app-page--has-fab .page-content {
+    padding-bottom: calc(var(--app-bottom-inset) + 112px);
+  }
+
+  /*
+   * Tabs pinned under a page's app bar take the bar's scrolled container with it, so the two read
+   * as one surface once content slides beneath them.
+   */
+  .m3-app-bar[data-scrolled] ~ .app-sticky-tabs {
+    --m3-tabs-container: var(--md-sys-color-surface-container);
+  }
+}

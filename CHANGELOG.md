@@ -2,11 +2,163 @@
 
 Starts at `1.0.0`. Earlier versions are in the git history and are not documented here.
 
-`mobile-db`, `reactive-db` and `reactive-vue` share one version and release together — see
+The libraries (`mobile-db`, `reactive-db`, `reactive-vue`, `repository`, `m3e`, `m3e-vue`,
+`recorder`) share one version and release together — see
 [docs/RELEASING.md](docs/RELEASING.md). `@cavulsqa/create` tracks template changes on its own
 cadence and has its own section.
 
 ## Libraries
+
+### 1.4.0
+
+`mobile-db`, `reactive-db`, `reactive-vue` and `repository` were not published at 1.3.0, so 1.4.0
+is their first release since 1.2.1 and also carries the 1.3.0 changes below.
+
+- **Arabic and other joined scripts get zero tracking.** Letter-spacing pulls apart letters that
+  must join, and the M3 type scale tracks labels and body text. `systemStylesheet` now zeroes every
+  typescale tracking token under `:lang()` for `JOINED_SCRIPT_LANGUAGES` (Arabic, Persian, Urdu,
+  Pashto, Sindhi, Uyghur, Kurdish Sorani, Syriac) - on the root and on any element with its own
+  `lang`, so a switch of language switches it.
+- `M3Chip` ellipsises a label longer than its container instead of overflowing it; under
+  right-to-left the overflow ran past the card's start edge.
+- Who reacted: a tap on a message's reactions opens a sheet with a chip per emoji and the people
+  behind each - the owner first, whose row takes their reaction off (`react` with `null`), then
+  the names in each reaction's new `by`, then the rest of a count it does not name
+  (`reactionPeople`).
+- `useSwipeStep`: previous and next by swiping the content itself - a day, a record. It follows
+  the finger, leaves past a quarter of its width or on a flick, and the replacement slides in from
+  the other side; at an end it resists and springs back. Vertical scrolling stays native,
+  right-to-left mirrors it, reduced motion changes in place.
+- `M3Tabs` no longer replays a swipe. The indicator followed the finger to the next tab, then the
+  selection caught up, the tabs re-rendered, and Vue re-applied the old tab's style binding - the
+  indicator snapped back and animated forward again. It now has one writer, which skips a move to
+  where it already is.
+- Location, contact, poll and event messages. `ChatMessage` takes `location`, `contact`, `poll` or
+  `invite`, and the bubble draws it as a card: a drawn street map with a pin (no tiles, so it works
+  offline), a contact row, a poll whose answers fill with their share, an invite with a date tile
+  and going / maybe / can't-go buttons. `M3Messages` emits `vote` and `rsvp`; `applyVote` and
+  `applyRsvp` apply them, moving a single-answer vote and taking back a second tap. Opening a
+  location or a contact is `press`. Labels come through `cardLabels`.
+- **Fixed:** a message typed in a different direction from the interface took the interface's
+  direction, so `Ready?` in an Arabic chat read `?Ready`. Message text and every user-supplied
+  string on a card now sets its own direction (`dir="auto"`), while a card's text keeps the card's
+  alignment.
+
+### 1.3.0
+
+**New packages: `@cavulsqa/m3e` and `@cavulsqa/m3e-vue`** - Material 3 Expressive, extracted from the
+hand-ported copies in three apps into one tested source. `m3e` is framework-free: the 2025 colour
+spec with the variant fallback made explicit (`effectiveSpec`), all 35 `MaterialShapes` built from
+the androidx vertices, morphing, closed-form springs with velocity, `linear()` spring easings, the
+wavy progress and loading-indicator frames, and every `--md-sys-*` token. `m3e-vue` holds 95
+components (date and time pickers as dialog or sheet, Framework7-style wheel pickers, a virtual list
+that recycles its rows, swipe actions on list items, a full-screen search view, a range slider,
+cascading menus, a standard bottom sheet with peek, half and expanded detents, Framework7-style skeleton
+loading, and Compose's carousel - multi-browse, hero and uncontained - ported keyline for keyline,
+Framework7's stepper with its dynamic auto-repeat, expandable list items with an accordion
+list, and the exposed dropdown menu as a select or Framework7's autocomplete, Framework7's in-app
+notification as `useNotification` with its host, Framework7's sortable list, its photo browser, the full-screen dialog, swipeable tabs pinned under the app bar, a timeline, infinite scroll, grouped lists with an A–Z index, Framework7's smart select, its treeview with tri-state checks, a data table, SVG line, area, bar and donut charts, Framework7's messages and messagebar, its popover, swiper as a pager with page dots, FAB morph and
+lazy image, form storage as `useFormDraft`, its breadcrumbs, an HCT colour picker, a rich text
+editor whose HTML is sanitised in and out, a signature pad for proof of delivery, and a
+swipeable week strip for agendas), an overlay stack Android back can close, and promise-based snackbar, dialog and action
+sheet services. Both join the libraries' shared version.
+
+**New package: `@cavulsqa/recorder`** - an in-app field recorder for Capacitor WebViews: rrweb,
+console, network, performance and database tracks in a `.capu` archive Capubridge opens. `f7-app`
+starts it after the database opens (`VITE_FIELD_RECORDER`, on in dev) and shares captures through the
+Android share sheet. It must be published before the next creator release.
+
+**Fixed before release, found on a device audit:**
+
+- Framework7's core stylesheet sizes every bare `button` to `width: 100%`. The components never set
+  a width, so tabs overflowed the page and dragged it sideways, and dialog actions, the snackbar
+  action and the hero buttons each took a full row. The package now undoes it at zero specificity.
+- Vue compiles `:global(.parent) .child` to `.parent` alone. The FAB menu items never became
+  visible, and the right-to-left rules rotated the page root. Whole selectors are now wrapped, and a
+  test rejects the broken form.
+- Shadows, spacing and sizes were checked against the Compose Material3 sources: no shadow on
+  dialogs or FAB menu items, none on the floating toolbar (1dp with a FAB), the 48dp sheet handle
+  area, fixed tabs sharing the row, the split button's asymmetric padding, 24dp icons in icon
+  buttons, the snackbar under modal windows.
+- Pickers opened with `open` already true showed 00:00 instead of their value.
+- `m3e-app` keeps the splash up until the first page renders, hides it when the bootstrap fails
+  (also fixed in `f7-app`, where a failed database open left the splash up for good), offers a reload
+  when a route fails to load, and pluralises with the language's own rules.
+- Second device round: the wheel picker re-rendered every option on each detent (150 on a year
+  drum) and sat inside the sheet's blocking touch listener - it now marks the active option
+  directly and opts out of the sheet's drag. The sheet date picker has a compact header and pinned
+  actions. Calendars fill all six weeks with muted neighbouring days, and a disabled day that is
+  selected keeps its contrast. In landscape the page was pushed below the screen: `F7App` passes no
+  class through, so the shell's flex row never applied.
+- Wheels are now built like Framework7's picker: flat rows and gradient fades instead of a
+  scroll-driven 3D tilt per row and a mask on the scroller, which together lagged on phone GPUs.
+  Picker sheets drag only from their handle, so no blocking touch listener sits over the wheels,
+  and the per-detent haptic is throttled to one every 40ms.
+- Wheel columns take `loop`: hours, minutes, days and months roll over, re-centring on a middle
+  copy once a spin settles, instead of stopping at an end with empty rows.
+- `M3eResolver` resolves by the `M3` prefix, so a dev server sees components added after it started.
+- `m3e-app` development: linked packages skip pre-bundling, the component stylesheet is imported
+  outside Tailwind's compile, and a rebuild reloads the page once, after its files exist again.
+- The colour studio applied a typed seed only when the hex field turned valid, so pasting one
+  valid colour over another did nothing; it now applies every valid value.
+- `useElementSize` reported a border-box size but observed the content box, so a padding-only
+  change - the message bar dropping its safe-area inset under the keyboard - went unseen.
+
+**Added to `m3e-vue` on the way to release, each found missing on a device:**
+
+- Message reactions: a long-pressed message lifts out of a dimmed screen with a pill of reactions
+  above it and its actions (`MessageAction`) below, moving only as far as it must for all three to
+  fit (`liftPlacement`). Reactions sit on cookie shapes cut out of the bubble's edge, a fresh one
+  pops in with a ring burst and a haptic tick, and `applyReaction` keeps one reaction per person.
+  Without `reactions` or `actions` a long-press still emits `hold`.
+- `M3AttachSheet`, the sheet a composer's "+" opens: tinted icons on expressive shapes that spring
+  in, with a slot for recent photos.
+- `M3CodeField`: a verification code drawn in cells over one real input, so SMS autofill, paste,
+  IMEs and Arabic-Indic digits all work (`sanitizeCode`); error shakes, success fills in a wave.
+- `M3ChipField`: input chips from typed or pasted entries (`splitEntries`, `hasEntry`); backspace
+  marks before it removes, duplicates flash, rejected entries stay in the input.
+- `M3TextField` is controlled: the input shows what the bound model kept, so a formatter or filter
+  leaves no stray keystrokes. Prefix and suffix are spaced from the value.
+- `M3DayTimeline`: a day as an hour grid, overlapping events in lanes (`layoutEvents`) and a now
+  line in step with the clock. `M3Calendar` takes `marks` like `M3WeekStrip` and emits `month`.
+- `M3DataTable` column menu: sort, group with per-group summaries, pin and hide, each a model
+  (`v-model:group`, `pinned`, `hidden`) so a screen can persist the layout.
+- Stacked notifications with expand and clear-all; `useHideOnScroll` and an enter-always top app
+  bar (`scrollBehavior`).
+
+**Scale, measured on a Huawei P30 Pro before release:**
+
+- `M3DataTable` renders only the rows in view past `virtualAfter` lines (120), between spacer rows;
+  columns only widen while it scrolls, and `aria-rowcount` / `aria-rowindex` keep the true size for
+  screen readers. At 5,000 rows: showing them 11.4s to 118ms, sorting 21.9s to 105ms, grouping
+  14.7s to 207ms, opening a column menu 1.1s to 85ms. Sorting reads each cell's text once instead of
+  in every comparison, and selecting a group no longer scans the selection per row.
+- `M3Messages` renders the newest `windowSize` rows (60) and more as the reader scrolls up, holding
+  the message they are reading in place; back at the end it drops the rows far above. In a
+  2,000-message thread: opening 2.8s to 130ms, a new message 545ms to 99ms, the worst frame while
+  scrolling back 1.5s to 99ms. `useConversationScroll` exposes `hold(change)` for the same purpose.
+
+**Right-to-left and dark, swept on a device:**
+
+- A verification code reads left to right in every language: `M3CodeField` keeps its cells in that
+  order under `dir="rtl"`, where they had filled from the right.
+- `M3TextField` keeps the value of a phone number, email, URL or number field left to right in a
+  right-to-left layout, prefix and suffix with it, while the label and icons mirror; a `+213`
+  number read backwards before. `valueDir` overrides the guess.
+- The reaction pill and the message menu are placed from their measured width and kept inside the
+  screen; a pill wider than the room beside a bubble ran off the edge (`alignBeside`).
+- `M3DayTimeline` shortens an event's text with an ellipsis inside its card; in a narrow lane the
+  text ran past the card's start edge, which under right-to-left cut its first letters.
+
+**Packaging, found by installing the tarballs into a fresh project at the top of every peer range:**
+
+- `@cavulsqa/m3e` bundles `@material/material-color-utilities` instead of importing it. Its 0.4.0
+  ships an extensionless import Node's ESM loader rejects, so a consumer's Vitest run or SSR crashed
+  on import unless it inlined the package itself - as this repository's own tests had to. Its
+  declarations and Apache-2.0 notices come along; nothing installs separately.
+- `@cavulsqa/recorder` bundles `rrweb` and builds for the browser. rrweb 2.0.0-alpha.4 is
+  `"type": "module"` with a UMD `main`, so a consumer's Vitest run got no named exports from it.
+- `M3DayTimeline` touched `document` during setup, which failed outside a browser.
 
 ### 1.2.1
 
@@ -137,6 +289,54 @@ If you are on something older, the breaking changes you have to cross were relea
   the key so it re-runs when the key moves.
 
 ## @cavulsqa/create
+
+### 2.10.0
+
+**New template: `m3e-app`** (`--template m3e-app`) - the same data layer in Material 3 Expressive,
+with Framework7 kept as the navigation engine only, a colour studio, an adaptive bar/rail shell, a
+component gallery and an `m3-expressive` skill. The creator now offers templates from a numbered
+menu; `f7-app` stays the default.
+
+- The gallery's agenda switches between day, week and month views; the chat demo reacts, copies and
+  deletes on long-press, and its "+" opens an attach sheet whose gallery, camera and file options use
+  the system pickers through file inputs; the text input page has a password strength meter, a
+  grouped mobile number, a verification code and customer tags; the data table persists its layout.
+- `app/scroll.config.ts` sets how the bars behave while a page scrolls: the small top app bar
+  enters always, the navigation bar hides on scroll.
+- **Fixed:** hiding the navigation bar on scroll also removed its row from the page padding, so near
+  the end of a page the content shrank under the finger, the scroll position clamped, the bar came
+  back and the page jumped - a loop that fought every scroll near the bottom. Scroll-hiding now only
+  slides the bar; the row is released for the keyboard and pushed pages.
+- The gallery's data table switches between 30, 1,000 and 5,000 rows, so scale can be checked on
+  any device.
+- **Fixed: dark mode never applied** unless the phone itself was dark and Framework7 happened to
+  agree. `F7App` turns an unset `darkMode` into `false`, and Framework7 then clears `dark` from
+  `<html>` at init - after the theme had set it. The template now hands Framework7 the mode the
+  theme already applied.
+- The document's `lang` and `dir` follow the app's locale from the first paint (they were only set
+  on a language change), and Framework7's own right-to-left flag follows them, so a right-to-left
+  locale needs nothing but its translation.
+- **Arabic (`ar-DZ`).** Every string, in Modern Standard Arabic for an Algerian audience: Latin
+  digits and the Algerian month names (جانفي، فيفري ...) come from the `ar-DZ` tag, plurals use
+  Arabic's six forms (`zero | one | two | few | many | other`, which the plural rule now
+  supports), and names, references and codes inserted into a sentence are wrapped in Unicode
+  isolates so a Latin value cannot scramble the line. A device set to any Arabic opens in it. A
+  test keeps every locale's keys and placeholders in step with English. Language names are shown
+  in their own language. The translation is AI-assisted and needs a native speaker's review.
+- A card expands into its page as one surface (a container transform): its corners and colour grow
+  into the page and shrink back into the same card on back. The gallery's Surfaces section
+  demonstrates it with three cards; the demo's orders and the order search open an order with it.
+- Each feature on Home opens with its own Framework7 page transition (circle, cover, vertical cover,
+  dive, fade, flip, parallax, push), named on its row and on the page it opens; back plays it in
+  reverse. Under reduced motion they fall back to the app's cross-fade.
+- The chat demo names who reacted, and the agenda's day view swipes to the previous and next day.
+- The chat's attach sheet sends a location, a contact, a poll or an event. Location asks the
+  device (the web view's own geolocation) and, when that fails, says why and offers the depot;
+  contacts are picked from the customers table; polls and events have composer sheets, and the
+  team votes and answers. A location opens in the maps app, a contact opens the order search for
+  that customer. Location needs `ACCESS_COARSE_LOCATION` and `ACCESS_FINE_LOCATION` in the generated
+  Android manifest - see `.claude/rules/native.md`.
+- Generated apps depend on the 1.4.0 libraries.
 
 ### 2.9.3
 

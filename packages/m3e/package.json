@@ -1,0 +1,53 @@
+{
+  "name": "@cavulsqa/m3e",
+  "version": "1.4.0",
+  "description": "Framework-free Material 3 Expressive core: 2025-spec dynamic colour, the 35-shape library with morphing, spring motion tokens, wavy progress geometry, the loading indicator and every system token as CSS.",
+  "keywords": [
+    "material-3",
+    "material-design",
+    "material-expressive",
+    "material-you",
+    "shapes",
+    "springs",
+    "theming"
+  ],
+  "homepage": "https://github.com/aybinv7/cavulsqa/tree/main/packages/m3e#readme",
+  "bugs": {
+    "url": "https://github.com/aybinv7/cavulsqa/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aybinv7/cavulsqa.git",
+    "directory": "packages/m3e"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "dev": "vp pack --watch",
+    "test": "vp test",
+    "check": "vp check",
+    "prepublishOnly": "vp run build"
+  },
+  "devDependencies": {
+    "@material/material-color-utilities": "^0.4.0",
+    "@types/node": "catalog:",
+    "bumpp": "^11.1.0",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plus": "catalog:"
+  },
+  "inlinedDependencies": {
+    "@material/material-color-utilities": "0.4.0"
+  }
+}

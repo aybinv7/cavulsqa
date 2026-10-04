@@ -35,6 +35,7 @@ declare const __APP_VERSION__: string;
 interface ImportMetaEnv {
   readonly VITE_STORAGE_ENGINE?: string;
   readonly VITE_PRAGMA_PROFILE?: "safe" | "fast";
+  readonly VITE_FIELD_RECORDER?: "on" | "off";
 }
 
 interface ImportMeta {

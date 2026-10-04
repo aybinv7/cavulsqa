@@ -1,0 +1,18 @@
+/*
+ * Framework7 still draws the page and view containers, so its variables point at the M3 roles. It
+ * draws nothing else: no navbar, no toolbar, no list. If something here grows past the page
+ * surface, a Framework7 component has crept back in.
+ */
+@layer theme {
+  :root,
+  .md,
+  .md.dark,
+  .dark {
+    --f7-page-bg-color: var(--md-sys-color-surface);
+    --f7-text-color: var(--md-sys-color-on-surface);
+    --f7-theme-color: var(--md-sys-color-primary);
+    --f7-font-family: var(--md-ref-typeface-plain);
+    --f7-bars-bg-color: transparent;
+    --f7-page-transition-duration: var(--md-sys-motion-spring-slow-spatial-duration);
+  }
+}

@@ -1,0 +1,6 @@
+/*
+ * The component stylesheet, in the `components` layer `app.css` declared. It is imported on its own,
+ * after `app.css`, so Vite's CSS pipeline - not Tailwind's - owns it: Tailwind caches its compile and
+ * never noticed a linked package rebuilding this file.
+ */
+@import "@cavulsqa/m3e-vue/style.css" layer(components);

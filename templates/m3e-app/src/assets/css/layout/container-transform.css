@@ -1,0 +1,113 @@
+/*
+ * `m3e-container`: Material's container transform, driven by `useContainerTransform`. The opened
+ * page starts clipped to the tapped card - its box, its corner radius, its colour, written on the
+ * view as `--m3e-ct-*` - and the clip opens to the full screen while the page's own content fades
+ * in over the card's colour. Back runs it in reverse into the card, re-measured just before. The
+ * page underneath holds still: only the container moves.
+ *
+ * The clip animates on the main thread, so it stays one element for one emphasized half-second.
+ * Under reduced motion it is a cross-fade.
+ *
+ * @see https://m3.material.io/styles/motion/transitions/transition-patterns
+ */
+@layer base {
+  :root {
+    --m3e-ct-duration: var(--md-sys-motion-duration-long2, 500ms);
+    --m3e-ct-ease: var(--md-sys-motion-easing-emphasized, cubic-bezier(0.2, 0, 0, 1));
+  }
+
+  .router-transition-m3e-container-forward .page-next {
+    z-index: 1;
+    animation: m3e-ct-open var(--m3e-ct-duration) var(--m3e-ct-ease) both;
+  }
+
+  .router-transition-m3e-container-forward .page-next > * {
+    animation: m3e-ct-content-in var(--m3e-ct-duration) linear both;
+  }
+
+  .router-transition-m3e-container-backward .page-current {
+    z-index: 1;
+    animation: m3e-ct-close var(--m3e-ct-duration) var(--m3e-ct-ease) both;
+  }
+
+  .router-transition-m3e-container-backward .page-current > * {
+    animation: m3e-ct-content-out var(--m3e-ct-duration) linear both;
+  }
+
+  .router-transition-m3e-container-forward .page-current,
+  .router-transition-m3e-container-backward .page-previous {
+    animation: m3e-ct-hold var(--m3e-ct-duration) linear both;
+  }
+
+  @keyframes m3e-ct-open {
+    from {
+      clip-path: inset(
+        var(--m3e-ct-top) var(--m3e-ct-right) var(--m3e-ct-bottom) var(--m3e-ct-left) round
+          var(--m3e-ct-radius)
+      );
+      background-color: var(--m3e-ct-color);
+    }
+    to {
+      clip-path: inset(0 0 0 0 round 0);
+    }
+  }
+
+  @keyframes m3e-ct-close {
+    from {
+      clip-path: inset(0 0 0 0 round 0);
+    }
+    to {
+      clip-path: inset(
+        var(--m3e-ct-top) var(--m3e-ct-right) var(--m3e-ct-bottom) var(--m3e-ct-left) round
+          var(--m3e-ct-radius)
+      );
+      background-color: var(--m3e-ct-color);
+    }
+  }
+
+  /* The card's own content is gone at once; the page's arrives once the container has room. */
+  @keyframes m3e-ct-content-in {
+    0%,
+    35% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes m3e-ct-content-out {
+    0% {
+      opacity: 1;
+    }
+    25%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes m3e-ct-hold {
+    from,
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .router-transition-m3e-container-forward .page-next,
+    .router-transition-m3e-container-backward .page-previous {
+      animation: m3e-fade-in 200ms linear both;
+    }
+
+    .router-transition-m3e-container-forward .page-current,
+    .router-transition-m3e-container-backward .page-current {
+      animation: m3e-fade-out 200ms linear both;
+    }
+
+    .router-transition-m3e-container-forward .page-next > *,
+    .router-transition-m3e-container-backward .page-current > * {
+      animation: none;
+    }
+  }
+}
