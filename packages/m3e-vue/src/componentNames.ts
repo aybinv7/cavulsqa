@@ -91,6 +91,7 @@ export const COMPONENT_NAMES = [
   "M3TopAppBar",
   "M3Tree",
   "M3VirtualList",
+  "M3WeekStrip",
   "M3WheelColumn",
   "M3WheelPicker",
 ] as const;

@@ -61,6 +61,16 @@ export function weekday(value: IsoDate): number {
   return new Date(Date.UTC(parts.year, parts.month, parts.day)).getUTCDay();
 }
 
+/** The first day of the week holding `value`, with weeks starting on `firstDay` (0 Sunday - 6 Saturday). */
+export function startOfWeek(value: IsoDate, firstDay: number): IsoDate {
+  return addDays(value, -((weekday(value) - firstDay + 7) % 7));
+}
+
+/** The seven days of the week starting at `start`. */
+export function weekDays(start: IsoDate): IsoDate[] {
+  return Array.from({ length: 7 }, (_, index) => addDays(start, index));
+}
+
 export interface DayCell {
   iso: IsoDate;
   day: number;
