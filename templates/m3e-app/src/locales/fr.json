@@ -227,6 +227,10 @@
         "title": "Saisie",
         "subtitle": "Champs et barre de recherche"
       },
+      "carousels": {
+        "title": "Carrousels",
+        "subtitle": "Multi-navigation, héros et libre"
+      },
       "surfaces": {
         "title": "Cartes et listes",
         "subtitle": "Surfaces et listes expressives"
@@ -471,6 +475,26 @@
       "searchViewNote": "La barre s’ouvre en vue plein écran sur un seul ressort : recherches récentes d’abord, puis résultats à la frappe. Retour la ferme.",
       "searchCustomers": "Rechercher des clients",
       "noMatches": "Aucun client ne correspond"
+    },
+    "carousels": {
+      "multiBrowse": "Multi-navigation",
+      "multiBrowseNote": "De grands éléments et de plus petits qui dépassent : chacun se compresse vers le bord et son image glisse sous le masque. Un geste vif porte aussi loin qu'il va et s'aligne sur un élément.",
+      "hero": "Héros",
+      "heroNote": "Un élément mis en avant entre deux petits, centré dès qu'on quitte le premier. Un geste vif avance d'un élément.",
+      "featured": "En avant : {place}",
+      "uncontained": "Libre",
+      "uncontainedNote": "Des éléments de largeur fixe qui glissent librement ; seul celui qui sort par le bord se compresse.",
+      "slide": "{n} sur {count}",
+      "places": {
+        "mountains": "Montagnes",
+        "forest": "Forêt",
+        "coast": "Côte",
+        "city": "Ville",
+        "harbour": "Port",
+        "trail": "Sentier",
+        "park": "Parc",
+        "cafe": "Café"
+      }
     },
     "surfaces": {
       "cards": "Cartes",

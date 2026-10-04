@@ -227,6 +227,10 @@
         "title": "Text input",
         "subtitle": "Fields and the search bar"
       },
+      "carousels": {
+        "title": "Carousels",
+        "subtitle": "Multi-browse, hero and uncontained"
+      },
       "surfaces": {
         "title": "Cards and lists",
         "subtitle": "Surfaces and expressive lists"
@@ -471,6 +475,26 @@
       "searchViewNote": "The bar opens into a full-screen view on one spring: recent searches first, then matches as you type. Back closes it.",
       "searchCustomers": "Search customers",
       "noMatches": "No customer matches"
+    },
+    "carousels": {
+      "multiBrowse": "Multi-browse",
+      "multiBrowseNote": "Large items with smaller ones peeking: each compresses toward the edge and its picture slides under the mask. A fling carries as far as it goes and snaps to an item.",
+      "hero": "Hero",
+      "heroNote": "One featured item between two small ones, centred once you leave the first. A fling moves one item.",
+      "featured": "Featured: {place}",
+      "uncontained": "Uncontained",
+      "uncontainedNote": "Fixed-width items that coast freely; only the one leaving the edge compresses.",
+      "slide": "{n} of {count}",
+      "places": {
+        "mountains": "Mountains",
+        "forest": "Forest",
+        "coast": "Coast",
+        "city": "City",
+        "harbour": "Harbour",
+        "trail": "Trail",
+        "park": "Park",
+        "cafe": "Café"
+      }
     },
     "surfaces": {
       "cards": "Cards",

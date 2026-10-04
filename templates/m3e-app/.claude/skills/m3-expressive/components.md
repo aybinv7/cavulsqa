@@ -60,6 +60,14 @@ standard. Items: `headline`, `supporting`, `overline`, `trailingText`, `multilin
 action past half the row (deletes, archives - pair with an undo snackbar), `v-model:swiped` reads
 the open side. One row open at a time; a tap outside closes it. → lists/specs
 
+**`M3Carousel`** - Compose's carousel, keyline for keyline: `items`, `label`, `variant`
+multi-browse (default; browsing many items - photos, products) | hero (one featured item at a time;
+a fling moves one) | uncontained (fixed `item-width`, coasts without snapping), `item-width`
+(preferred large width, 186), `item-spacing` 8, `content-padding` 16, `height`, `v-model:item`.
+Items are laid out full size and masked, so put a full-bleed picture in the slot and let it
+parallax; fade labels with `--m3-carousel-item-progress` and slide them with
+`--m3-carousel-mask-start`. The slot's `scrollTo` brings a tapped item forward. → carousel/specs
+
 **`M3Card`** - `variant` elevated | filled | outlined; `clickable` makes the whole card one target -
 then put no other buttons inside. → cards/specs
 

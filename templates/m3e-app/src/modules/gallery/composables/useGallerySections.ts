@@ -11,6 +11,7 @@ import WidgetsIcon from "~icons/material-symbols/widgets-outline-rounded";
 import TuneIcon from "~icons/material-symbols/tune-rounded";
 import CalendarIcon from "~icons/material-symbols/calendar-today-outline-rounded";
 import SpeedIcon from "~icons/material-symbols/speed-rounded";
+import CarouselIcon from "~icons/material-symbols/view-carousel-outline-rounded";
 import type { Tone } from "@/shared/utils/tone";
 
 export interface GallerySection {
@@ -111,6 +112,13 @@ export const sections: readonly GallerySection[] = [
     "gem",
     "secondary",
     () => import("../components/sections/GalleryInputs.vue"),
+  ),
+  section(
+    "carousels",
+    CarouselIcon,
+    "cookie12Sided",
+    "primary",
+    () => import("../components/sections/GalleryCarousels.vue"),
   ),
   section(
     "surfaces",
