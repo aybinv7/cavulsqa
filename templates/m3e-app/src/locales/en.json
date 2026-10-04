@@ -230,7 +230,7 @@
       },
       "carousels": {
         "title": "Carousels",
-        "subtitle": "Multi-browse, hero and uncontained"
+        "subtitle": "Multi-browse, hero, uncontained, photo browser"
       },
       "surfaces": {
         "title": "Cards and lists",
@@ -526,6 +526,17 @@
         "trail": "Trail",
         "park": "Park",
         "cafe": "Café"
+      },
+      "photos": "Photo browser",
+      "photosNote": "Framework7's photo browser: swipe between photos, pinch or double-tap to zoom, pan when zoomed, swipe up or down to close. A tap hides the bar.",
+      "counter": "{position} of {count}",
+      "scenes": {
+        "mountains": "Mountains at dawn",
+        "coast": "The coast, portrait",
+        "dunes": "Dunes, panorama",
+        "city": "City skyline",
+        "forest": "Pine forest",
+        "harbour": "Harbour at dusk"
       }
     },
     "surfaces": {

@@ -195,6 +195,7 @@ declare global {
   const useCurrentElement: typeof import('@vueuse/core').useCurrentElement
   const useCycleList: typeof import('@vueuse/core').useCycleList
   const useDark: typeof import('@vueuse/core').useDark
+  const useDarkStatusBar: typeof import('./src/shared/composables/theme/useThemeSettings').useDarkStatusBar
   const useDateFormat: typeof import('@vueuse/core').useDateFormat
   const useDebounce: typeof import('@vueuse/core').useDebounce
   const useDebounceFn: typeof import('@vueuse/core').useDebounceFn
@@ -269,6 +270,7 @@ declare global {
   const useParentElement: typeof import('@vueuse/core').useParentElement
   const usePerformanceObserver: typeof import('@vueuse/core').usePerformanceObserver
   const usePermission: typeof import('@vueuse/core').usePermission
+  const usePhotoScenes: typeof import('./src/modules/gallery/composables/usePhotoScenes').usePhotoScenes
   const usePointer: typeof import('@vueuse/core').usePointer
   const usePointerLock: typeof import('@vueuse/core').usePointerLock
   const usePointerSwipe: typeof import('@vueuse/core').usePointerSwipe
@@ -588,6 +590,7 @@ declare module 'vue' {
     readonly useCurrentElement: UnwrapRef<typeof import('@vueuse/core')['useCurrentElement']>
     readonly useCycleList: UnwrapRef<typeof import('@vueuse/core')['useCycleList']>
     readonly useDark: UnwrapRef<typeof import('@vueuse/core')['useDark']>
+    readonly useDarkStatusBar: UnwrapRef<typeof import('./src/shared/composables/theme/useThemeSettings')['useDarkStatusBar']>
     readonly useDateFormat: UnwrapRef<typeof import('@vueuse/core')['useDateFormat']>
     readonly useDebounce: UnwrapRef<typeof import('@vueuse/core')['useDebounce']>
     readonly useDebounceFn: UnwrapRef<typeof import('@vueuse/core')['useDebounceFn']>
@@ -661,6 +664,7 @@ declare module 'vue' {
     readonly useParentElement: UnwrapRef<typeof import('@vueuse/core')['useParentElement']>
     readonly usePerformanceObserver: UnwrapRef<typeof import('@vueuse/core')['usePerformanceObserver']>
     readonly usePermission: UnwrapRef<typeof import('@vueuse/core')['usePermission']>
+    readonly usePhotoScenes: UnwrapRef<typeof import('./src/modules/gallery/composables/usePhotoScenes')['usePhotoScenes']>
     readonly usePointer: UnwrapRef<typeof import('@vueuse/core')['usePointer']>
     readonly usePointerLock: UnwrapRef<typeof import('@vueuse/core')['usePointerLock']>
     readonly usePointerSwipe: UnwrapRef<typeof import('@vueuse/core')['usePointerSwipe']>

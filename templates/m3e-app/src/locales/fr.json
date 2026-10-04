@@ -230,7 +230,7 @@
       },
       "carousels": {
         "title": "Carrousels",
-        "subtitle": "Multi-navigation, héros et libre"
+        "subtitle": "Multi-navigation, héros, libre, visionneuse"
       },
       "surfaces": {
         "title": "Cartes et listes",
@@ -526,6 +526,17 @@
         "trail": "Sentier",
         "park": "Parc",
         "cafe": "Café"
+      },
+      "photos": "Visionneuse de photos",
+      "photosNote": "La visionneuse de Framework7 : glissez d'une photo à l'autre, pincez ou touchez deux fois pour zoomer, déplacez une photo agrandie, glissez vers le haut ou le bas pour fermer. Un toucher masque la barre.",
+      "counter": "{position} sur {count}",
+      "scenes": {
+        "mountains": "Montagnes à l'aube",
+        "coast": "La côte, en portrait",
+        "dunes": "Dunes, panorama",
+        "city": "Silhouette de la ville",
+        "forest": "Forêt de pins",
+        "harbour": "Port au crépuscule"
       }
     },
     "surfaces": {

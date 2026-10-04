@@ -78,6 +78,34 @@
       </template>
     </M3Carousel>
   </GalleryBlock>
+
+  <GalleryBlock
+    :title="t('gallery.carousels.photos')"
+    :note="t('gallery.carousels.photosNote')"
+    stack
+  >
+    <div class="grid grid-cols-3 gap-1 overflow-hidden rounded-lg">
+      <button
+        v-for="(photo, position) in photos"
+        :key="position"
+        type="button"
+        class="aspect-square w-full overflow-hidden border-0 p-0"
+        :aria-label="photo.alt"
+        @click="openPhoto(position)"
+      >
+        <img :src="photo.src" alt="" class="size-full object-cover" decoding="async" />
+      </button>
+    </div>
+  </GalleryBlock>
+
+  <M3PhotoBrowser
+    v-model:open="browserOpen"
+    v-model:index="photoIndex"
+    :photos="photos"
+    :label="t('gallery.carousels.photos')"
+    :close-label="t('shell.dismiss')"
+    :counter-text="counterText"
+  />
 </template>
 
 <script setup lang="ts">
@@ -93,6 +121,7 @@ import ParkIcon from "~icons/material-symbols/park-outline-rounded";
 import SailingIcon from "~icons/material-symbols/sailing-outline-rounded";
 import GalleryBlock from "@/modules/gallery/components/GalleryBlock.vue";
 import GalleryCarouselTile from "@/modules/gallery/components/GalleryCarouselTile.vue";
+import { usePhotoScenes } from "@/modules/gallery/composables/usePhotoScenes";
 
 interface Place {
   id: string;
@@ -104,6 +133,19 @@ interface Place {
 
 const { t } = useI18n();
 const featured = ref(0);
+const browserOpen = ref(false);
+const photoIndex = ref(0);
+const { photos } = usePhotoScenes((kind) => t(`gallery.carousels.scenes.${kind}`));
+useDarkStatusBar(() => browserOpen.value);
+
+function openPhoto(position: number) {
+  photoIndex.value = position;
+  browserOpen.value = true;
+}
+
+function counterText(position: number, count: number) {
+  return t("gallery.carousels.counter", { position, count });
+}
 
 const PLACES: readonly Place[] = [
   {

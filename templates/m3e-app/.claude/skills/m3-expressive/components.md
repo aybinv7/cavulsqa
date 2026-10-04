@@ -144,6 +144,14 @@ tick per detent. **`M3DateWheel`** / **`M3TimeWheel`** are the ready date and ti
 an `M3BottomSheet` with a draft when the choice needs confirming. No M3 spec - it is the F7 parity
 piece.
 
+## Photos
+
+**`M3PhotoBrowser`** - Framework7's photo browser: `photos` (`{ src, alt, caption?, width?, height? }`),
+`v-model:open`, `v-model:index`, `label`, `#actions` for the bar (share, delete). Swipe between,
+pinch or double-tap to zoom, pan when zoomed, swipe up or down to close; only neighbours load. Give
+`width`/`height` when known. It is drawn on black - call `useDarkStatusBar(() => open.value)` so the
+status bar icons turn light while it shows.
+
 ## Lists at scale
 
 **`M3VirtualList`** - thousands of rows against the page's own scroller (the app bar still

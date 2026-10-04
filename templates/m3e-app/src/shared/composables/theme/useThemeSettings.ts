@@ -141,3 +141,15 @@ export function useThemeSettings(): ThemeControls {
     },
   };
 }
+
+/**
+ * Light status-bar icons while `active` holds - for a surface drawn on black, such as the photo
+ * browser - and the theme's own style back once it ends or the caller unmounts.
+ */
+export function useDarkStatusBar(active: () => boolean): void {
+  const { isDark } = startTheme();
+  watch(active, (on) => void paintStatusBar(on || isDark.value));
+  onScopeDispose(() => {
+    if (active()) void paintStatusBar(isDark.value);
+  });
+}
