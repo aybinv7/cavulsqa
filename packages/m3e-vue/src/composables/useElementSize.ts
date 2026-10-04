@@ -47,7 +47,7 @@ export function useElementSize(target: Ref<Element | null | undefined>): Element
         width.value = box ? box.inlineSize : entry.contentRect.width;
         height.value = box ? box.blockSize : entry.contentRect.height;
       });
-      ro.observe(element);
+      ro.observe(element, { box: "border-box" });
     },
     { immediate: true, flush: "post" },
   );

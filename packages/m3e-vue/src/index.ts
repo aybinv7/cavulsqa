@@ -41,6 +41,8 @@ export { default as M3LoadingIndicator } from "./components/progress/M3LoadingIn
 export { default as M3Menu } from "./components/menu/M3Menu.vue";
 export { default as M3MenuGroup } from "./components/menu/M3MenuGroup.vue";
 export { default as M3MenuItem } from "./components/menu/M3MenuItem.vue";
+export { default as M3MessageBar } from "./components/messages/M3MessageBar.vue";
+export { default as M3Messages } from "./components/messages/M3Messages.vue";
 export { default as M3ModalNavigationRail } from "./components/navigation/M3ModalNavigationRail.vue";
 export { default as M3NavigationBar } from "./components/navigation/M3NavigationBar.vue";
 export { default as M3NavigationItem } from "./components/navigation/M3NavigationItem.vue";
@@ -172,3 +174,4 @@ export { groupKey } from "./utils/listIndex.js";
 export type { TreeNode } from "./utils/tree.js";
 export type { DataColumn, DataSort } from "./utils/dataTable.js";
 export type { ChartSeries } from "./components/chart/palette.js";
+export type { ChatMessage, MessageImage, MessageStatus } from "./utils/messages.js";

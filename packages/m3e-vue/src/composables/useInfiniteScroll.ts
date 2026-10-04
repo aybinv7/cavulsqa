@@ -9,6 +9,8 @@ export interface InfiniteScrollOptions {
   load: () => Promise<boolean | void>;
   /** How far before the end, in px, the next page starts loading. */
   distance?: () => number;
+  /** Which end of the scroller the sentinel sits at - `start` for history loaded above. */
+  edge?: () => "start" | "end";
   enabled: () => boolean;
 }
 
@@ -23,11 +25,19 @@ export function useInfiniteScroll(options: InfiniteScrollOptions) {
   let observer: IntersectionObserver | null = null;
   let root: HTMLElement | null = null;
 
+  const distance = () => options.distance?.() ?? 200;
+  const atStart = () => options.edge?.() === "start";
+
   function withinReach(): boolean {
     const sentinel = options.sentinel.value;
     if (!sentinel) return false;
+    const box = sentinel.getBoundingClientRect();
+    if (atStart()) {
+      const top = root ? root.getBoundingClientRect().top : 0;
+      return box.bottom >= top - distance();
+    }
     const bottom = root ? root.getBoundingClientRect().bottom : window.innerHeight;
-    return sentinel.getBoundingClientRect().top <= bottom + (options.distance?.() ?? 200);
+    return box.top <= bottom + distance();
   }
 
   async function run() {
@@ -63,7 +73,10 @@ export function useInfiniteScroll(options: InfiniteScrollOptions) {
       (entries) => {
         if (entries.some((entry) => entry.isIntersecting)) void run();
       },
-      { root, rootMargin: `0px 0px ${options.distance?.() ?? 200}px 0px` },
+      {
+        root,
+        rootMargin: atStart() ? `${distance()}px 0px 0px 0px` : `0px 0px ${distance()}px 0px`,
+      },
     );
     observer.observe(sentinel);
   }

@@ -10,11 +10,13 @@ import { useInfiniteScroll } from "../../composables/useInfiniteScroll.js";
  * loads it shows the loading indicator; a failed page shows `errorText` and a retry button instead
  * of trying again by itself; `endText`, when given, closes the list. The status is announced.
  * Call the exposed `reset()` after replacing the list, such as on a new filter or a refresh.
+ * With `edge="start"` it sits above a list and loads what came before - a conversation's history.
  */
 const props = withDefaults(
   defineProps<{
     load: () => Promise<boolean | void>;
     distance?: number;
+    edge?: "start" | "end";
     disabled?: boolean;
     loadingLabel?: string;
     errorText?: string;
@@ -23,6 +25,7 @@ const props = withDefaults(
   }>(),
   {
     distance: 200,
+    edge: "end",
     disabled: false,
     loadingLabel: "Loading more",
     errorText: "Could not load more",
@@ -35,6 +38,7 @@ const { state, retry, reset } = useInfiniteScroll({
   sentinel,
   load: () => props.load(),
   distance: () => props.distance,
+  edge: () => props.edge,
   enabled: () => !props.disabled,
 });
 

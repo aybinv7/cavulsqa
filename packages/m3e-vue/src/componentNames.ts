@@ -40,6 +40,8 @@ export const COMPONENT_NAMES = [
   "M3Menu",
   "M3MenuGroup",
   "M3MenuItem",
+  "M3MessageBar",
+  "M3Messages",
   "M3ModalNavigationRail",
   "M3NavigationBar",
   "M3NavigationItem",
