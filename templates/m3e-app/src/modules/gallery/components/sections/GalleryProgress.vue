@@ -8,6 +8,58 @@
     />
   </GalleryBlock>
 
+  <GalleryBlock
+    :title="t('gallery.progress.skeleton')"
+    :note="t('gallery.progress.skeletonNote')"
+    stack
+  >
+    <div class="flex flex-wrap items-center gap-2">
+      <M3Chip
+        v-for="option in EFFECTS"
+        :key="option"
+        kind="filter"
+        :label="t(`gallery.progress.${option}`)"
+        :selected="effect === option"
+        @update:selected="effect = option"
+      />
+      <M3Button class="ms-auto" variant="tonal" size="s" :disabled="loading" @click="reload">{{
+        t("gallery.progress.reload")
+      }}</M3Button>
+    </div>
+    <M3Skeleton
+      v-if="loading"
+      class="flex flex-col gap-4 [--m3-skeleton-surface:var(--md-sys-color-surface-container-low)]"
+      :effect="effect"
+      :label="t('gallery.progress.loadingCustomers')"
+    >
+      <div v-for="row in 3" :key="row" class="flex items-center gap-4">
+        <M3SkeletonBlock shape="circle" :width="40" />
+        <div class="flex flex-1 flex-col">
+          <M3SkeletonText :lines="1" typescale="body-large" width="45%" />
+          <M3SkeletonText :lines="1" typescale="body-medium" width="30%" />
+        </div>
+      </div>
+    </M3Skeleton>
+    <div v-else class="flex flex-col gap-4">
+      <div v-for="row in 3" :key="row" class="flex items-center gap-4">
+        <M3Shape
+          shape="cookie9Sided"
+          class="size-10 bg-primary-container text-on-primary-container"
+        >
+          <span class="type-title-medium grid size-full place-items-center">{{ row }}</span>
+        </M3Shape>
+        <div class="flex flex-col">
+          <span class="type-body-large text-on-surface">{{
+            t("gallery.progress.customer", { n: row })
+          }}</span>
+          <span class="type-body-medium text-on-surface-variant">{{
+            t("gallery.progress.customerNote", { count: row * 2 })
+          }}</span>
+        </div>
+      </div>
+    </div>
+  </GalleryBlock>
+
   <GalleryBlock :title="t('gallery.progress.loading')" :note="t('gallery.progress.loadingNote')">
     <M3LoadingIndicator :label="t('gallery.loading')" />
     <M3LoadingIndicator contained :label="t('gallery.loading')" />
@@ -49,5 +101,18 @@ import GalleryBlock from "@/modules/gallery/components/GalleryBlock.vue";
 
 const { t } = useI18n();
 const percent = ref(62);
+const EFFECTS = ["wave", "pulse"] as const;
+const effect = ref<(typeof EFFECTS)[number]>("wave");
+const loading = ref(true);
+let timer: ReturnType<typeof setTimeout> | undefined;
+
+function reload() {
+  loading.value = true;
+  clearTimeout(timer);
+  timer = setTimeout(() => (loading.value = false), 2400);
+}
+
+onMounted(reload);
+onBeforeUnmount(() => clearTimeout(timer));
 const value = computed(() => percent.value / 100);
 </script>

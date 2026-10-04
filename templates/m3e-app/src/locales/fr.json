@@ -304,7 +304,15 @@
       "linear": "Linéaire",
       "linearNote": "Ondulé, indéterminé, plat et épais. Un espace et un point marquent la fin de la piste.",
       "circular": "Circulaire",
-      "circularNote": "Ondulé 48dp ou plat 40dp, et la jauge en demi-anneau."
+      "circularNote": "Ondulé 48dp ou plat 40dp, et la jauge en demi-anneau.",
+      "skeleton": "Chargement squelette",
+      "skeletonNote": "Les espaces réservés de Framework7 aux couleurs Material : la mise en page de ce qui arrive, balayée d'un seul reflet.",
+      "reload": "Recharger",
+      "wave": "Vague",
+      "pulse": "Pulsation",
+      "loadingCustomers": "Chargement des clients",
+      "customer": "Client {n}",
+      "customerNote": "{count} commandes en cours"
     },
     "shapes": {
       "morph": "Morphose",

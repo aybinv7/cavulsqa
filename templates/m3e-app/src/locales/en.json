@@ -304,7 +304,15 @@
       "linear": "Linear",
       "linearNote": "Wavy, indeterminate, flat and thick. A gap and a stop dot mark where the track ends.",
       "circular": "Circular",
-      "circularNote": "48dp wavy or 40dp flat, and the half-ring gauge."
+      "circularNote": "48dp wavy or 40dp flat, and the half-ring gauge.",
+      "skeleton": "Skeleton loading",
+      "skeletonNote": "Framework7's placeholders in Material colours: the layout of what is coming, with one highlight sweeping the whole group.",
+      "reload": "Reload",
+      "wave": "Wave",
+      "pulse": "Pulse",
+      "loadingCustomers": "Loading customers",
+      "customer": "Customer {n}",
+      "customerNote": "{count} open orders"
     },
     "shapes": {
       "morph": "Morph",

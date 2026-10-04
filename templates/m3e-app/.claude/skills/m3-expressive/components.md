@@ -136,6 +136,13 @@ the loading indicator fills with the pull and loops until it settles.
 
 ## Progress
 
+**`M3Skeleton` + `M3SkeletonBlock` + `M3SkeletonText`** - Framework7's skeleton: placeholders in
+the shape of the content on its way, for loads you expect to take more than a moment (a list from
+the database, a detail screen). Mirror the real layout exactly - same rows, same type scales via
+`M3SkeletonText typescale` - so nothing jumps when it lands. `effect` wave (default) | pulse | none;
+set `--m3-skeleton-surface` to the colour behind the group. Use `M3LoadingIndicator` instead when
+there is no layout to predict.
+
 **`M3LoadingIndicator`** - waits up to a few seconds, or `progress` 0-1 for determinate. `contained`
 over content. Replaces every spinner. → loading-indicator/specs
 
