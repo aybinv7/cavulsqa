@@ -24,6 +24,7 @@ export { default as M3Fab } from "./components/button/M3Fab.vue";
 export { default as M3FabMenu } from "./components/button/M3FabMenu.vue";
 export { default as M3FabMenuItem } from "./components/button/M3FabMenuItem.vue";
 export { default as M3FloatingToolbar } from "./components/toolbar/M3FloatingToolbar.vue";
+export { default as M3FullScreenDialog } from "./components/dialog/M3FullScreenDialog.vue";
 export { default as M3Glyph } from "./components/icon/M3Glyph.vue";
 export { default as M3IconButton } from "./components/button/M3IconButton.vue";
 export { default as M3LinearProgress } from "./components/progress/M3LinearProgress.vue";

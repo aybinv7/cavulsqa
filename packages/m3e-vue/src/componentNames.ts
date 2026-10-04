@@ -23,6 +23,7 @@ export const COMPONENT_NAMES = [
   "M3FabMenu",
   "M3FabMenuItem",
   "M3FloatingToolbar",
+  "M3FullScreenDialog",
   "M3Glyph",
   "M3IconButton",
   "M3LinearProgress",

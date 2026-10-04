@@ -13,14 +13,14 @@ cadence and has its own section.
 hand-ported copies in three apps into one tested source. `m3e` is framework-free: the 2025 colour
 spec with the variant fallback made explicit (`effectiveSpec`), all 35 `MaterialShapes` built from
 the androidx vertices, morphing, closed-form springs with velocity, `linear()` spring easings, the
-wavy progress and loading-indicator frames, and every `--md-sys-*` token. `m3e-vue` holds 68
+wavy progress and loading-indicator frames, and every `--md-sys-*` token. `m3e-vue` holds 69
 components (date and time pickers as dialog or sheet, Framework7-style wheel pickers, a virtual list
 that recycles its rows, swipe actions on list items, a full-screen search view, a range slider,
 cascading menus, a standard bottom sheet with peek, half and expanded detents, Framework7-style skeleton
 loading, and Compose's carousel - multi-browse, hero and uncontained - ported keyline for keyline,
 Framework7's stepper with its dynamic auto-repeat, expandable list items with an accordion
 list, and the exposed dropdown menu as a select or Framework7's autocomplete, Framework7's in-app
-notification as `useNotification` with its host, Framework7's sortable list, and its photo browser), an overlay stack Android back can close, and promise-based snackbar, dialog and action
+notification as `useNotification` with its host, Framework7's sortable list, its photo browser, and the full-screen dialog), an overlay stack Android back can close, and promise-based snackbar, dialog and action
 sheet services. Both join the libraries' shared version.
 
 **New package: `@cavulsqa/recorder`** - an in-app field recorder for Capacitor WebViews: rrweb,
