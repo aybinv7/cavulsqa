@@ -213,7 +213,7 @@ export const LOGIN_SECTION: GallerySection = {
   path: "/gallery/login/",
 };
 
-/** A week strip pinned under the app bar over the chosen day's visits. */
+/** The route agenda: day, week and month views over the same visits. */
 export const AGENDA_SECTION: GallerySection = {
   id: "agenda",
   icon: AgendaIcon,

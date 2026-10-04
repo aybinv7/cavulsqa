@@ -10,70 +10,106 @@
       </M3IconButton>
     </template>
     <template #bottom>
-      <M3WeekStrip
-        v-model="day"
-        class="bg-surface pb-2"
-        :label="t('gallery.agenda.days')"
-        :locale="locale"
-        :marks="marks"
-        :mark-label="visitsLabel"
-      />
+      <div>
+        <M3ButtonGroup
+          variant="connected"
+          size="s"
+          class="agenda-switcher px-4 pb-2"
+          :label="t('gallery.agenda.view')"
+        >
+          <M3Button
+            v-for="option in AGENDA_VIEWS"
+            :key="option"
+            variant="tonal"
+            toggle
+            :selected="view === option"
+            @update:selected="view = option"
+          >
+            {{ t(`gallery.agenda.views.${option}`) }}
+          </M3Button>
+        </M3ButtonGroup>
+        <M3WeekStrip
+          v-if="view !== 'month'"
+          v-model="day"
+          class="pb-2"
+          :label="t('gallery.agenda.days')"
+          :locale="locale"
+          :marks="weekMarks"
+          :mark-label="visitsLabel"
+        />
+      </div>
     </template>
 
-    <h2 class="type-title-medium m-0 px-6 pb-2 pt-4 text-on-surface">{{ heading }}</h2>
-    <M3List v-if="visits.length" variant="segmented" inset>
-      <M3ListItem
-        v-for="visit in visits"
-        :key="visit.id"
-        :headline="visit.customer"
-        :supporting="visit.city"
-        :overline="visit.time"
-      >
-        <template #leading>
-          <i-ms-check-circle-rounded v-if="visit.state === 'done'" class="text-primary" />
-          <i-ms-near-me-rounded v-else-if="visit.state === 'next'" class="text-tertiary" />
-          <i-ms-schedule-outline-rounded v-else class="text-on-surface-variant" />
-        </template>
-        <template #trailing>
-          <span class="type-label-medium" :class="STATE_TONE[visit.state]">
-            {{ t(`gallery.agenda.states.${visit.state}`) }}
-          </span>
-        </template>
-      </M3ListItem>
-    </M3List>
-    <EmptyState
-      v-else
-      shape="sunny"
-      :headline="t('gallery.agenda.weekend')"
-      :text="t('gallery.agenda.weekendText')"
-    />
+    <Transition name="agenda-through" mode="out-in" @enter="rewind">
+      <AgendaDay
+        v-if="view === 'day'"
+        key="day"
+        :day="day"
+        :today="today"
+        :heading="heading"
+        :visits="visits"
+      />
+      <AgendaMonth
+        v-else-if="view === 'month'"
+        key="month"
+        v-model="day"
+        :heading="heading"
+        :visits="visits"
+        :marks="monthMarks"
+        :mark-label="visitsLabel"
+        @month="shownMonth = $event"
+      />
+      <AgendaVisitList v-else key="week" :heading="heading" :visits="visits" />
+    </Transition>
   </AppPage>
 </template>
 
 <script setup lang="ts">
-import { formatIso, todayIso } from "@cavulsqa/m3e-vue";
-import { marksAround, visitsFor, type VisitState } from "@/modules/gallery/composables/routePlan";
-
-const STATE_TONE: Record<VisitState, string> = {
-  done: "text-on-surface-variant",
-  next: "text-tertiary",
-  planned: "text-on-surface-variant",
-};
+import AgendaDay from "@/modules/gallery/components/agenda/AgendaDay.vue";
+import AgendaMonth from "@/modules/gallery/components/agenda/AgendaMonth.vue";
+import AgendaVisitList from "@/modules/gallery/components/agenda/AgendaVisitList.vue";
+import { AGENDA_VIEWS, useAgenda } from "@/modules/gallery/composables/useAgenda";
 
 const { t, locale } = useI18n();
-const today = todayIso();
-const day = ref(today);
+const { today, day, view, visits, weekMarks, monthMarks, shownMonth, month, heading, visitsLabel } =
+  useAgenda();
 
-const visits = computed(() => visitsFor(day.value, today));
-const marks = computed(() => marksAround(day.value, today));
-const month = computed(() =>
-  formatIso(day.value, locale.value, { month: "long", year: "numeric" }),
-);
-const heading = computed(() =>
-  formatIso(day.value, locale.value, { weekday: "long", day: "numeric", month: "long" }),
-);
-
-function visitsLabel(count: number) {
-  return t("gallery.agenda.visits", { count }, count);
+function rewind(element: Element) {
+  element.closest(".page-content")?.scrollTo({ top: 0 });
 }
 </script>
+
+<style scoped>
+.agenda-switcher {
+  display: flex;
+}
+
+.agenda-switcher > :deep(*) {
+  flex: 1 1 0;
+}
+
+.agenda-through-leave-active {
+  transition: opacity 90ms var(--md-sys-motion-easing-emphasized-accelerate);
+}
+
+.agenda-through-enter-active {
+  transition:
+    opacity 210ms var(--md-sys-motion-easing-emphasized-decelerate),
+    transform 210ms var(--md-sys-motion-easing-emphasized-decelerate);
+}
+
+.agenda-through-leave-to,
+.agenda-through-enter-from {
+  opacity: 0;
+}
+
+.agenda-through-enter-from {
+  transform: scale(0.96);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .agenda-through-enter-from {
+    transform: none;
+  }
+}
+</style>

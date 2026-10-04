@@ -277,7 +277,7 @@
       },
       "agenda": {
         "title": "Agenda",
-        "subtitle": "A week strip over the day's visits"
+        "subtitle": "Day, week and month views of a rep's route"
       }
     },
     "buttons": {
@@ -1013,7 +1013,16 @@
         "done": "Done",
         "next": "Next",
         "planned": "Planned"
-      }
+      },
+      "view": "Agenda view",
+      "views": {
+        "day": "Day",
+        "week": "Week",
+        "month": "Month"
+      },
+      "previousMonth": "Previous month",
+      "nextMonth": "Next month",
+      "chooseYear": "Choose year"
     }
   },
   "settings": {

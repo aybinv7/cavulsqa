@@ -277,7 +277,7 @@
       },
       "agenda": {
         "title": "Agenda",
-        "subtitle": "Une semaine au-dessus des visites du jour"
+        "subtitle": "La tournée en vue jour, semaine et mois"
       }
     },
     "buttons": {
@@ -1013,7 +1013,16 @@
         "done": "Fait",
         "next": "Suivant",
         "planned": "Prévu"
-      }
+      },
+      "view": "Vue de l'agenda",
+      "views": {
+        "day": "Jour",
+        "week": "Semaine",
+        "month": "Mois"
+      },
+      "previousMonth": "Mois précédent",
+      "nextMonth": "Mois suivant",
+      "chooseYear": "Choisir l'année"
     }
   },
   "settings": {

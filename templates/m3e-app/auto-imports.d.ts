@@ -9,6 +9,7 @@
 export {}
 declare global {
   const AGENDA_SECTION: typeof import('./src/modules/gallery/composables/useGallerySections').AGENDA_SECTION
+  const AGENDA_VIEWS: typeof import('./src/modules/gallery/composables/useAgenda').AGENDA_VIEWS
   const AppContextKey: typeof import('./src/shared/composables/theme/useAppTheme').AppContextKey
   const CHAT_SECTION: typeof import('./src/modules/gallery/composables/useGallerySections').CHAT_SECTION
   const CONTACTS_SECTION: typeof import('./src/modules/gallery/composables/useGallerySections').CONTACTS_SECTION
@@ -87,6 +88,8 @@ declare global {
   const makeDestructurable: typeof import('@vueuse/core').makeDestructurable
   const markRaw: typeof import('vue').markRaw
   const marksAround: typeof import('./src/modules/gallery/composables/routePlan').marksAround
+  const marksBetween: typeof import('./src/modules/gallery/composables/routePlan').marksBetween
+  const marksForMonth: typeof import('./src/modules/gallery/composables/routePlan').marksForMonth
   const nextTick: typeof import('vue').nextTick
   const onActivated: typeof import('vue').onActivated
   const onBeforeMount: typeof import('vue').onBeforeMount
@@ -161,6 +164,7 @@ declare global {
   const useActionSheet: typeof import('@cavulsqa/m3e-vue').useActionSheet
   const useActiveElement: typeof import('@vueuse/core').useActiveElement
   const useActiveTab: typeof import('./src/shared/composables/navigation/useActiveTab').useActiveTab
+  const useAgenda: typeof import('./src/modules/gallery/composables/useAgenda').useAgenda
   const useAndroidBackButton: typeof import('./src/plugins/capacitor/useAndroidBackButton').useAndroidBackButton
   const useAnimate: typeof import('@vueuse/core').useAnimate
   const useAppTheme: typeof import('./src/shared/composables/theme/useAppTheme').useAppTheme
@@ -410,6 +414,9 @@ declare global {
   export type { VisitState, Visit } from './src/modules/gallery/composables/routePlan'
   import('./src/modules/gallery/composables/routePlan')
   // @ts-ignore
+  export type { AgendaView } from './src/modules/gallery/composables/useAgenda'
+  import('./src/modules/gallery/composables/useAgenda')
+  // @ts-ignore
   export type { GallerySection } from './src/modules/gallery/composables/useGallerySections'
   import('./src/modules/gallery/composables/useGallerySections')
   // @ts-ignore
@@ -423,6 +430,7 @@ declare module 'vue' {
   interface GlobalComponents {}
   interface ComponentCustomProperties {
     readonly AGENDA_SECTION: UnwrapRef<typeof import('./src/modules/gallery/composables/useGallerySections')['AGENDA_SECTION']>
+    readonly AGENDA_VIEWS: UnwrapRef<typeof import('./src/modules/gallery/composables/useAgenda')['AGENDA_VIEWS']>
     readonly CHAT_SECTION: UnwrapRef<typeof import('./src/modules/gallery/composables/useGallerySections')['CHAT_SECTION']>
     readonly CONTACTS_SECTION: UnwrapRef<typeof import('./src/modules/gallery/composables/useGallerySections')['CONTACTS_SECTION']>
     readonly CONTRAST_LEVELS: UnwrapRef<typeof import('./src/shared/utils/theme/themeSettings')['CONTRAST_LEVELS']>
@@ -499,6 +507,8 @@ declare module 'vue' {
     readonly makeDestructurable: UnwrapRef<typeof import('@vueuse/core')['makeDestructurable']>
     readonly markRaw: UnwrapRef<typeof import('vue')['markRaw']>
     readonly marksAround: UnwrapRef<typeof import('./src/modules/gallery/composables/routePlan')['marksAround']>
+    readonly marksBetween: UnwrapRef<typeof import('./src/modules/gallery/composables/routePlan')['marksBetween']>
+    readonly marksForMonth: UnwrapRef<typeof import('./src/modules/gallery/composables/routePlan')['marksForMonth']>
     readonly nextTick: UnwrapRef<typeof import('vue')['nextTick']>
     readonly onActivated: UnwrapRef<typeof import('vue')['onActivated']>
     readonly onBeforeMount: UnwrapRef<typeof import('vue')['onBeforeMount']>
@@ -571,6 +581,7 @@ declare module 'vue' {
     readonly useActionSheet: UnwrapRef<typeof import('@cavulsqa/m3e-vue')['useActionSheet']>
     readonly useActiveElement: UnwrapRef<typeof import('@vueuse/core')['useActiveElement']>
     readonly useActiveTab: UnwrapRef<typeof import('./src/shared/composables/navigation/useActiveTab')['useActiveTab']>
+    readonly useAgenda: UnwrapRef<typeof import('./src/modules/gallery/composables/useAgenda')['useAgenda']>
     readonly useAndroidBackButton: UnwrapRef<typeof import('./src/plugins/capacitor/useAndroidBackButton')['useAndroidBackButton']>
     readonly useAnimate: UnwrapRef<typeof import('@vueuse/core')['useAnimate']>
     readonly useArrayDifference: UnwrapRef<typeof import('@vueuse/core')['useArrayDifference']>
