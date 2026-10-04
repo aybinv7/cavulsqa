@@ -11,6 +11,7 @@ export const COMPONENT_NAMES = [
   "M3Chip",
   "M3CircularProgress",
   "M3ClockDial",
+  "M3DataTable",
   "M3DatePicker",
   "M3DatePickerPanel",
   "M3DateWheel",
