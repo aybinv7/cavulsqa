@@ -45,8 +45,13 @@ function exportedFiles(packageDir: string): string[] {
  * imports, so a rebuild paired new JavaScript with old scoped styles. Here every change or
  * deletion under a linked `dist` - through both of Vite's HMR hooks - is held back until writing
  * stops and every exported file exists again with the same size on two checks in a row (a file that
- * exists can still be half written); then every cached module from a linked `dist`, and all
- * cached CSS, is dropped and the page reloads once.
+ * exists can still be half written); then the dev server restarts, and the page reloads when it
+ * reconnects.
+ *
+ * A restart rather than a module invalidation, because the native resolver caches what it saw
+ * while `dist` was empty: an app file transformed in that window keeps failing with "Failed to
+ * resolve import" after the rebuild, since the resolver's cache is keyed by the real path and the
+ * app reaches the package through its `node_modules` link. A restart starts every cache fresh.
  */
 export function linkedRebuilds(root: string, names: readonly string[]): Plugin {
   const packages = names.map((name) => realpathSync(join(root, "node_modules", name)));
@@ -70,12 +75,12 @@ export function linkedRebuilds(root: string, names: readonly string[]): Plugin {
       timer = setTimeout(reload, SETTLE_MS);
       return;
     }
-    for (const module of server.moduleGraph.idToModuleMap.values()) {
-      const file = module.file;
-      if (file && (file.endsWith(".css") || inDist(file)))
-        server.moduleGraph.invalidateModule(module);
-    }
-    server.ws.send({ type: "full-reload" });
+    const restarting = server;
+    server = undefined;
+    restarting.config.logger.info("linked package rebuilt - restarting", { timestamp: true });
+    restarting.restart().catch((error: unknown) => {
+      restarting.config.logger.error(`restart after a linked rebuild failed: ${String(error)}`);
+    });
   };
 
   const schedule = () => {
