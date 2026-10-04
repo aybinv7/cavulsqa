@@ -1,0 +1,121 @@
+/*
+ * `m3e-axis`: Material's shared-axis X transition with an Expressive spring. Forward, the new page
+ * slides in from the end edge while the old one drifts toward the start; the two fade through each
+ * other rather than stacking, so a page never reads as a card sliding over another. Back plays the
+ * same movement mirrored. Directions flip under `dir="rtl"`.
+ *
+ * Travel runs on the slow spatial spring (full-screen moves), the fade on linear keyframes timed for
+ * a fade-through. Only transform and opacity move, both on the compositor. Under reduced motion it
+ * is a plain cross-fade: the meaning (you went somewhere) stays, the travel goes.
+ *
+ * @see https://m3.material.io/styles/motion/transitions/transition-patterns
+ */
+@layer base {
+  :root {
+    --m3e-axis-distance: 64px;
+    --m3e-axis-sign: 1;
+    --m3e-axis-duration: var(--md-sys-motion-spring-slow-spatial-duration, 650ms);
+    --m3e-axis-ease: var(--md-sys-motion-spring-slow-spatial, cubic-bezier(0.2, 0, 0, 1));
+  }
+
+  [dir="rtl"] {
+    --m3e-axis-sign: -1;
+  }
+
+  .router-transition-m3e-axis-forward .page,
+  .router-transition-m3e-axis-backward .page {
+    animation-fill-mode: both;
+  }
+
+  .router-transition-m3e-axis-forward .page-next {
+    animation:
+      m3e-axis-from-end var(--m3e-axis-duration) var(--m3e-axis-ease) both,
+      m3e-fade-in var(--m3e-axis-duration) linear both;
+  }
+
+  .router-transition-m3e-axis-forward .page-current {
+    animation:
+      m3e-axis-to-start var(--m3e-axis-duration) var(--m3e-axis-ease) both,
+      m3e-fade-out var(--m3e-axis-duration) linear both;
+  }
+
+  .router-transition-m3e-axis-backward .page-current {
+    animation:
+      m3e-axis-to-end var(--m3e-axis-duration) var(--m3e-axis-ease) both,
+      m3e-fade-out var(--m3e-axis-duration) linear both;
+  }
+
+  .router-transition-m3e-axis-backward .page-previous {
+    animation:
+      m3e-axis-from-start var(--m3e-axis-duration) var(--m3e-axis-ease) both,
+      m3e-fade-in var(--m3e-axis-duration) linear both;
+  }
+
+  @keyframes m3e-axis-from-end {
+    from {
+      transform: translateX(calc(var(--m3e-axis-distance) * var(--m3e-axis-sign)));
+    }
+    to {
+      transform: none;
+    }
+  }
+
+  @keyframes m3e-axis-to-start {
+    from {
+      transform: none;
+    }
+    to {
+      transform: translateX(calc(var(--m3e-axis-distance) * var(--m3e-axis-sign) * -1));
+    }
+  }
+
+  @keyframes m3e-axis-to-end {
+    from {
+      transform: none;
+    }
+    to {
+      transform: translateX(calc(var(--m3e-axis-distance) * var(--m3e-axis-sign)));
+    }
+  }
+
+  @keyframes m3e-axis-from-start {
+    from {
+      transform: translateX(calc(var(--m3e-axis-distance) * var(--m3e-axis-sign) * -1));
+    }
+    to {
+      transform: none;
+    }
+  }
+
+  @keyframes m3e-fade-in {
+    0%,
+    30% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes m3e-fade-out {
+    0% {
+      opacity: 1;
+    }
+    30%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .router-transition-m3e-axis-forward .page-next,
+    .router-transition-m3e-axis-backward .page-previous {
+      animation: m3e-fade-in 200ms linear both;
+    }
+
+    .router-transition-m3e-axis-forward .page-current,
+    .router-transition-m3e-axis-backward .page-current {
+      animation: m3e-fade-out 200ms linear both;
+    }
+  }
+}
