@@ -10,6 +10,13 @@ export default defineConfig({
       tsgo: false,
     },
     exports: true,
+    /**
+     * Bundled, not imported: material-color-utilities 0.4.0 ships `color_spec_2025.js` with an
+     * extensionless import that Node's ESM loader rejects, so a consumer's test or SSR run would
+     * crash on import unless it inlined the package itself. Its declarations are inlined with it, and
+     * its Apache-2.0 notices are kept, so it is a devDependency: nothing of it installs separately.
+     */
+    noExternal: ["@material/material-color-utilities"],
   },
   test: {
     server: {

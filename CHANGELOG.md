@@ -7,7 +7,9 @@ The libraries (`mobile-db`, `reactive-db`, `reactive-vue`, `repository`, `m3e`, 
 [docs/RELEASING.md](docs/RELEASING.md). `@cavulsqa/create` tracks template changes on its own
 cadence and has its own section.
 
-## Unreleased
+## Libraries
+
+### 1.3.0
 
 **New packages: `@cavulsqa/m3e` and `@cavulsqa/m3e-vue`** - Material 3 Expressive, extracted from the
 hand-ported copies in three apps into one tested source. `m3e` is framework-free: the 2025 colour
@@ -30,11 +32,6 @@ sheet services. Both join the libraries' shared version.
 console, network, performance and database tracks in a `.capu` archive Capubridge opens. `f7-app`
 starts it after the database opens (`VITE_FIELD_RECORDER`, on in dev) and shares captures through the
 Android share sheet. It must be published before the next creator release.
-
-**New template: `m3e-app`** (`--template m3e-app`) - the same data layer in Material 3 Expressive,
-with Framework7 kept as the navigation engine only, a colour studio, an adaptive bar/rail shell, a
-component gallery and an `m3-expressive` skill. The creator now offers templates from a numbered
-menu; `f7-app` stays the default.
 
 **Fixed before release, found on a device audit:**
 
@@ -72,7 +69,37 @@ menu; `f7-app` stays the default.
 - `useElementSize` reported a border-box size but observed the content box, so a padding-only
   change - the message bar dropping its safe-area inset under the keyboard - went unseen.
 
-## Libraries
+**Added to `m3e-vue` on the way to release, each found missing on a device:**
+
+- Message reactions: a long-pressed message lifts out of a dimmed screen with a pill of reactions
+  above it and its actions (`MessageAction`) below, moving only as far as it must for all three to
+  fit (`liftPlacement`). Reactions sit on cookie shapes cut out of the bubble's edge, a fresh one
+  pops in with a ring burst and a haptic tick, and `applyReaction` keeps one reaction per person.
+  Without `reactions` or `actions` a long-press still emits `hold`.
+- `M3AttachSheet`, the sheet a composer's "+" opens: tinted icons on expressive shapes that spring
+  in, with a slot for recent photos.
+- `M3CodeField`: a verification code drawn in cells over one real input, so SMS autofill, paste,
+  IMEs and Arabic-Indic digits all work (`sanitizeCode`); error shakes, success fills in a wave.
+- `M3ChipField`: input chips from typed or pasted entries (`splitEntries`, `hasEntry`); backspace
+  marks before it removes, duplicates flash, rejected entries stay in the input.
+- `M3TextField` is controlled: the input shows what the bound model kept, so a formatter or filter
+  leaves no stray keystrokes. Prefix and suffix are spaced from the value.
+- `M3DayTimeline`: a day as an hour grid, overlapping events in lanes (`layoutEvents`) and a now
+  line in step with the clock. `M3Calendar` takes `marks` like `M3WeekStrip` and emits `month`.
+- `M3DataTable` column menu: sort, group with per-group summaries, pin and hide, each a model
+  (`v-model:group`, `pinned`, `hidden`) so a screen can persist the layout.
+- Stacked notifications with expand and clear-all; `useHideOnScroll` and an enter-always top app
+  bar (`scrollBehavior`).
+
+**Packaging, found by installing the tarballs into a fresh project at the top of every peer range:**
+
+- `@cavulsqa/m3e` bundles `@material/material-color-utilities` instead of importing it. Its 0.4.0
+  ships an extensionless import Node's ESM loader rejects, so a consumer's Vitest run or SSR crashed
+  on import unless it inlined the package itself - as this repository's own tests had to. Its
+  declarations and Apache-2.0 notices come along; nothing installs separately.
+- `@cavulsqa/recorder` bundles `rrweb` and builds for the browser. rrweb 2.0.0-alpha.4 is
+  `"type": "module"` with a UMD `main`, so a consumer's Vitest run got no named exports from it.
+- `M3DayTimeline` touched `document` during setup, which failed outside a browser.
 
 ### 1.2.1
 
@@ -203,6 +230,25 @@ If you are on something older, the breaking changes you have to cross were relea
   the key so it re-runs when the key moves.
 
 ## @cavulsqa/create
+
+### 2.10.0
+
+**New template: `m3e-app`** (`--template m3e-app`) - the same data layer in Material 3 Expressive,
+with Framework7 kept as the navigation engine only, a colour studio, an adaptive bar/rail shell, a
+component gallery and an `m3-expressive` skill. The creator now offers templates from a numbered
+menu; `f7-app` stays the default.
+
+- The gallery's agenda switches between day, week and month views; the chat demo reacts, copies and
+  deletes on long-press, and its "+" opens an attach sheet whose gallery, camera and file options use
+  the system pickers through file inputs; the text input page has a password strength meter, a
+  grouped mobile number, a verification code and customer tags; the data table persists its layout.
+- `app/scroll.config.ts` sets how the bars behave while a page scrolls: the small top app bar
+  enters always, the navigation bar hides on scroll.
+- **Fixed:** hiding the navigation bar on scroll also removed its row from the page padding, so near
+  the end of a page the content shrank under the finger, the scroll position clamped, the bar came
+  back and the page jumped - a loop that fought every scroll near the bottom. Scroll-hiding now only
+  slides the bar; the row is released for the keyboard and pushed pages.
+- Generated apps depend on the 1.3.0 libraries.
 
 ### 2.9.3
 

@@ -82,7 +82,9 @@ function onVisibility() {
 function stopClock() {
   clearTimeout(timer);
   timer = undefined;
-  document.removeEventListener("visibilitychange", onVisibility);
+  if (typeof document !== "undefined") {
+    document.removeEventListener("visibilitychange", onVisibility);
+  }
 }
 
 watch(

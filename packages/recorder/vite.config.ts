@@ -13,6 +13,15 @@ export default defineConfig({
       tsgo: false,
     },
     exports: true,
+    /**
+     * Bundled, not imported: rrweb 2.0.0-alpha.4 is `"type": "module"` but its `main` is a UMD file,
+     * so anything resolving it the Node way - a consumer's Vitest run, which loads dependencies
+     * through Node - gets no named exports and fails on import. Bundlers read its `module` entry,
+     * which is why the app never noticed. It is a devDependency for that reason.
+     */
+    noExternal: [/^rrweb/, /^@rrweb\//],
+    /** The recorder runs in a WebView: resolve the browser entries, rrweb's ES build among them. */
+    platform: "browser",
   },
   test: {
     environment: "happy-dom",
