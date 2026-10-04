@@ -867,7 +867,7 @@
     },
     "tables": {
       "orders": "Commandes",
-      "ordersNote": "Le tableau de données de Framework7 : touchez un en-tête pour trier, encore pour inverser, encore pour annuler. Sélectionnez des lignes pour les totaliser. Il défile ici dans sa propre hauteur, l'en-tête et la colonne des commandes restent en place.",
+      "ordersNote": "Touchez un en-tête pour son menu : trier, grouper avec un total par groupe, épingler, masquer. La disposition est gardée pour la prochaine fois.",
       "dense": "Compact",
       "selected": "Aucune sélection | {count} sélectionnée | {count} sélectionnées",
       "selectAll": "Sélectionner toutes les commandes",
@@ -878,7 +878,20 @@
       "customer": "Client",
       "date": "Date",
       "status": "Statut",
-      "totalColumn": "Total"
+      "totalColumn": "Total",
+      "menu": {
+        "sortAscending": "Tri croissant",
+        "sortDescending": "Tri décroissant",
+        "clearSort": "Retirer le tri",
+        "groupBy": "Grouper par cette colonne",
+        "ungroup": "Dégrouper",
+        "pin": "Épingler au début",
+        "unpin": "Désépingler",
+        "hide": "Masquer la colonne",
+        "columns": "Colonnes"
+      },
+      "groupCount": "{count} commande | {count} commandes",
+      "selectGroup": "Sélectionner les commandes {label}"
     },
     "charts": {
       "line": "Ventes mensuelles",

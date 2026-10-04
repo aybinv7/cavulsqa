@@ -867,7 +867,7 @@
     },
     "tables": {
       "orders": "Orders",
-      "ordersNote": "Framework7's data table: tap a header to sort, again to reverse, again to clear. Select rows to total them. It scrolls inside its own height here, so the header and the order column stay put.",
+      "ordersNote": "Tap a header for its menu: sort, group with a total per group, pin, hide. The layout is kept for next time.",
       "dense": "Dense",
       "selected": "None selected | {count} selected | {count} selected",
       "selectAll": "Select every order",
@@ -878,7 +878,20 @@
       "customer": "Customer",
       "date": "Date",
       "status": "Status",
-      "totalColumn": "Total"
+      "totalColumn": "Total",
+      "menu": {
+        "sortAscending": "Sort ascending",
+        "sortDescending": "Sort descending",
+        "clearSort": "Clear sort",
+        "groupBy": "Group by this column",
+        "ungroup": "Ungroup",
+        "pin": "Pin to start",
+        "unpin": "Unpin",
+        "hide": "Hide column",
+        "columns": "Columns"
+      },
+      "groupCount": "{count} order | {count} orders",
+      "selectGroup": "Select every {label} order"
     },
     "charts": {
       "line": "Monthly sales",

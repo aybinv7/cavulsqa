@@ -14,6 +14,9 @@
     <M3DataTable
       v-model:sort="sort"
       v-model:selected="selected"
+      v-model:group="layout.group"
+      v-model:pinned="layout.pinned"
+      v-model:hidden="layout.hidden"
       class="-mx-2"
       :rows="ORDERS"
       :columns="columns"
@@ -26,6 +29,9 @@
       :dense="dense"
       :select-all-label="t('gallery.tables.selectAll')"
       :select-row-label="selectRowLabel"
+      :select-group-label="selectGroupLabel"
+      :group-count-label="groupCount"
+      :menu-labels="menuLabels"
       @row-click="openOrder"
     >
       <template #cell="{ row, column, text }">
@@ -38,9 +44,9 @@
       </template>
       <template #footer>
         <tr>
-          <td />
-          <td :colspan="4">{{ t("gallery.tables.total") }}</td>
-          <td class="text-end tabular-nums">{{ money(total) }}</td>
+          <td :colspan="span" class="text-end tabular-nums">
+            {{ t("gallery.tables.total") }} · {{ money(total) }}
+          </td>
         </tr>
       </template>
     </M3DataTable>
@@ -80,6 +86,10 @@ const snackbar = useSnackbar();
 const sort = ref<DataSort | null>({ key: "date", direction: "descending" });
 const selected = ref<(string | number)[]>([]);
 const dense = ref(false);
+const layout = useLocalStorage<{ group: string | null; pinned: string[]; hidden: string[] }>(
+  "gallery.orders.layout",
+  { group: null, pinned: [], hidden: [] },
+);
 
 const money = (cents: number) =>
   new Intl.NumberFormat(locale.value, { style: "currency", currency: "DZD" }).format(cents / 100);
@@ -106,9 +116,33 @@ const columns = computed<DataColumn<Order>[]>(() => [
     label: t("gallery.tables.totalColumn"),
     numeric: true,
     sortable: true,
+    summary: "sum",
     format: (value) => (typeof value === "number" ? money(value) : ""),
+    formatSummary: money,
   },
 ]);
+
+const span = computed(() => columns.value.length - layout.value.hidden.length + 1);
+
+const menuLabels = computed(() => ({
+  sortAscending: t("gallery.tables.menu.sortAscending"),
+  sortDescending: t("gallery.tables.menu.sortDescending"),
+  clearSort: t("gallery.tables.menu.clearSort"),
+  groupBy: t("gallery.tables.menu.groupBy"),
+  ungroup: t("gallery.tables.menu.ungroup"),
+  pin: t("gallery.tables.menu.pin"),
+  unpin: t("gallery.tables.menu.unpin"),
+  hide: t("gallery.tables.menu.hide"),
+  columns: t("gallery.tables.menu.columns"),
+}));
+
+function groupCount(count: number) {
+  return t("gallery.tables.groupCount", { count }, count);
+}
+
+function selectGroupLabel(label: string) {
+  return t("gallery.tables.selectGroup", { label });
+}
 
 const total = computed(() =>
   ORDERS.filter(
