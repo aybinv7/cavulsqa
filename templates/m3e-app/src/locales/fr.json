@@ -418,6 +418,14 @@
       "gotIt": "Compris"
     },
     "selection": {
+      "stepper": "Compteur",
+      "stepperNote": "Le compteur de Framework7 : maintenez un bouton pour répéter - sur une large plage, il accélère. Touchez la valeur pour la saisir ; les flèches avancent d'un pas.",
+      "guests": "Invités",
+      "weight": "Poids",
+      "units": "Unités",
+      "kilos": "{value} kg",
+      "decrease": "Diminuer",
+      "increase": "Augmenter",
       "switches": "Interrupteurs",
       "switchesNote": "La poignée grandit une fois activée et se déplace sur le ressort spatial rapide.",
       "wifi": "Wi-Fi",

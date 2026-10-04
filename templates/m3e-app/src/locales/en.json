@@ -418,6 +418,14 @@
       "gotIt": "Got it"
     },
     "selection": {
+      "stepper": "Stepper",
+      "stepperNote": "Framework7's stepper: hold a button to repeat - across a wide range it speeds up. Tap the value to type it; the arrow keys step.",
+      "guests": "Guests",
+      "weight": "Weight",
+      "units": "Units",
+      "kilos": "{value} kg",
+      "decrease": "Decrease",
+      "increase": "Increase",
       "switches": "Switches",
       "switchesNote": "The handle grows when on and travels on the fast spatial spring.",
       "wifi": "Wi-Fi",

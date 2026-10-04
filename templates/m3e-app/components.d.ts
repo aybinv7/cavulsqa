@@ -155,6 +155,7 @@ declare module 'vue' {
     M3SnackbarHost: typeof import('@cavulsqa/m3e-vue')['M3SnackbarHost']
     M3SplitButton: typeof import('@cavulsqa/m3e-vue')['M3SplitButton']
     M3StandardBottomSheet: typeof import('@cavulsqa/m3e-vue')['M3StandardBottomSheet']
+    M3Stepper: typeof import('@cavulsqa/m3e-vue')['M3Stepper']
     M3SwipeAction: typeof import('@cavulsqa/m3e-vue')['M3SwipeAction']
     M3Switch: typeof import('@cavulsqa/m3e-vue')['M3Switch']
     M3Tab: typeof import('@cavulsqa/m3e-vue')['M3Tab']

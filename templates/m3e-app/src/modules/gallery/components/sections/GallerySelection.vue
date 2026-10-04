@@ -9,6 +9,52 @@
     <M3Switch :model-value="true" disabled :label="t('gallery.selection.locked')" />
   </GalleryBlock>
 
+  <GalleryBlock
+    :title="t('gallery.selection.stepper')"
+    :note="t('gallery.selection.stepperNote')"
+    stack
+  >
+    <div class="flex items-center justify-between gap-4">
+      <span class="type-body-large text-on-surface">{{ t("gallery.selection.guests") }}</span>
+      <M3Stepper
+        v-model="guests"
+        :label="t('gallery.selection.guests')"
+        :min="1"
+        :max="12"
+        :decrement-label="t('gallery.selection.decrease')"
+        :increment-label="t('gallery.selection.increase')"
+      />
+    </div>
+    <div class="flex items-center justify-between gap-4">
+      <span class="type-body-large text-on-surface">{{ t("gallery.selection.weight") }}</span>
+      <M3Stepper
+        v-model="weight"
+        variant="tonal"
+        editable
+        :label="t('gallery.selection.weight')"
+        :min="0"
+        :max="50"
+        :step="0.5"
+        :format="(value) => t('gallery.selection.kilos', { value: value.toFixed(1) })"
+        :decrement-label="t('gallery.selection.decrease')"
+        :increment-label="t('gallery.selection.increase')"
+      />
+    </div>
+    <div class="flex items-center justify-between gap-4">
+      <span class="type-body-large text-on-surface">{{ t("gallery.selection.units") }}</span>
+      <M3Stepper
+        v-model="units"
+        size="m"
+        editable
+        :label="t('gallery.selection.units')"
+        :min="0"
+        :max="1000"
+        :decrement-label="t('gallery.selection.decrease')"
+        :increment-label="t('gallery.selection.increase')"
+      />
+    </div>
+  </GalleryBlock>
+
   <GalleryBlock :title="t('gallery.selection.checks')" :note="t('gallery.selection.checksNote')">
     <M3Checkbox v-model="terms" :label="t('gallery.selection.terms')" />
     <M3Checkbox :model-value="false" indeterminate :label="t('gallery.selection.partial')" />
@@ -116,6 +162,9 @@ const invalid = ref(false);
 const cup = ref<(typeof SIZES)[number]>("medium");
 const volume = ref(40);
 const steps = ref(4);
+const guests = ref(2);
+const weight = ref(2.5);
+const units = ref(120);
 const brightness = ref(70);
 const priceFrom = ref(2000);
 const priceTo = ref(12000);

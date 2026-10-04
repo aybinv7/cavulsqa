@@ -164,7 +164,11 @@ on), `thickness`; circular takes `gauge` and a centred slot. Linear sits 4dp in 
 or a form submitted later; **`M3Radio`** (`v-model` + `value`) for one of few visible options - more
 than ~5, use an action sheet. **`M3Slider`** - `size` xs..xl, `step`, `ticks`, `#icon` from m, `format`
 for the value bubble. **`M3RangeSlider`** - `v-model:start` / `v-model:end`, `startLabel` /
-`endLabel` (each handle is its own slider), `minDistance` keeps them apart. **`M3Chip`** - `kind` assist | filter (`v-model:selected`) | input
+`endLabel` (each handle is its own slider), `minDistance` keeps them apart. **`M3Stepper`** - Framework7's stepper for small counts (cart quantity, guests, a dose):
+`v-model`, `label`, `min`/`max`/`step` (decimals stay clean), `variant` outlined | tonal, `size` s | m,
+`editable` (type the value; a decimal comma is read), `format` for units. Holding a button repeats
+and speeds up across wide ranges. Use a slider when the exact value matters less than its position.
+**`M3Chip`** - `kind` assist | filter (`v-model:selected`) | input
 (`removable`) | suggestion. **`M3TextField`** - `variant` filled (default) | outlined, `supporting`,
 `error`, `maxlength` counter, `prefix`/`suffix`, `multiline`, `#leading`/`#trailing`; native
 attributes pass through. **`M3SearchBar`** - `v-model`, `@search`, `#leading`/`#trailing`, for
