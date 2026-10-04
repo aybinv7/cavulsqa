@@ -7,13 +7,23 @@ import AutoImport from "unplugin-auto-import/vite";
 import Icons from "unplugin-icons/vite";
 import IconsResolver from "unplugin-icons/resolver";
 import Components from "unplugin-vue-components/vite";
-import { defineConfig } from "vite-plus";
+import { defineConfig, loadEnv } from "vite-plus";
 import {
   Framework7VueResolver,
   getFramework7AutoImports,
 } from "./src/shared/utils/resolvers/resolvers.js";
 
 const SRC = fileURLToPath(new URL("./src", import.meta.url));
+const ROOT = fileURLToPath(new URL(".", import.meta.url));
+
+/**
+ * One port for the dev server and the live-reload URL `capacitor.config.ts` builds, both read from
+ * `VITE_LIVE_RELOAD_PORT` - change it when another dev server already holds 5173.
+ */
+function devPort(mode: string): number {
+  const port = Number(loadEnv(mode, ROOT, "VITE_").VITE_LIVE_RELOAD_PORT);
+  return Number.isInteger(port) && port > 0 ? port : 5173;
+}
 
 // Read once so Settings can show the real name and version without importing the manifest
 // into the bundle.
@@ -21,7 +31,7 @@ const pkg = JSON.parse(
   readFileSync(fileURLToPath(new URL("./package.json", import.meta.url)), "utf-8"),
 ) as { name: string; version: string };
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   define: {
     __APP_NAME__: JSON.stringify("App"),
     __APP_VERSION__: JSON.stringify(pkg.version),
@@ -89,7 +99,7 @@ export default defineConfig({
   ],
 
   resolve: { alias: { "@": SRC } },
-  server: { port: 5173 },
+  server: { port: devPort(mode), strictPort: true },
   build: { target: "esnext" },
   lint: { options: { typeAware: false } },
   /**
@@ -101,4 +111,4 @@ export default defineConfig({
   fmt: {
     ignorePatterns: ["**/auto-imports.d.ts", "**/components.d.ts"],
   },
-});
+}));

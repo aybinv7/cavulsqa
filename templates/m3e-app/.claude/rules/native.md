@@ -54,6 +54,23 @@ carried by the template. Add it to `android/app/src/main/AndroidManifest.xml` af
   asks the person at runtime only for a permission the manifest declares, so without these the
   lookup fails as `denied` and the chat offers the depot instead.
 
+## Identity, environments and updates come from env
+
+`capacitor.config.ts` reads `VITE_APP_ID` and `VITE_APP_NAME`, falling back to the literals
+`create` wrote. It loads env with Node's own `process.loadEnvFile` - there is no dotenv, and adding
+one is a second loader that disagrees with this one about precedence. Nothing overwrites a value
+already set, so the order is: the shell, `.env.local`, `.env`, then `build/<env>/.env.<env>` for
+`VITE_ENVIRONMENT` (dev by default).
+
+- Change the id or name in the env, never as a second literal in the config.
+- Every variable the app reads is documented in `.env.example`; a new one goes there too.
+- Live reload is `VITE_LIVE_RELOAD=true` in `.env.local`; staging and prod ignore it.
+- An app generated with Capuchoo updates has `build/{dev,staging,prod}/.env.*` (committed - they
+  are configuration, not secrets), `capuchooUpdaterConfig` in the config and `notifyAppReady()`
+  first in `src/main.ts`. Keep that call unconditional and before anything that can throw: a bundle
+  that has not confirmed it booted within ten seconds is rolled back. `pnpm exec capuchoo doctor`
+  checks the whole setup.
+
 ## Proof obligations
 
 Say which platform you tested on. "Type-checks" is not a claim about a device, and neither is a

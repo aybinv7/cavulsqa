@@ -7,11 +7,13 @@
  * silent default, because a generated app named "my-app" in the wrong directory is worse than a
  * failed command.
  */
+import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { basename, dirname, isAbsolute, join, resolve } from "node:path";
 import { createInterface } from "node:readline/promises";
 import { fileURLToPath } from "node:url";
 import { scaffold } from "../lib/scaffold.mjs";
+import { knownUpdateServer, linkCommands, normaliseUpdateUrl } from "../lib/updates.mjs";
 import {
   defaultTemplate,
   listTemplates,
@@ -50,6 +52,9 @@ Options:
   --app-id ID          android application id (default: com.ayb.<name>)
   --engine ID          which storage engine the app prefers, written to .env
   --pragmas PROFILE    safe (default) or fast
+  --updates            wire Capuchoo over-the-air updates (asked when interactive)
+  --update-url URL     the update server; implies --updates
+  --no-link            with updates, write the files but do not install or run capuchoo init
   --from PATH          use a template directory on disk instead of the bundled ones
   --yes                take the defaults, ask nothing
   --help               this
@@ -71,6 +76,62 @@ function listEngines(templateDir) {
     // A template that declares none simply has no engine choice to offer.
     return [];
   }
+}
+
+/**
+ * The update server, or undefined for an app without over-the-air updates - the default, because an
+ * updater with nowhere to check is dead weight in every build. Interactive answers are asked again
+ * until they parse; a flag that does not parse is an error.
+ */
+async function chooseUpdates(flags, ask, interactive) {
+  const given = flags.get("update-url");
+  if (typeof given === "string") return normaliseUpdateUrl(given);
+
+  const wanted =
+    flags.has("updates") ||
+    (await ask("Capuchoo over-the-air updates? [y/N]", "n")).toLowerCase().startsWith("y");
+  if (!wanted) return undefined;
+
+  const known = knownUpdateServer();
+  if (!interactive) {
+    if (!known) throw new Error("--updates needs --update-url, or a signed-in capuchoo CLI");
+    return normaliseUpdateUrl(known);
+  }
+  for (;;) {
+    const answer = await ask("Update server URL", known);
+    try {
+      return normaliseUpdateUrl(answer ?? "");
+    } catch (error) {
+      console.log(`  ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+}
+
+/** Runs the server-side half; stops at the first failure and says which step it was. */
+function link(out, appId) {
+  for (const args of linkCommands(appId)) {
+    console.log(`\n> pnpm ${args.join(" ")}`);
+    const result = spawnSync("pnpm", args, {
+      cwd: out,
+      stdio: "inherit",
+      shell: process.platform === "win32",
+    });
+    if (result.status !== 0) {
+      const why = result.error
+        ? `could not start: ${result.error.message}`
+        : `exited ${result.status}`;
+      console.error(`\nStopped at "pnpm ${args.join(" ")}" (${why}). The rest is below.`);
+      return false;
+    }
+  }
+  return true;
+}
+
+function commandLines(appId) {
+  return linkCommands(appId)
+    .filter(([first]) => first !== "install")
+    .map((args) => `  pnpm ${args.join(" ")}`)
+    .join("\n");
 }
 
 /** npm package names: lowercase, no spaces, no leading dot or underscore. */
@@ -143,6 +204,8 @@ async function main() {
       throw new Error(`--pragmas must be "safe" or "fast", not "${pragmas}"`);
     }
 
+    const updateUrl = await chooseUpdates(flags, ask, Boolean(rl));
+
     const dir = flags.get("dir") ?? (await ask("Directory", `./${name}`));
     const out = isAbsolute(dir) ? dir : resolve(process.cwd(), dir);
 
@@ -154,17 +217,26 @@ async function main() {
       appName: String(appName),
       engine: typeof engine === "string" ? engine : undefined,
       pragmas: typeof pragmas === "string" ? pragmas : undefined,
+      updateUrl,
     });
 
     console.log(`
 ${appName} created in ${out}
   template  ${template}
-  appId     ${appId}
+  appId     ${appId}${updateUrl ? `\n  updates   ${updateUrl}` : ""}`);
 
-  cd ${basename(out)}
-  pnpm install
+    const wantsLink =
+      Boolean(updateUrl && rl && !flags.has("no-link")) &&
+      (await ask("Install dependencies and link to Capuchoo now? [Y/n]", "y")).toLowerCase() !==
+        "n";
+    // capuchoo init asks its own questions; two readers on one stdin would split the keystrokes.
+    rl?.close();
+    const linked = wantsLink && link(out, appId);
+
+    console.log(`
+  cd ${basename(out)}${linked ? "" : "\n  pnpm install"}
   pnpm dev
-
+${updateUrl && !linked ? `\nThen link it to Capuchoo (needs your account):\n${commandLines(appId)}\n` : ""}
 Android needs JDK 21: npx cap add android, then pnpm build && npx cap sync android`);
   } finally {
     rl?.close();

@@ -2,13 +2,19 @@ import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node
 import { basename, dirname, join } from "node:path";
 import { listTemplateFiles } from "./templateFiles.mjs";
 import { pruneEngines } from "./pruneEngines.mjs";
+import { addUpdates, linkCommands } from "./updates.mjs";
 
 /** Files whose contents carry the app's identity and have to be rewritten, not copied. */
 function personalise(entry, text, { name, appName }) {
   if (entry === "capacitor.config.ts") {
     return text
-      .replace(/appId: "[^"]*"/, `appId: "${name.appId}"`)
-      .replace(/appName: "[^"]*"/, `appName: "${appName}"`);
+      .replace(/(appId: [^\n"]*")[^"\n]*(")/, `$1${name.appId}$2`)
+      .replace(/(appName: [^\n"]*")[^"\n]*(")/, `$1${appName}$2`);
+  }
+  if (entry === ".env.example") {
+    return text
+      .replace(/^VITE_APP_ID=.*$/m, `VITE_APP_ID=${name.appId}`)
+      .replace(/^VITE_APP_NAME=.*$/m, `VITE_APP_NAME=${appName}`);
   }
   if (entry === "vite.config.ts") {
     return text.replace(
@@ -20,6 +26,26 @@ function personalise(entry, text, { name, appName }) {
     return text.replace(/<title>[^<]*<\/title>/, `<title>${appName}</title>`);
   }
   return null;
+}
+
+function updatesReadme(appId) {
+  const commands = linkCommands(appId)
+    .map((args) => `pnpm ${args.join(" ")}`)
+    .join("\n");
+  return `
+## Over-the-air updates
+
+Wired for [Capuchoo](https://www.npmjs.com/package/@capuchoo/cli): the updater packages,
+\`capacitor.config.ts\`, \`notifyAppReady()\` in \`src/main.ts\`, and one flavour per environment in
+\`build/<env>/.env.<env>\`. Linking the app to the server, its channels and the dev and staging ids
+need an account, so they run once:
+
+\`\`\`bash
+${commands}
+\`\`\`
+
+The app ships no update screen: drive it with \`useUpdater()\` from \`@capuchoo/updater/vue\`.
+`;
 }
 
 function manifest(source, { name, appName, templateName }) {
@@ -56,7 +82,7 @@ function copyTree(from, to, transform) {
  * The template's dependencies are already concrete - `bundleTemplates.mjs` resolved them when the
  * creator was packed - so nothing here has to know about workspaces or catalogs.
  */
-export function scaffold({ templateDir, out, name, appId, appName, engine, pragmas }) {
+export function scaffold({ templateDir, out, name, appId, appName, engine, pragmas, updateUrl }) {
   if (!existsSync(templateDir)) throw new Error(`no template at ${templateDir}`);
   if (existsSync(out)) throw new Error(`${out} already exists`);
 
@@ -92,6 +118,8 @@ export function scaffold({ templateDir, out, name, appId, appName, engine, pragm
     writeFileSync(join(out, ".env"), `${lines.join("\n")}\n`);
   }
 
+  if (updateUrl) addUpdates(out, { appId, appName, updateUrl });
+
   // pnpm will not finish an install while a dependency's build script is neither allowed nor
   // denied, and vite-plus pulls esbuild in. Without this every generated app fails its first
   // `pnpm install` with ERR_PNPM_IGNORED_BUILDS.
@@ -117,6 +145,9 @@ export function scaffold({ templateDir, out, name, appId, appName, engine, pragm
       "",
       existing,
       "",
+      "# Flavour files are configuration to commit. Last, because the last matching rule wins.",
+      "!build/*/.env.*",
+      "",
     ].join("\n"),
   );
 
@@ -136,7 +167,7 @@ pnpm build && npx cap sync android && npx cap run android
 Android builds need **JDK 21**; an older one fails with \`invalid source release: 21\`.
 
 \`CLAUDE.md\` and \`.claude/\` carry the architecture an agent needs before editing anything here.
-`,
+${updateUrl ? updatesReadme(appId) : ""}`,
   );
 
   return { templateName };
