@@ -29,6 +29,8 @@ export const COMPONENT_NAMES = [
   "M3InfiniteScroll",
   "M3LinearProgress",
   "M3List",
+  "M3ListGroup",
+  "M3ListIndex",
   "M3ListItem",
   "M3LoadingIndicator",
   "M3Menu",
