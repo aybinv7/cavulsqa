@@ -8,6 +8,14 @@
     }}</M3Button>
   </GalleryBlock>
 
+  <GalleryBlock :title="t('gallery.overlays.standard')" :note="t('gallery.overlays.standardNote')">
+    <M3Button variant="tonal" @click="toggleStandard">{{
+      standardDetent === "hidden"
+        ? t("gallery.overlays.showStandard")
+        : t("gallery.overlays.hideStandard")
+    }}</M3Button>
+  </GalleryBlock>
+
   <GalleryBlock :title="t('gallery.overlays.side')" :note="t('gallery.overlays.sideNote')">
     <M3Button variant="tonal" @click="sideOpen = true">{{
       t("gallery.overlays.openSide")
@@ -132,6 +140,28 @@
     </M3NavigationItem>
   </M3ModalNavigationRail>
 
+  <M3StandardBottomSheet
+    v-model:detent="standardDetent"
+    :label="t('gallery.overlays.nearby')"
+    :title="t('gallery.overlays.nearby')"
+    :peek-height="112"
+    :expand-label="t('gallery.overlays.expandSheet')"
+    :collapse-label="t('gallery.overlays.collapseSheet')"
+    hideable
+  >
+    <M3List variant="segmented" inset>
+      <M3ListItem
+        v-for="stop in 24"
+        :key="stop"
+        clickable
+        :headline="t('gallery.overlays.stop', { n: stop })"
+        :supporting="t('gallery.overlays.stopNote', { minutes: stop * 3 })"
+      >
+        <template #leading><i-ms-location-on-outline-rounded /></template>
+      </M3ListItem>
+    </M3List>
+  </M3StandardBottomSheet>
+
   <M3BottomSheet v-model:open="sheetOpen" :title="t('gallery.overlays.sheetTitle')">
     <p class="type-body-medium m-0 px-6 pb-4 text-on-surface-variant">
       {{ t("gallery.overlays.sheetText") }}
@@ -152,6 +182,7 @@
 </template>
 
 <script setup lang="ts">
+import type { SheetDetent } from "@cavulsqa/m3e-vue";
 import { markRaw } from "vue";
 import ContentCopyIcon from "~icons/material-symbols/content-copy-outline-rounded";
 import DeleteIcon from "~icons/material-symbols/delete-outline-rounded";
@@ -172,10 +203,15 @@ const sideOpen = ref(false);
 const railOpen = ref(false);
 const destination = ref<string>("inbox");
 const sheetOpen = ref(false);
+const standardDetent = ref<SheetDetent>("hidden");
 const menuOpen = ref(false);
 const sort = ref<(typeof ORDERS)[number]>("recent");
 const groupBy = ref<(typeof GROUPS)[number]>("none");
 const menuAnchor = useTemplateRef<HTMLElement>("menuAnchor");
+
+function toggleStandard() {
+  standardDetent.value = standardDetent.value === "hidden" ? "peek" : "hidden";
+}
 
 async function openActions() {
   const choice = await actionSheet.open({

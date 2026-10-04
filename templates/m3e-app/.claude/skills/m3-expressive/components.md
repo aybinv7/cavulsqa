@@ -71,6 +71,12 @@ then put no other buttons inside. → cards/specs
 `#footer` (fixed actions). Spring-driven; drag from handle or top-scrolled content. Prefer it to a
 dialog for anything with more than one choice or any form. → bottom-sheets/specs
 
+**`M3StandardBottomSheet`** - the non-modal sheet beside the content (a map, a route, a player):
+`v-model:detent` peek | half | expanded (| hidden with `hideable`), `label`, `title`, `peekHeight`
+(56 by default - raise it to show the title), `half`. Drags anywhere until expanded, then the content
+scrolls; pulling down from the content's top brings it back. Fixed to the window: set
+`--m3-standard-sheet-inset-bottom` above a navigation bar and pad the page by the peek.
+
 **Action sheet** - `await useActionSheet().open({ title, supporting, quickActions, groups })` resolves
 the chosen id or null. Options with icons in segmented groups; `selected` shows a check, `tone:
 "destructive"` paints error. Icons are components wrapped in `markRaw`.
