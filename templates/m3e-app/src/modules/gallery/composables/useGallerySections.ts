@@ -10,6 +10,7 @@ import ShapesIcon from "~icons/material-symbols/shapes-outline-rounded";
 import WidgetsIcon from "~icons/material-symbols/widgets-outline-rounded";
 import TuneIcon from "~icons/material-symbols/tune-rounded";
 import TabsIcon from "~icons/material-symbols/tab-outline-rounded";
+import TableIcon from "~icons/material-symbols/table-outline-rounded";
 import ContactsIcon from "~icons/material-symbols/contacts-outline-rounded";
 import CalendarIcon from "~icons/material-symbols/calendar-today-outline-rounded";
 import SpeedIcon from "~icons/material-symbols/speed-rounded";
@@ -123,6 +124,13 @@ export const sections: readonly GallerySection[] = [
     "cookie12Sided",
     "primary",
     () => import("../components/sections/GalleryCarousels.vue"),
+  ),
+  section(
+    "tables",
+    TableIcon,
+    "square",
+    "secondary",
+    () => import("../components/sections/GalleryTables.vue"),
   ),
   section(
     "surfaces",

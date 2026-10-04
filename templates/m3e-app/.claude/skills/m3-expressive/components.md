@@ -82,6 +82,12 @@ lazy? }`), `label`, `mode` select (`v-model:selected`) | check (`v-model:checked
 tri-state branches), `v-model:expanded`, `load` for lazy children, `#icon="{ node, expanded }"`,
 `#trailing`. Categories, charts of accounts, permission sets.
 
+**`M3DataTable`** - Framework7's data table: `rows`, `columns` (`{ key, label, value?, format?,
+numeric?, sortable?, width? }`), `row-key`, `label`, `v-model:sort` (sorts locally unless
+`:sort-locally="false"` - then sort in SQL from the model), `selectable` + `v-model:selected`,
+`max-height` + `sticky-first-column` for wide tables, `dense`, `#cell`, `#footer` (totals), `#empty`.
+For phones prefer a list with the key fields; use the table where rows are compared across columns.
+
 **`M3Card`** - `variant` elevated | filled | outlined; `clickable` makes the whole card one target -
 then put no other buttons inside. → cards/specs
 

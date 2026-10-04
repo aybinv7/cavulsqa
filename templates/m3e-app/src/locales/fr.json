@@ -251,6 +251,10 @@
       "contacts": {
         "title": "Liste groupée et index",
         "subtitle": "Titres de groupe collants, un rail A–Z"
+      },
+      "tables": {
+        "title": "Tableau de données",
+        "subtitle": "Tri, sélection, en-tête et colonne fixes"
       }
     },
     "buttons": {
@@ -774,6 +778,21 @@
         "cancel": "Annuler",
         "adjust": "Ajuster"
       }
+    },
+    "tables": {
+      "orders": "Commandes",
+      "ordersNote": "Le tableau de données de Framework7 : touchez un en-tête pour trier, encore pour inverser, encore pour annuler. Sélectionnez des lignes pour les totaliser. Il défile ici dans sa propre hauteur, l'en-tête et la colonne des commandes restent en place.",
+      "dense": "Compact",
+      "selected": "Aucune sélection | {count} sélectionnée | {count} sélectionnées",
+      "selectAll": "Sélectionner toutes les commandes",
+      "selectRow": "Sélectionner {ref}",
+      "opened": "{ref} ouverte",
+      "total": "Total",
+      "ref": "Commande",
+      "customer": "Client",
+      "date": "Date",
+      "status": "Statut",
+      "totalColumn": "Total"
     }
   },
   "settings": {

@@ -251,6 +251,10 @@
       "contacts": {
         "title": "Grouped list and index",
         "subtitle": "Sticky group titles, an A–Z rail"
+      },
+      "tables": {
+        "title": "Data table",
+        "subtitle": "Sort, select, sticky header and column"
       }
     },
     "buttons": {
@@ -774,6 +778,21 @@
         "cancel": "Cancel",
         "adjust": "Adjust"
       }
+    },
+    "tables": {
+      "orders": "Orders",
+      "ordersNote": "Framework7's data table: tap a header to sort, again to reverse, again to clear. Select rows to total them. It scrolls inside its own height here, so the header and the order column stay put.",
+      "dense": "Dense",
+      "selected": "None selected | {count} selected | {count} selected",
+      "selectAll": "Select every order",
+      "selectRow": "Select {ref}",
+      "opened": "Opened {ref}",
+      "total": "Total",
+      "ref": "Order",
+      "customer": "Customer",
+      "date": "Date",
+      "status": "Status",
+      "totalColumn": "Total"
     }
   },
   "settings": {
