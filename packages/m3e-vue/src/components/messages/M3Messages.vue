@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import ChatBubble from "./ChatBubble.vue";
 import ChatLiftLayer from "./ChatLiftLayer.vue";
+import ChatReactionsSheet from "./ChatReactionsSheet.vue";
 import ChatTyping from "./ChatTyping.vue";
 import M3Glyph from "../icon/M3Glyph.vue";
 import { computed, onMounted, onScopeDispose, shallowRef, useTemplateRef, watch } from "vue";
@@ -33,6 +34,8 @@ import type { MessageAction } from "./types.js";
  * above it and the message's `actions` under it, emitting `react` and `action`; the reactions sit
  * on the bubble's edge, drawn from each message's `reactions`, and `applyReaction` computes the
  * next ones. Without either prop the long-press emits `hold` instead, for a menu of your own.
+ * Tapping a message's reactions lists who reacted - names come from each reaction's `by` - and
+ * the owner's own row takes their reaction off, as `react` with `null`.
  *
  * It renders the newest `windowSize` rows and more, a chunk at a time, as the reader scrolls up
  * toward them - the place they are reading stays put - so a new message costs the same in a
@@ -59,6 +62,10 @@ const props = withDefaults(
     reactLabel?: string;
     menuLabel?: string;
     reactionsLabel?: (reactions: readonly MessageReaction[]) => string;
+    reactionsTitle?: string;
+    allReactionsLabel?: string;
+    removeReactionLabel?: string;
+    othersLabel?: (count: number) => string;
     /** How many rows render from the end; more render as the reader scrolls up. */
     windowSize?: number;
   }>(),
@@ -75,6 +82,10 @@ const props = withDefaults(
     actions: () => [],
     windowSize: 60,
     reactLabel: "React",
+    reactionsTitle: "Reactions",
+    allReactionsLabel: "All",
+    removeReactionLabel: "Tap to remove",
+    othersLabel: (count: number) => (count === 1 ? "1 other" : `${count} others`),
     menuLabel: "Message actions",
     reactionsLabel: (reactions: readonly MessageReaction[]) =>
       reactions
@@ -232,6 +243,24 @@ function toggle(key: string | number) {
 }
 
 const lifts = computed(() => props.reactions.length > 0 || props.actions.length > 0);
+const reactionsOpen = shallowRef(false);
+const reactionsOf = shallowRef<ChatMessage | null>(null);
+
+function showReactions(message: ChatMessage) {
+  reactionsOf.value = message;
+  reactionsOpen.value = true;
+}
+
+watch(
+  () => props.messages,
+  (messages) => {
+    const shown = reactionsOf.value;
+    if (!shown) return;
+    const current = messages.find((message) => message.id === shown.id);
+    if (current !== shown) reactionsOf.value = current ?? null;
+    if (!current?.reactions?.length) reactionsOpen.value = false;
+  },
+);
 
 function hold(message: ChatMessage, event: MouseEvent) {
   haptics.confirm();
@@ -269,6 +298,7 @@ function hold(message: ChatMessage, event: MouseEvent) {
           @hold="hold(row.message, $event)"
           @press="emit('press', row.message)"
           @retry="emit('retry', row.message)"
+          @reactions="showReactions(row.message)"
         />
       </template>
     </ol>
@@ -289,6 +319,16 @@ function hold(message: ChatMessage, event: MouseEvent) {
       :menu-label="props.menuLabel"
       @react="(message, emoji) => emit('react', message, emoji)"
       @action="(message, id) => emit('action', message, id)"
+    />
+    <ChatReactionsSheet
+      v-model:open="reactionsOpen"
+      :message="reactionsOf"
+      :title="props.reactionsTitle"
+      :all-label="props.allReactionsLabel"
+      :you-label="props.youLabel"
+      :remove-label="props.removeReactionLabel"
+      :others-label="props.othersLabel"
+      @remove="(message) => emit('react', message, null)"
     />
     <div class="m3-messages__dock">
       <Transition name="m3-messages-jump">

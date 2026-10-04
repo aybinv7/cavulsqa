@@ -21,6 +21,10 @@ export) before the next release.
   `lang`, so a switch of language switches it.
 - `M3Chip` ellipsises a label longer than its container instead of overflowing it; under
   right-to-left the overflow ran past the card's start edge.
+- Who reacted: a tap on a message's reactions opens a sheet with a chip per emoji and the people
+  behind each - the owner first, whose row takes their reaction off (`react` with `null`), then
+  the names in each reaction's new `by`, then the rest of a count it does not name
+  (`reactionPeople`).
 - `M3Tabs` no longer replays a swipe. The indicator followed the finger to the next tab, then the
   selection caught up, the tabs re-rendered, and Vue re-applied the old tab's style binding - the
   indicator snapped back and animated forward again. It now has one writer, which skips a move to

@@ -7,6 +7,7 @@ import {
   applyReaction,
   createM3e,
   ownReaction,
+  reactionPeople,
   reactionTotal,
   type ChatMessage,
 } from "../src/index.js";
@@ -217,6 +218,117 @@ describe("M3AttachSheet", () => {
     await flushPromises();
     expect(chosen).toEqual(["camera"]);
     expect(open.value).toBe(false);
+    wrapper.unmount();
+  });
+});
+
+describe("who reacted", () => {
+  test("rows put the owner first, then named people, then the unnamed rest", () => {
+    expect(
+      reactionPeople([
+        { emoji: "👍", count: 3, mine: true, by: ["Amina"] },
+        { emoji: "❤️", count: 2, by: ["Karim"] },
+      ]),
+    ).toEqual([
+      { emoji: "👍", mine: true },
+      { emoji: "👍", mine: false, name: "Amina" },
+      { emoji: "👍", mine: false, others: 1 },
+      { emoji: "❤️", mine: false, name: "Karim" },
+      { emoji: "❤️", mine: false, others: 1 },
+    ]);
+  });
+
+  test("tapping the reactions lists who reacted; the owner's row takes theirs off", async () => {
+    const messages = shallowRef<ChatMessage[]>([
+      {
+        id: 1,
+        sent: false,
+        author: "Amina",
+        at: Date.now() - 60_000,
+        text: "Route done",
+        reactions: [
+          { emoji: "👍", count: 2, mine: true, by: ["Karim"] },
+          { emoji: "❤️", count: 1, by: ["Samir"] },
+        ],
+      },
+    ]);
+    const wrapper = mount(
+      defineComponent({
+        setup: () => () =>
+          h(M3Messages, {
+            messages: messages.value,
+            label: "Team",
+            onReact: (message: ChatMessage, emoji: string | null) => {
+              messages.value = messages.value.map((entry) =>
+                entry.id === message.id
+                  ? { ...entry, reactions: applyReaction(entry.reactions, emoji) }
+                  : entry,
+              );
+            },
+          }),
+      }),
+      { global: { plugins }, attachTo: document.body },
+    );
+    await wrapper.get("button.m3-chat-reactions").trigger("click");
+    await flushPromises();
+    const sheet = () => document.body.querySelector(".m3-chat-reactions-sheet");
+    expect(sheet()).not.toBeNull();
+    const rows = () =>
+      [...sheet()!.querySelectorAll(".m3-list-item")].map((row) => row.textContent?.trim() ?? "");
+    expect(rows()).toHaveLength(3);
+    expect(rows()[0]).toContain("You");
+    expect(rows()[1]).toContain("Karim");
+    expect(rows()[2]).toContain("Samir");
+    const heart = [
+      ...sheet()!.querySelectorAll<HTMLButtonElement>(".m3-chip button, button.m3-chip"),
+    ].find((chip) => chip.textContent?.includes("❤️"));
+    heart!.click();
+    await flushPromises();
+    expect(rows()).toHaveLength(1);
+    expect(rows()[0]).toContain("Samir");
+    expect(wrapper.findComponent(M3Messages).emitted("hold")).toBeUndefined();
+    wrapper.unmount();
+  });
+
+  test("the owner's row removes their reaction", async () => {
+    const messages = shallowRef<ChatMessage[]>([
+      {
+        id: 1,
+        sent: false,
+        author: "Amina",
+        at: Date.now() - 60_000,
+        text: "Route done",
+        reactions: [{ emoji: "👍", count: 2, mine: true, by: ["Karim"] }],
+      },
+    ]);
+    const wrapper = mount(
+      defineComponent({
+        setup: () => () =>
+          h(M3Messages, {
+            messages: messages.value,
+            label: "Team",
+            onReact: (message: ChatMessage, emoji: string | null) => {
+              messages.value = messages.value.map((entry) =>
+                entry.id === message.id
+                  ? { ...entry, reactions: applyReaction(entry.reactions, emoji) }
+                  : entry,
+              );
+            },
+          }),
+      }),
+      { global: { plugins }, attachTo: document.body },
+    );
+    await wrapper.get("button.m3-chat-reactions").trigger("click");
+    await flushPromises();
+    const mine = document.body.querySelector<HTMLElement>(
+      ".m3-chat-reactions-sheet .m3-list-item [role=button], .m3-chat-reactions-sheet .m3-list-item button",
+    );
+    (mine ??
+      document.body.querySelector<HTMLElement>(".m3-chat-reactions-sheet .m3-list-item"))!.click();
+    await flushPromises();
+    expect(messages.value[0]!.reactions).toEqual([
+      { emoji: "👍", count: 1, mine: false, by: ["Karim"] },
+    ]);
     wrapper.unmount();
   });
 });

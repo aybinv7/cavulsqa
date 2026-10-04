@@ -213,11 +213,13 @@ export type { ChartSeries } from "./components/chart/palette.js";
 export {
   applyReaction,
   ownReaction,
+  reactionPeople,
   reactionTotal,
   type ChatMessage,
   type MessageImage,
   type MessageReaction,
   type MessageStatus,
+  type ReactionPerson,
 } from "./utils/messages.js";
 export type { MessageAction } from "./components/messages/types.js";
 export type { AttachOption } from "./components/sheet/attach.js";

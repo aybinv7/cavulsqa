@@ -12,9 +12,10 @@ const SHOWN = 3;
  * A message's reactions on small cookies at the bubble's edge, each cut out of the bubble by a ring
  * of the surface behind it, the way Google Messages sets them. Three at most, then the total. A
  * reaction chosen moments ago pops in with a turn and a ring bursting off it, and a haptic tick -
- * a reaction you only see is half a reaction.
+ * a reaction you only see is half a reaction. A tap opens who reacted (`open`).
  */
 const props = defineProps<{ reactions: readonly MessageReaction[]; label: string }>();
+const emit = defineEmits<{ open: [] }>();
 
 const haptics = useHaptics();
 const shown = computed(() =>
@@ -42,7 +43,14 @@ watch(
 </script>
 
 <template>
-  <span class="m3-chat-reactions" role="img" :aria-label="props.label">
+  <button
+    type="button"
+    class="m3-chat-reactions m3-focus-ring"
+    :aria-label="props.label"
+    aria-haspopup="dialog"
+    @click.stop="emit('open')"
+    @contextmenu.stop.prevent
+  >
     <span
       v-for="reaction in shown"
       :key="key(reaction)"
@@ -61,18 +69,31 @@ watch(
       </M3Shape>
     </span>
     <span v-if="total > 1" class="m3-chat-reactions__count" aria-hidden="true">{{ total }}</span>
-  </span>
+  </button>
 </template>
 
 <style scoped>
 .m3-chat-reactions {
   display: inline-flex;
+  width: auto;
   align-items: center;
-  pointer-events: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.m3-chat-reactions:active .m3-chat-reactions__badge {
+  scale: 0.9;
 }
 
 .m3-chat-reactions__badge {
   position: relative;
+  transition: scale var(--md-sys-motion-spring-fast-spatial-duration)
+    var(--md-sys-motion-spring-fast-spatial);
   display: grid;
   width: 30px;
   height: 30px;

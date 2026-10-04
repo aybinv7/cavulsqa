@@ -22,6 +22,7 @@ const emit = defineEmits<{
   hold: [event: MouseEvent];
   press: [];
   retry: [];
+  reactions: [];
 }>();
 
 const STATUS_GLYPH: Record<string, GlyphName> = {
@@ -114,6 +115,7 @@ const imageStyle = computed(() => {
           class="m3-chat-row__reactions"
           :reactions="message.reactions"
           :label="props.reactionsLabel"
+          @open="emit('reactions')"
         />
       </div>
       <button

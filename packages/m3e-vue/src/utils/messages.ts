@@ -15,6 +15,17 @@ export interface MessageReaction {
   mine?: boolean;
   /** When it was last chosen - one chosen moments ago springs in rather than just appearing. */
   at?: Date | string | number;
+  /** Who else chose it, by name, for the list a tap on the reactions opens; the owner is `mine`. */
+  by?: readonly string[];
+}
+
+/** One row of the who-reacted list: the owner, a named person, or the rest of a count unnamed. */
+export interface ReactionPerson {
+  emoji: string;
+  mine: boolean;
+  name?: string;
+  /** People counted on this reaction but not named. */
+  others?: number;
 }
 
 export interface ChatMessage {
@@ -236,4 +247,24 @@ export function applyReaction(
 /** Everyone's reactions on a message, counted. */
 export function reactionTotal(reactions: readonly MessageReaction[] | undefined): number {
   return (reactions ?? []).reduce((sum, reaction) => sum + Math.max(1, reaction.count ?? 1), 0);
+}
+
+/**
+ * Who reacted, as rows: the owner first, then each named person, then whoever a count includes
+ * but `by` does not name, as one row per emoji.
+ */
+export function reactionPeople(
+  reactions: readonly MessageReaction[] | undefined,
+): ReactionPerson[] {
+  const list = reactions ?? [];
+  const rows: ReactionPerson[] = list
+    .filter((reaction) => reaction.mine)
+    .map((reaction) => ({ emoji: reaction.emoji, mine: true }));
+  for (const reaction of list) {
+    const named = reaction.by ?? [];
+    for (const name of named) rows.push({ emoji: reaction.emoji, mine: false, name });
+    const others = Math.max(1, reaction.count ?? 1) - (reaction.mine ? 1 : 0) - named.length;
+    if (others > 0) rows.push({ emoji: reaction.emoji, mine: false, others });
+  }
+  return rows;
 }
