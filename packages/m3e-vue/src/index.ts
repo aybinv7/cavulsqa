@@ -19,6 +19,7 @@ export { default as M3Dialog } from "./components/dialog/M3Dialog.vue";
 export { default as M3DialogHost } from "./components/dialog/M3DialogHost.vue";
 export { default as M3Divider } from "./components/divider/M3Divider.vue";
 export { default as M3DockedToolbar } from "./components/toolbar/M3DockedToolbar.vue";
+export { default as M3ExposedDropdown } from "./components/textfield/M3ExposedDropdown.vue";
 export { default as M3Fab } from "./components/button/M3Fab.vue";
 export { default as M3FabMenu } from "./components/button/M3FabMenu.vue";
 export { default as M3FabMenuItem } from "./components/button/M3FabMenuItem.vue";

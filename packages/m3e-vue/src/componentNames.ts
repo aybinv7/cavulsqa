@@ -18,6 +18,7 @@ export const COMPONENT_NAMES = [
   "M3DialogHost",
   "M3Divider",
   "M3DockedToolbar",
+  "M3ExposedDropdown",
   "M3Fab",
   "M3FabMenu",
   "M3FabMenuItem",
