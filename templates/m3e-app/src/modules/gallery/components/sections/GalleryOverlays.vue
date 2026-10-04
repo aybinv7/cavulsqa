@@ -45,6 +45,20 @@
     </M3Tooltip>
   </GalleryBlock>
 
+  <GalleryBlock
+    :title="t('gallery.overlays.fullscreen')"
+    :note="t('gallery.overlays.fullscreenNote')"
+  >
+    <M3Button variant="tonal" @click="formOpen = true">{{
+      t("gallery.overlays.newCustomer")
+    }}</M3Button>
+  </GalleryBlock>
+
+  <GalleryCustomerForm
+    v-model:open="formOpen"
+    @saved="(name) => snackbar.show(t('gallery.overlays.customerSaved', { name }))"
+  />
+
   <GalleryBlock :title="t('gallery.overlays.dialog')" :note="t('gallery.overlays.dialogNote')">
     <M3Button variant="tonal" @click="confirm">{{ t("gallery.overlays.openDialog") }}</M3Button>
   </GalleryBlock>
@@ -204,6 +218,7 @@ import EditIcon from "~icons/material-symbols/edit-outline-rounded";
 import ShareIcon from "~icons/material-symbols/share-outline-rounded";
 import StarIcon from "~icons/material-symbols/star-outline-rounded";
 import GalleryBlock from "@/modules/gallery/components/GalleryBlock.vue";
+import GalleryCustomerForm from "@/modules/gallery/components/GalleryCustomerForm.vue";
 
 const { t } = useI18n();
 const snackbar = useSnackbar();
@@ -218,6 +233,7 @@ const sideOpen = ref(false);
 const railOpen = ref(false);
 const destination = ref<string>("inbox");
 const sheetOpen = ref(false);
+const formOpen = ref(false);
 const standardDetent = ref<SheetDetent>("hidden");
 const menuOpen = ref(false);
 const sort = ref<(typeof ORDERS)[number]>("recent");

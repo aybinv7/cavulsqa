@@ -427,7 +427,19 @@
       "orderTitle": "New order from Oran Market",
       "orderText": "SO-1024 · 12 lines · 48,300 DA, to deliver tomorrow morning.",
       "orderOpened": "Opened SO-1024",
-      "syncTitle": "Everything is up to date"
+      "syncTitle": "Everything is up to date",
+      "fullscreen": "Full-screen dialog",
+      "fullscreenNote": "Framework7's popup for a task that needs the whole screen. Save waits for a name; closing with changes asks before discarding them. From 600dp it becomes a basic dialog.",
+      "newCustomer": "New customer",
+      "save": "Save",
+      "customerName": "Customer name",
+      "phone": "Phone",
+      "note": "Delivery note",
+      "discardTitle": "Discard this customer?",
+      "discardText": "What you typed will be lost.",
+      "discard": "Discard",
+      "keepEditing": "Keep editing",
+      "customerSaved": "Saved {name}"
     },
     "selection": {
       "stepper": "Stepper",

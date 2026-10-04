@@ -427,7 +427,19 @@
       "orderTitle": "Nouvelle commande d'Oran Market",
       "orderText": "SO-1024 · 12 lignes · 48 300 DA, à livrer demain matin.",
       "orderOpened": "SO-1024 ouverte",
-      "syncTitle": "Tout est à jour"
+      "syncTitle": "Tout est à jour",
+      "fullscreen": "Dialogue plein écran",
+      "fullscreenNote": "La popup de Framework7 pour une tâche qui demande tout l'écran. Enregistrer attend un nom ; fermer avec des changements demande avant de les abandonner. À partir de 600dp, il devient un dialogue simple.",
+      "newCustomer": "Nouveau client",
+      "save": "Enregistrer",
+      "customerName": "Nom du client",
+      "phone": "Téléphone",
+      "note": "Note de livraison",
+      "discardTitle": "Abandonner ce client ?",
+      "discardText": "Ce que vous avez saisi sera perdu.",
+      "discard": "Abandonner",
+      "keepEditing": "Continuer",
+      "customerSaved": "{name} enregistré"
     },
     "selection": {
       "stepper": "Compteur",

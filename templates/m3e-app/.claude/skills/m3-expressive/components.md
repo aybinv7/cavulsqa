@@ -98,6 +98,12 @@ the chosen id or null. Options with icons in segmented groups; `selected` shows 
 confirmations, required choices. `destructive` paints the confirm action; `icon` centres the headline.
 → dialogs/specs
 
+**`M3FullScreenDialog`** - Framework7's popup, M3's full-screen dialog: `v-model:open`, `title`,
+`confirm-label` (+ `confirm-disabled`), `#actions`, `@confirm`, `@close`. For a task that needs the
+whole phone screen - a new order, an intake form; from 600dp it becomes a basic dialog. While the
+form is dirty pass `:dismissible="false"` and ask in `@close` before discarding (`useDialog`
+confirmations draw above it).
+
 **`M3Menu` + `M3MenuItem` + `M3MenuGroup`** - anchored to an element ref (`:anchor`), `variant`
 standard | vibrant; groups give the expressive segmented look. `checkable` for single/multi select.
 A `#submenu` slot of items makes a cascading item (trailing arrow; opens beside it on tap, hover or
