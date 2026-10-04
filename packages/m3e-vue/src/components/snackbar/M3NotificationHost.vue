@@ -1,215 +1,104 @@
 <script setup lang="ts">
-import M3Glyph from "../icon/M3Glyph.vue";
-import { MOTION_SCHEMES, animateSpring, type SpringAnimation } from "@cavulsqa/m3e";
-import { nextTick, onBeforeUnmount, shallowRef, useTemplateRef, watch } from "vue";
-import { vRipple } from "../../directives/ripple.js";
-import { useDismissDrag } from "../../composables/useDismissDrag.js";
-import { useReducedMotion } from "../../composables/useReducedMotion.js";
+import NotificationCard from "./NotificationCard.vue";
+import { computed, shallowRef, watch } from "vue";
 import { useM3eConfig } from "../../services/config.js";
 import type { NotificationItem, NotificationResult } from "../../services/notification.js";
-import { dismissDirection, type DismissDirection } from "../../utils/dismiss.js";
 
 /**
- * Shows `useNotification().show(...)` as Framework7's in-app notification in Material dress: a
- * banner that drops in below the status bar. Tapping it opens it; it flies out sideways or slides
- * up when swiped, following the finger, as Android's heads-up notifications do; its timer pauses
- * while it is touched. A new notification replaces the one showing. Mount it once.
+ * Shows `useNotification().show(...)` as Framework7's in-app notifications in Material dress:
+ * banners that drop in below the status bar and stack, newest in front with the older ones
+ * peeking behind, as Android groups heads-up notifications. Tapping one opens it; it flies out
+ * sideways or slides up when swiped, following the finger, and the next one rises into place.
+ * Only the front one counts down, and only while it is not touched. With more than one, a pill
+ * under the stack - or a tap on the cards behind - spreads them into a list to act on each, with
+ * "Clear all". Mount it once.
  */
 const props = withDefaults(
-  defineProps<{ closeLabel?: string; label?: string; teleport?: string | HTMLElement }>(),
-  { closeLabel: "Dismiss", label: "Notification", teleport: "body" },
+  defineProps<{
+    closeLabel?: string;
+    label?: string;
+    teleport?: string | HTMLElement;
+    moreLabel?: (count: number) => string;
+    lessLabel?: string;
+    clearLabel?: string;
+  }>(),
+  {
+    closeLabel: "Dismiss",
+    label: "Notification",
+    teleport: "body",
+    moreLabel: (count: number) => `${count} more`,
+    lessLabel: "Show less",
+    clearLabel: "Clear all",
+  },
 );
 
+const PEEK = 3;
 const { notification } = useM3eConfig();
-const reduced = useReducedMotion();
-const card = useTemplateRef<HTMLElement>("card");
-const shown = shallowRef<NotificationItem | null>(null);
-const motion = MOTION_SCHEMES.expressive;
+const expanded = shallowRef(false);
+const items = computed(() => notification.items.value);
 
-let x = 0;
-let y = 0;
-let animation: SpringAnimation | null = null;
-let leaving = false;
-let timer: ReturnType<typeof setTimeout> | undefined;
-let remaining = 0;
-let startedAt = 0;
-
-function draw(element: HTMLElement | null | undefined) {
-  if (!element) return;
-  element.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-  element.style.opacity = String(1 - Math.min(1, Math.abs(x) / Math.max(1, element.offsetWidth)));
+function done(item: NotificationItem, result: NotificationResult) {
+  notification.settle(result, item.id);
 }
 
-function animateTo(toX: number, toY: number, velocity: number, spatial: "fast" | "default") {
-  animation?.stop();
-  const element = card.value;
-  const fromX = x;
-  const fromY = y;
-  const distance = Math.hypot(toX - fromX, toY - fromY) || 1;
-  animation = animateSpring({
-    from: 0,
-    to: 1,
-    spring: (spatial === "fast" ? motion.fastSpatial : motion.defaultSpatial).spring,
-    velocity: velocity / distance,
-    instant: reduced.value,
-    restDelta: 0.001,
-    onFrame(progress) {
-      x = fromX + (toX - fromX) * progress;
-      y = fromY + (toY - fromY) * progress;
-      draw(element);
-    },
-  });
-  return animation.finished;
-}
-
-function offscreenY(): number {
-  const rect = card.value?.getBoundingClientRect();
-  if (!rect) return -200;
-  return -(rect.top - y + rect.height + 16);
-}
-
-function stopTimer() {
-  clearTimeout(timer);
-  timer = undefined;
-}
-
-function runTimer(ms: number) {
-  stopTimer();
-  if (!Number.isFinite(ms)) return;
-  remaining = ms;
-  startedAt = performance.now();
-  timer = setTimeout(() => void dismiss("timeout"), ms);
-}
-
-function pause() {
-  if (!timer) return;
-  stopTimer();
-  remaining = Math.max(0, remaining - (performance.now() - startedAt));
-}
-
-function resume() {
-  if (shown.value && !timer && !leaving && Number.isFinite(remaining)) {
-    runTimer(Math.max(remaining, 1500));
-  }
-}
-
-async function enter(item: NotificationItem) {
-  await nextTick();
-  if (shown.value !== item) return;
-  x = 0;
-  y = offscreenY();
-  draw(card.value);
-  runTimer(item.durationMs);
-  void animateTo(0, 0, 0, "default");
-}
-
-async function dismiss(
-  result: NotificationResult,
-  direction: DismissDirection = "up",
-  velocity = 0,
-) {
-  const item = shown.value;
-  if (!item || leaving) return;
-  leaving = true;
-  stopTimer();
-  const width = (card.value?.offsetWidth ?? 360) * 1.2;
-  const target =
-    direction === "up" ? [0, offscreenY()] : [direction === "left" ? -width : width, 0];
-  await animateTo(target[0]!, target[1]!, velocity, "fast");
-  if (shown.value === item) shown.value = null;
-  leaving = false;
-  if (notification.current.value === item) notification.settle(result);
+function expand() {
+  if (items.value.length > 1) expanded.value = true;
 }
 
 watch(
-  notification.current,
-  (item) => {
-    if (item && item !== shown.value) {
-      animation?.stop();
-      leaving = false;
-      shown.value = item;
-      void enter(item);
-    } else if (!item && shown.value && !leaving) {
-      void dismiss("dismissed");
-    }
+  () => items.value.length,
+  (count) => {
+    if (count <= 1) expanded.value = false;
   },
-  { immediate: true },
 );
-
-useDismissDrag({
-  target: card,
-  enabled: () => Boolean(shown.value) && !leaving,
-  onStart() {
-    animation?.stop();
-    pause();
-  },
-  onMove(dx, dy) {
-    x = dx;
-    y = dy;
-    draw(card.value);
-  },
-  onRelease(dx, dy, vx, vy) {
-    const direction = dismissDirection({
-      dx,
-      dy,
-      vx,
-      vy,
-      width: card.value?.offsetWidth ?? 360,
-    });
-    if (direction) {
-      void dismiss("dismissed", direction, direction === "up" ? -vy : Math.abs(vx));
-    } else {
-      void animateTo(0, 0, 0, "fast");
-      resume();
-    }
-  },
-});
-
-onBeforeUnmount(() => {
-  stopTimer();
-  animation?.stop();
-});
 </script>
 
 <template>
   <Teleport :to="props.teleport">
-    <div class="m3-notification-region" role="status" aria-live="polite">
+    <div
+      class="m3-notification-region"
+      :class="{ 'm3-notification-region--expanded': expanded }"
+      role="status"
+      aria-live="polite"
+    >
       <div
-        v-if="shown"
-        :key="shown.id"
-        ref="card"
-        class="m3-notification"
-        :aria-label="props.label"
-        @pointerdown="pause"
-        @pointerup="resume"
-        @pointercancel="resume"
+        class="m3-notification-stack"
+        :style="{ '--m3-peeks': Math.min(PEEK, items.length) - 1 }"
       >
-        <button
-          v-ripple
-          type="button"
-          class="m3-notification__body m3-state m3-focus-ring"
-          @click="dismiss('opened')"
+        <div
+          v-for="(item, depth) in items"
+          :key="item.id"
+          class="m3-notification-slot"
+          :class="{ 'm3-notification-slot--hidden': !expanded && depth >= PEEK }"
+          :style="{ '--m3-depth': depth, zIndex: items.length - depth }"
+          @click="depth > 0 && !expanded ? expand() : undefined"
         >
-          <span v-if="shown.icon" class="m3-notification__icon" aria-hidden="true">
-            <component :is="shown.icon" />
-          </span>
-          <span class="m3-notification__text">
-            <span v-if="shown.source || shown.meta" class="m3-notification__source">
-              {{ shown.source }}<template v-if="shown.source && shown.meta"> · </template
-              >{{ shown.meta }}
-            </span>
-            <span class="m3-notification__title">{{ shown.title }}</span>
-            <span v-if="shown.text" class="m3-notification__message">{{ shown.text }}</span>
-          </span>
+          <NotificationCard
+            :item="item"
+            :timed="!expanded && depth === 0"
+            :interactive="expanded || depth === 0"
+            :close-label="props.closeLabel"
+            :label="props.label"
+            @done="done(item, $event)"
+          />
+        </div>
+      </div>
+      <div v-if="items.length > 1" class="m3-notification-actions">
+        <button
+          type="button"
+          class="m3-notification-pill m3-state m3-focus-ring"
+          :aria-expanded="expanded"
+          @click="expanded ? (expanded = false) : expand()"
+        >
+          {{ expanded ? props.lessLabel : props.moreLabel(items.length - 1) }}
         </button>
         <button
-          v-ripple
+          v-if="expanded"
           type="button"
-          class="m3-notification__close m3-state m3-focus-ring"
-          :aria-label="props.closeLabel"
-          @click="dismiss('dismissed')"
+          class="m3-notification-pill m3-state m3-focus-ring"
+          @click="notification.clear()"
         >
-          <M3Glyph name="close" />
+          {{ props.clearLabel }}
         </button>
       </div>
     </div>
@@ -223,110 +112,80 @@ onBeforeUnmount(() => {
   top: calc(env(safe-area-inset-top) + 8px);
   z-index: calc(var(--m3-overlay-z, 12000) + 10);
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
   padding: 0 8px;
   pointer-events: none;
 }
 
-.m3-notification {
-  position: relative;
-  display: flex;
-  align-items: flex-start;
-  box-sizing: border-box;
+.m3-notification-stack {
+  display: grid;
   width: 100%;
   max-width: 600px;
-  border-radius: 28px;
-  background: var(--md-sys-color-surface-container-high);
-  color: var(--md-sys-color-on-surface);
-  box-shadow: var(--md-sys-elevation-level3);
-  transform: translate3d(0, -200%, 0);
-  touch-action: none;
+  padding-bottom: calc(max(0, var(--m3-peeks, 0)) * 10px);
+  transition: padding-bottom var(--md-sys-motion-spring-default-spatial-duration)
+    var(--md-sys-motion-spring-default-spatial);
+}
+
+.m3-notification-slot {
+  grid-area: 1 / 1;
+  align-self: start;
   pointer-events: auto;
-  will-change: transform, opacity;
+  transform: translateY(calc(var(--m3-depth) * 10px)) scale(calc(1 - var(--m3-depth) * 0.05));
+  transform-origin: 50% 100%;
+  transition:
+    transform var(--md-sys-motion-spring-default-spatial-duration)
+      var(--md-sys-motion-spring-default-spatial),
+    opacity var(--md-sys-motion-spring-default-effects-duration)
+      var(--md-sys-motion-spring-default-effects);
 }
 
-.m3-notification__body {
+.m3-notification-slot--hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.m3-notification-region--expanded .m3-notification-stack {
   display: flex;
-  flex: 1;
-  align-items: flex-start;
-  gap: 16px;
-  min-width: 0;
-  margin: 0;
-  padding: 16px 0 16px 16px;
-  border: 0;
-  border-radius: inherit;
-  background: none;
-  color: inherit;
-  font: inherit;
-  text-align: start;
-  cursor: pointer;
-}
-
-.m3-notification__icon {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--md-sys-color-primary-container);
-  color: var(--md-sys-color-on-primary-container);
-}
-
-.m3-notification__icon :deep(svg) {
-  width: 24px;
-  height: 24px;
-}
-
-.m3-notification__text {
-  display: flex;
-  flex: 1;
+  padding-bottom: 0;
   flex-direction: column;
-  min-width: 0;
+  gap: 8px;
+  max-height: calc(100dvh - env(safe-area-inset-top) - 96px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  pointer-events: auto;
 }
 
-.m3-notification__source {
-  color: var(--md-sys-color-on-surface-variant);
-  font: var(--md-sys-typescale-label-medium-weight) var(--md-sys-typescale-label-medium-size) /
-    var(--md-sys-typescale-label-medium-line-height) var(--md-sys-typescale-label-medium-font);
+.m3-notification-region--expanded .m3-notification-slot {
+  align-self: stretch;
+  transform: none;
 }
 
-.m3-notification__title {
-  overflow: hidden;
-  font: var(--md-sys-typescale-title-small-weight) var(--md-sys-typescale-title-small-size) /
-    var(--md-sys-typescale-title-small-line-height) var(--md-sys-typescale-title-small-font);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.m3-notification-actions {
+  display: flex;
+  gap: 8px;
+  pointer-events: auto;
 }
 
-.m3-notification__message {
-  display: -webkit-box;
-  overflow: hidden;
-  color: var(--md-sys-color-on-surface-variant);
-  font: var(--md-sys-typescale-body-medium-weight) var(--md-sys-typescale-body-medium-size) /
-    var(--md-sys-typescale-body-medium-line-height) var(--md-sys-typescale-body-medium-font);
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-}
-
-.m3-notification__close {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  margin: 8px 8px 0 4px;
-  padding: 0;
+.m3-notification-pill {
+  width: auto;
+  min-height: 32px;
+  margin: 0;
+  padding: 0 16px;
   border: 0;
-  border-radius: 20px;
-  background: none;
-  color: var(--md-sys-color-on-surface-variant);
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+  box-shadow: var(--md-sys-elevation-level2);
   cursor: pointer;
+  font: var(--md-sys-typescale-label-large-weight) var(--md-sys-typescale-label-large-size) /
+    var(--md-sys-typescale-label-large-line-height) var(--md-sys-typescale-label-large-font);
 }
 
-.m3-notification__close :deep(svg) {
-  width: 20px;
-  height: 20px;
-  fill: currentColor;
+@media (prefers-reduced-motion: reduce) {
+  .m3-notification-slot {
+    transition: none;
+  }
 }
 </style>

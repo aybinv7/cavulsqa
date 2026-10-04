@@ -6,15 +6,30 @@ import { createNotificationQueue } from "../src/services/notification.js";
 import { dismissDirection } from "../src/utils/dismiss.js";
 
 describe("notification queue", () => {
-  test("a new notification replaces the one showing", async () => {
+  test("notifications stack newest first and each settles on its own", async () => {
     const queue = createNotificationQueue();
     const first = queue.show({ title: "First" });
     const second = queue.show({ title: "Second" });
-    await expect(first).resolves.toBe("replaced");
+    expect(queue.items.value.map((item) => item.title)).toEqual(["Second", "First"]);
     expect(queue.current.value?.title).toBe("Second");
     queue.settle("opened");
     await expect(second).resolves.toBe("opened");
+    expect(queue.current.value?.title).toBe("First");
+    queue.settle("dismissed", queue.items.value[0]!.id);
+    await expect(first).resolves.toBe("dismissed");
     expect(queue.current.value).toBeNull();
+  });
+
+  test("past the limit the oldest gives way, and clear dismisses all", async () => {
+    const queue = createNotificationQueue(2);
+    const oldest = queue.show({ title: "1" });
+    const middle = queue.show({ title: "2" });
+    const newest = queue.show({ title: "3" });
+    await expect(oldest).resolves.toBe("replaced");
+    expect(queue.items.value.map((item) => item.title)).toEqual(["3", "2"]);
+    queue.clear();
+    await expect(middle).resolves.toBe("dismissed");
+    await expect(newest).resolves.toBe("dismissed");
   });
 });
 
@@ -81,5 +96,32 @@ describe("M3NotificationHost", () => {
     await settle();
     await vi.advanceTimersByTimeAsync(3100);
     await expect(timed).resolves.toBe("timeout");
+  });
+
+  test("a second one stacks in front; only the front counts down; expanded lists them all", async () => {
+    const service = mountHost();
+    const older = service.show({ title: "Order SO-1", duration: 3000 });
+    await settle();
+    const newer = service.show({ title: "Order SO-2", duration: 3000 });
+    await settle();
+    const slots = () => [...document.body.querySelectorAll<HTMLElement>(".m3-notification-slot")];
+    expect(slots().map((slot) => slot.textContent?.includes("SO-2"))).toEqual([true, false]);
+    expect(slots()[1]!.querySelector(".m3-notification")!.hasAttribute("inert")).toBe(true);
+    await vi.advanceTimersByTimeAsync(3100);
+    await expect(newer).resolves.toBe("timeout");
+    expect(slots()).toHaveLength(1);
+    void service.show({ title: "Order SO-3" });
+    await settle();
+    const pill = document.body.querySelector<HTMLButtonElement>(".m3-notification-pill")!;
+    expect(pill.textContent?.trim()).toBe("1 more");
+    pill.click();
+    await settle();
+    expect(
+      slots().every((slot) => !slot.querySelector(".m3-notification")!.hasAttribute("inert")),
+    ).toBe(true);
+    [...document.body.querySelectorAll<HTMLButtonElement>(".m3-notification-pill")].at(-1)!.click();
+    await settle();
+    await expect(older).resolves.toBe("dismissed");
+    expect(slots()).toHaveLength(0);
   });
 });
