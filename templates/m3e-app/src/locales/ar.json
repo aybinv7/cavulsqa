@@ -1015,7 +1015,11 @@
       "attachUnavailable": "\u2068{label}\u2069 غير متاح في هذا العرض التوضيحي",
       "react": "تفاعل",
       "messageActions": "إجراءات الرسالة",
-      "reactionCount": "\u2068{emoji}\u2069 من لا أحد | \u2068{emoji}\u2069 من شخص واحد | \u2068{emoji}\u2069 من شخصين | \u2068{emoji}\u2069 من {count} أشخاص | \u2068{emoji}\u2069 من {count} شخصًا | \u2068{emoji}\u2069 من {count} شخص"
+      "reactionCount": "\u2068{emoji}\u2069 من لا أحد | \u2068{emoji}\u2069 من شخص واحد | \u2068{emoji}\u2069 من شخصين | \u2068{emoji}\u2069 من {count} أشخاص | \u2068{emoji}\u2069 من {count} شخصًا | \u2068{emoji}\u2069 من {count} شخص",
+      "reactionsTitle": "التفاعلات",
+      "allReactions": "الكل",
+      "removeReaction": "اضغط للإزالة",
+      "othersReacted": "لا أحد آخر | شخص آخر | شخصان آخران | {count} أشخاص آخرين | {count} شخصًا آخر | {count} شخص آخر"
     },
     "onboarding": {
       "title": "التعريف بالتطبيق",

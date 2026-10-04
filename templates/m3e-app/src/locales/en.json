@@ -1015,7 +1015,11 @@
       "attachUnavailable": "{label} isn't part of this demo",
       "react": "React",
       "messageActions": "Message actions",
-      "reactionCount": "{emoji} from {count} person | {emoji} from {count} people"
+      "reactionCount": "{emoji} from {count} person | {emoji} from {count} people",
+      "reactionsTitle": "Reactions",
+      "allReactions": "All",
+      "removeReaction": "Tap to remove",
+      "othersReacted": "{count} other | {count} others"
     },
     "onboarding": {
       "title": "Welcome tour",

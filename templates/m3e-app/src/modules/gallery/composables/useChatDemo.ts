@@ -29,13 +29,20 @@ const TEAM_REACTIONS = ["❤️", "👍", "🔥", "😂"] as const;
 function joinReaction(
   reactions: readonly MessageReaction[] | undefined,
   emoji: string,
+  name: string,
 ): MessageReaction[] {
   const at = Date.now();
   const list = [...(reactions ?? [])];
   const index = list.findIndex((reaction) => reaction.emoji === emoji);
   const existing = list[index];
-  if (existing) list[index] = { ...existing, count: (existing.count ?? 1) + 1, at };
-  else list.push({ emoji, count: 1, at });
+  if (existing)
+    list[index] = {
+      ...existing,
+      count: (existing.count ?? 1) + 1,
+      by: [...(existing.by ?? []), name],
+      at,
+    };
+  else list.push({ emoji, count: 1, by: [name], at });
   return list;
 }
 
@@ -88,7 +95,10 @@ export function useChatDemo(photo: (index: number) => MessageImage | null) {
       text(AMINA, "s1", now - 2 * DAY),
       text(null, "s2", now - 2 * DAY + 4 * MINUTE),
       text(AMINA, "s3", now - DAY),
-      { ...text(null, "s4", now - DAY + 2 * MINUTE), reactions: [{ emoji: "🔥", count: 2 }] },
+      {
+        ...text(null, "s4", now - DAY + 2 * MINUTE),
+        reactions: [{ emoji: "🔥", count: 2, by: [AMINA, KARIM] }],
+      },
       text(null, "s5", now - DAY + 3 * MINUTE),
       { id: id(), sent: false, author: AMINA, at: now - DAY + 5 * MINUTE, text: "👏" },
       {
@@ -138,7 +148,7 @@ export function useChatDemo(photo: (index: number) => MessageImage | null) {
         const emoji = TEAM_REACTIONS[(replies >> 1) % TEAM_REACTIONS.length]!;
         update(lastSent.id, (entry) => ({
           ...entry,
-          reactions: joinReaction(entry.reactions, emoji),
+          reactions: joinReaction(entry.reactions, emoji, author!),
         }));
       }
       messages.value = [

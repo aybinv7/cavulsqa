@@ -23,6 +23,10 @@
       :react-label="t('gallery.chat.react')"
       :menu-label="t('gallery.chat.messageActions')"
       :reactions-label="reactionsLabel"
+      :reactions-title="t('gallery.chat.reactionsTitle')"
+      :all-reactions-label="t('gallery.chat.allReactions')"
+      :remove-reaction-label="t('gallery.chat.removeReaction')"
+      :others-label="othersLabel"
       @react="react"
       @action="onAction"
       @press="openPhoto"
@@ -170,6 +174,10 @@ function reactionsLabel(reactions: readonly MessageReaction[]) {
       ),
     )
     .join(", ");
+}
+
+function othersLabel(count: number) {
+  return t("gallery.chat.othersReacted", { count }, count);
 }
 
 function onFailed(name: string) {

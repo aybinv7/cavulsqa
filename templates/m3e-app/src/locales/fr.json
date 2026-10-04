@@ -1015,7 +1015,11 @@
       "attachUnavailable": "{label} ne fait pas partie de cette démo",
       "react": "Réagir",
       "messageActions": "Actions sur le message",
-      "reactionCount": "{emoji} de {count} personne | {emoji} de {count} personnes"
+      "reactionCount": "{emoji} de {count} personne | {emoji} de {count} personnes",
+      "reactionsTitle": "Réactions",
+      "allReactions": "Toutes",
+      "removeReaction": "Appuyez pour retirer",
+      "othersReacted": "{count} autre | {count} autres"
     },
     "onboarding": {
       "title": "Visite guidée",
