@@ -60,7 +60,10 @@ standard. Items: `headline`, `supporting`, `overline`, `trailingText`, `multilin
 action past half the row (deletes, archives - pair with an undo snackbar), `v-model:swiped` reads
 the open side. One row open at a time; a tap outside closes it. Expandable items: put the hidden
 content in `#details` (`v-model:expanded`); `M3List accordion` keeps one open, as Framework7's
-accordion list does - FAQs, settings groups, order lines. → lists/specs
+accordion list does - FAQs, settings groups, order lines. `M3List sortable` is Framework7's
+sortable list: a drag handle on every item plus long-press-and-drag on the row; handle
+`@sort="(from, to) => (rows = moveItem(rows, from, to))"` and persist the order yourself. Not for
+`M3VirtualList`. → lists/specs
 
 **`M3Carousel`** - Compose's carousel, keyline for keyline: `items`, `label`, `variant`
 multi-browse (default; browsing many items - photos, products) | hero (one featured item at a time;

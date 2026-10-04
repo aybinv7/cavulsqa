@@ -571,6 +571,18 @@
           "q": "Puis-je exporter mes commandes ?",
           "a": "Pas encore dans le modèle - une fonction de dépôt sur la table des commandes suffit."
         }
+      },
+      "sortable": "Liste triable",
+      "sortableNote": "La liste triable de Framework7 : tirez une poignée, ou appuyez longuement sur un arrêt puis faites-le glisser. Les autres s'écartent et la page défile près de ses bords.",
+      "reorder": "Réordonner",
+      "moved": "{label}, position {position} sur {count}",
+      "stopOrder": "Arrêt {n}",
+      "stops": {
+        "warehouse": "Entrepôt central",
+        "market": "Oran Market",
+        "pharmacy": "Pharmacie El Hayat",
+        "school": "École Ibn Khaldoun",
+        "bakery": "Boulangerie Sidi El Houari"
       }
     },
     "pickers": {

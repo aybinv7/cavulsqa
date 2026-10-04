@@ -55,6 +55,28 @@
     </M3ListItem>
   </M3List>
 
+  <SectionHeader :title="t('gallery.surfaces.sortable')" />
+  <p class="type-body-small m-0 px-8 pb-3 text-on-surface-variant">
+    {{ t("gallery.surfaces.sortableNote") }}
+  </p>
+  <M3List
+    variant="segmented"
+    inset
+    sortable
+    :reorder-label="t('gallery.surfaces.reorder')"
+    :moved-text="movedText"
+    @sort="(from, to) => (route = moveItem(route, from, to))"
+  >
+    <M3ListItem
+      v-for="(stop, index) in route"
+      :key="stop"
+      :headline="t(`gallery.surfaces.stops.${stop}`)"
+      :supporting="t('gallery.surfaces.stopOrder', { n: index + 1 })"
+    >
+      <template #leading><i-ms-local-shipping-outline-rounded /></template>
+    </M3ListItem>
+  </M3List>
+
   <SectionHeader :title="t('gallery.surfaces.standard')" />
   <M3List variant="standard">
     <M3ListItem :headline="t('gallery.surfaces.wifi')" :supporting="t('gallery.surfaces.wifiText')">
@@ -66,6 +88,7 @@
 </template>
 
 <script setup lang="ts">
+import { moveItem } from "@cavulsqa/m3e-vue";
 import GalleryBlock from "@/modules/gallery/components/GalleryBlock.vue";
 
 const { t } = useI18n();
@@ -73,6 +96,11 @@ const snackbar = useSnackbar();
 const CARDS = ["elevated", "filled", "outlined"] as const;
 const ITEMS = ["inbox", "drafts", "archive"] as const;
 const QUESTIONS = ["offline", "sync", "storage", "export"] as const;
+const route = ref(["warehouse", "market", "pharmacy", "school", "bakery"]);
+
+function movedText(label: string, position: number, count: number) {
+  return t("gallery.surfaces.moved", { label, position, count });
+}
 
 const selected = ref<(typeof ITEMS)[number]>("inbox");
 const wifi = ref(true);

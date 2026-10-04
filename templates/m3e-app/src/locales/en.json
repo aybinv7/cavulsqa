@@ -571,6 +571,18 @@
           "q": "Can I export my orders?",
           "a": "Not yet in the template - a repository function over the orders table is all it takes."
         }
+      },
+      "sortable": "Sortable list",
+      "sortableNote": "Framework7's sortable list: drag a handle, or long-press a stop and drag it. The others step aside and the page scrolls near its edges.",
+      "reorder": "Reorder",
+      "moved": "{label}, position {position} of {count}",
+      "stopOrder": "Stop {n}",
+      "stops": {
+        "warehouse": "Central warehouse",
+        "market": "Oran Market",
+        "pharmacy": "El Hayat pharmacy",
+        "school": "Ibn Khaldoun school",
+        "bakery": "Sidi El Houari bakery"
       }
     },
     "pickers": {
