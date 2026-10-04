@@ -7,6 +7,7 @@ export { default as M3Button } from "./components/button/M3Button.vue";
 export { default as M3ButtonGroup } from "./components/button/M3ButtonGroup.vue";
 export { default as M3Calendar } from "./components/datetime/M3Calendar.vue";
 export { default as M3Card } from "./components/card/M3Card.vue";
+export { default as M3Carousel } from "./components/carousel/M3Carousel.vue";
 export { default as M3Checkbox } from "./components/selection/M3Checkbox.vue";
 export { default as M3Chip } from "./components/chip/M3Chip.vue";
 export { default as M3CircularProgress } from "./components/progress/M3CircularProgress.vue";

@@ -6,6 +6,7 @@ export const COMPONENT_NAMES = [
   "M3ButtonGroup",
   "M3Calendar",
   "M3Card",
+  "M3Carousel",
   "M3Checkbox",
   "M3Chip",
   "M3CircularProgress",
