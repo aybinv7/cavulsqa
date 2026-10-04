@@ -37,6 +37,7 @@ export { default as M3ModalNavigationRail } from "./components/navigation/M3Moda
 export { default as M3NavigationBar } from "./components/navigation/M3NavigationBar.vue";
 export { default as M3NavigationItem } from "./components/navigation/M3NavigationItem.vue";
 export { default as M3NavigationRail } from "./components/navigation/M3NavigationRail.vue";
+export { default as M3NotificationHost } from "./components/snackbar/M3NotificationHost.vue";
 export { default as M3PullToRefresh } from "./components/progress/M3PullToRefresh.vue";
 export { default as M3Radio } from "./components/selection/M3Radio.vue";
 export { default as M3RangeSlider } from "./components/slider/M3RangeSlider.vue";
@@ -83,12 +84,23 @@ export {
   type SnackbarResult,
 } from "./services/snackbar.js";
 export type { DialogOptions } from "./services/dialog.js";
+export {
+  NOTIFICATION_DURATION,
+  type NotificationOptions,
+  type NotificationResult,
+} from "./services/notification.js";
 export type {
   ActionSheetGroup,
   ActionSheetItem,
   ActionSheetOptions,
 } from "./services/actionSheet.js";
-export { useActionSheet, useDialog, useHaptics, useSnackbar } from "./composables/services.js";
+export {
+  useActionSheet,
+  useDialog,
+  useHaptics,
+  useNotification,
+  useSnackbar,
+} from "./composables/services.js";
 export { useReducedMotion } from "./composables/useReducedMotion.js";
 export { useFrame, subscribeFrame, type FrameCallback } from "./composables/useFrame.js";
 export { useInView } from "./composables/useInView.js";

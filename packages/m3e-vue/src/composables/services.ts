@@ -1,6 +1,7 @@
 import { useM3eConfig } from "../services/config.js";
 import type { ActionSheetService } from "../services/actionSheet.js";
 import type { DialogService } from "../services/dialog.js";
+import type { NotificationQueue } from "../services/notification.js";
 import type { SnackbarQueue } from "../services/snackbar.js";
 import type { M3eHaptics } from "../services/config.js";
 
@@ -14,6 +15,12 @@ export function useSnackbar(): Pick<SnackbarQueue, "show" | "clear"> {
 export function useDialog(): Pick<DialogService, "confirm"> {
   const { dialog } = useM3eConfig();
   return { confirm: (options) => dialog.confirm(options) };
+}
+
+/** `show({ title, text })` resolves how the notification ended. Needs `<M3NotificationHost>` mounted once. */
+export function useNotification(): Pick<NotificationQueue, "show" | "clear"> {
+  const { notification } = useM3eConfig();
+  return { show: (options) => notification.show(options), clear: () => notification.clear() };
 }
 
 /** `open({ groups })` resolves the chosen id or null. Needs `<M3ActionSheetHost>` mounted once. */

@@ -61,7 +61,7 @@ describe("M3ExposedDropdown", () => {
             options: CITIES,
             editable,
             modelValue: value.value,
-            "onUpdate:modelValue": (next: string | null) => (value.value = next),
+            "onUpdate:modelValue": (next: unknown) => (value.value = next as string | null),
           }),
       }),
       { global: { plugins: [createM3e({ reducedMotion: true })] }, attachTo: document.body },

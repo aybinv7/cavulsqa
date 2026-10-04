@@ -3,6 +3,7 @@ import { createOverlayStack, type OverlayStack } from "./overlayStack.js";
 import { createSnackbarQueue, type SnackbarQueue } from "./snackbar.js";
 import { createDialogService, type DialogService } from "./dialog.js";
 import { createActionSheetService, type ActionSheetService } from "./actionSheet.js";
+import { createNotificationQueue, type NotificationQueue } from "./notification.js";
 
 /** Native feedback the app wires in; every call is optional and fire-and-forget. */
 export interface M3eHaptics {
@@ -20,6 +21,7 @@ export interface M3eConfig {
   snackbar: SnackbarQueue;
   dialog: DialogService;
   actionSheet: ActionSheetService;
+  notification: NotificationQueue;
 }
 
 export const M3E_CONFIG: InjectionKey<M3eConfig> = Symbol("m3e-config");
@@ -37,6 +39,7 @@ export function createM3eConfig(options: M3eOptions = {}): M3eConfig {
     snackbar: createSnackbarQueue(),
     dialog: createDialogService(),
     actionSheet: createActionSheetService(),
+    notification: createNotificationQueue(),
   };
 }
 
