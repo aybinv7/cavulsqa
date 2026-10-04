@@ -15,7 +15,7 @@ function mountTabs() {
           M3Tabs,
           {
             modelValue: selected.value,
-            "onUpdate:modelValue": (value: string) => (selected.value = value),
+            "onUpdate:modelValue": (value: string | undefined) => (selected.value = value ?? ""),
             pager,
           },
           () => TABS.map((value) => h(M3Tab, { key: value, value, label: value })),
@@ -24,7 +24,7 @@ function mountTabs() {
           M3TabPanels,
           {
             modelValue: selected.value,
-            "onUpdate:modelValue": (value: string) => (selected.value = value),
+            "onUpdate:modelValue": (value: string | undefined) => (selected.value = value ?? ""),
             pager,
           },
           () =>

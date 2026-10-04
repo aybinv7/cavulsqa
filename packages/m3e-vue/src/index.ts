@@ -27,6 +27,7 @@ export { default as M3FloatingToolbar } from "./components/toolbar/M3FloatingToo
 export { default as M3FullScreenDialog } from "./components/dialog/M3FullScreenDialog.vue";
 export { default as M3Glyph } from "./components/icon/M3Glyph.vue";
 export { default as M3IconButton } from "./components/button/M3IconButton.vue";
+export { default as M3InfiniteScroll } from "./components/list/M3InfiniteScroll.vue";
 export { default as M3LinearProgress } from "./components/progress/M3LinearProgress.vue";
 export { default as M3List } from "./components/list/M3List.vue";
 export { default as M3ListItem } from "./components/list/M3ListItem.vue";
@@ -63,6 +64,8 @@ export { default as M3TabPanel } from "./components/tabs/M3TabPanel.vue";
 export { default as M3TabPanels } from "./components/tabs/M3TabPanels.vue";
 export { default as M3Tabs } from "./components/tabs/M3Tabs.vue";
 export { default as M3TextField } from "./components/textfield/M3TextField.vue";
+export { default as M3Timeline } from "./components/timeline/M3Timeline.vue";
+export { default as M3TimelineItem } from "./components/timeline/M3TimelineItem.vue";
 export { default as M3TimePicker } from "./components/datetime/M3TimePicker.vue";
 export { default as M3TimePickerPanel } from "./components/datetime/M3TimePickerPanel.vue";
 export { default as M3TimeWheel } from "./components/picker/M3TimeWheel.vue";
