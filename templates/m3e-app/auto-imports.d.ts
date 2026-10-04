@@ -9,6 +9,7 @@
 export {}
 declare global {
   const AppContextKey: typeof import('./src/shared/composables/theme/useAppTheme').AppContextKey
+  const CONTACTS_SECTION: typeof import('./src/modules/gallery/composables/useGallerySections').CONTACTS_SECTION
   const CONTRAST_LEVELS: typeof import('./src/shared/utils/theme/themeSettings').CONTRAST_LEVELS
   const DEFAULT_THEME: typeof import('./src/shared/utils/theme/themeSettings').DEFAULT_THEME
   const Dom7: typeof import('framework7/lite').Dom7
@@ -410,6 +411,7 @@ import { UnwrapRef } from 'vue'
 declare module 'vue' {
   interface GlobalComponents {}
   interface ComponentCustomProperties {
+    readonly CONTACTS_SECTION: UnwrapRef<typeof import('./src/modules/gallery/composables/useGallerySections')['CONTACTS_SECTION']>
     readonly CONTRAST_LEVELS: UnwrapRef<typeof import('./src/shared/utils/theme/themeSettings')['CONTRAST_LEVELS']>
     readonly DEFAULT_THEME: UnwrapRef<typeof import('./src/shared/utils/theme/themeSettings')['DEFAULT_THEME']>
     readonly Dom7: UnwrapRef<typeof import('framework7/lite')['Dom7']>

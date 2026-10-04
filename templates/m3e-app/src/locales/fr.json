@@ -247,6 +247,10 @@
       "tabs": {
         "title": "Onglets glissants",
         "subtitle": "Des pages sous la barre, à faire glisser"
+      },
+      "contacts": {
+        "title": "Liste groupée et index",
+        "subtitle": "Titres de groupe collants, un rail A–Z"
       }
     },
     "buttons": {
@@ -722,6 +726,10 @@
       },
       "noReturns": "Aucun retour",
       "noReturnsText": "Les marchandises retournées apparaissent ici."
+    },
+    "contacts": {
+      "title": "Clients de A à Z",
+      "jump": "Aller à la lettre"
     }
   },
   "settings": {

@@ -247,6 +247,10 @@
       "tabs": {
         "title": "Swipeable tabs",
         "subtitle": "Pages under the app bar, swiped between"
+      },
+      "contacts": {
+        "title": "Grouped list and index",
+        "subtitle": "Sticky group titles, an A–Z rail"
       }
     },
     "buttons": {
@@ -722,6 +726,10 @@
       },
       "noReturns": "No returns",
       "noReturnsText": "Returned goods show up here."
+    },
+    "contacts": {
+      "title": "Customers A–Z",
+      "jump": "Jump to letter"
     }
   },
   "settings": {

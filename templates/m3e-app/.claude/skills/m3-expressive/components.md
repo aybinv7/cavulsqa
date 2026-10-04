@@ -164,6 +164,11 @@ status bar icons turn light while it shows.
 
 ## Lists at scale
 
+**`M3ListGroup` + `M3ListIndex`** - Framework7's contacts list and list index: groups whose titles
+stick under the app bar (`title`, `indexKey`; `groupKey(label)` folds accents and buckets digits
+under `#`), and an A–Z rail (`keys`, `label`) in `AppPage`'s `#fixed` slot that jumps as the finger
+drags. Pad the content ~24px at the end edge so rows clear the rail.
+
 **`M3InfiniteScroll`** - after a list: `:load` returns a promise and resolves `false` when there is
 no more; failures wait for the user's retry; `endText` closes the list; expose `reset()` after a new
 filter. Feed it from a repository with `LIMIT/OFFSET` (or a keyset) - never load everything to

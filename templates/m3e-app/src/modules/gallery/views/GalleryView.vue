@@ -23,10 +23,20 @@
 
 <script setup lang="ts">
 import type { Router } from "framework7/types";
-import { TABS_SECTION, sections } from "@/modules/gallery/composables/useGallerySections";
+import {
+  CONTACTS_SECTION,
+  TABS_SECTION,
+  sections,
+} from "@/modules/gallery/composables/useGallerySections";
 import { TONE_CLASSES } from "@/shared/utils/tone";
 
 defineProps<{ f7router: Router.Router }>();
 const { t } = useI18n();
-const entries = [...sections.slice(0, 5), TABS_SECTION, ...sections.slice(5)];
+const entries = [
+  ...sections.slice(0, 5),
+  TABS_SECTION,
+  ...sections.slice(5, 9),
+  CONTACTS_SECTION,
+  ...sections.slice(9),
+];
 </script>

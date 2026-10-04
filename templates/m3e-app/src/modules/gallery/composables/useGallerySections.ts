@@ -10,6 +10,7 @@ import ShapesIcon from "~icons/material-symbols/shapes-outline-rounded";
 import WidgetsIcon from "~icons/material-symbols/widgets-outline-rounded";
 import TuneIcon from "~icons/material-symbols/tune-rounded";
 import TabsIcon from "~icons/material-symbols/tab-outline-rounded";
+import ContactsIcon from "~icons/material-symbols/contacts-outline-rounded";
 import CalendarIcon from "~icons/material-symbols/calendar-today-outline-rounded";
 import SpeedIcon from "~icons/material-symbols/speed-rounded";
 import CarouselIcon from "~icons/material-symbols/view-carousel-outline-rounded";
@@ -142,6 +143,18 @@ export const TABS_SECTION: GallerySection = {
   subtitleKey: "gallery.sections.tabs.subtitle",
   component: { render: () => null },
   path: "/gallery/tabs/",
+};
+
+/** Groups pinned under the app bar with an index rail in the page's fixed layer. */
+export const CONTACTS_SECTION: GallerySection = {
+  id: "contacts",
+  icon: ContactsIcon,
+  shape: "clover4Leaf",
+  tone: "secondary",
+  titleKey: "gallery.sections.contacts.title",
+  subtitleKey: "gallery.sections.contacts.subtitle",
+  component: { render: () => null },
+  path: "/gallery/contacts/",
 };
 
 export function findSection(id: string): GallerySection | undefined {
