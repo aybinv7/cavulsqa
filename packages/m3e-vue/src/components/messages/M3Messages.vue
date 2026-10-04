@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ChatBubble from "./ChatBubble.vue";
+import ChatLiftLayer from "./ChatLiftLayer.vue";
 import ChatTyping from "./ChatTyping.vue";
 import M3Glyph from "../icon/M3Glyph.vue";
 import { computed, shallowRef, useTemplateRef } from "vue";
@@ -8,9 +9,11 @@ import { useConversationScroll } from "../../composables/useConversationScroll.j
 import {
   conversationRows,
   type ChatMessage,
+  type MessageReaction,
   type MessageRow,
   type MessageStatus,
 } from "../../utils/messages.js";
+import type { MessageAction } from "./types.js";
 
 /**
  * Framework7's messages: a conversation drawn as Material 3 bubbles - the owner's at the end edge
@@ -23,8 +26,12 @@ import {
  * follows new ones while the reader is at the end. A reader scrolled back keeps their place as
  * messages arrive below or older pages load above - put an `M3InfiniteScroll edge="start"` in the
  * `#before` slot - and a button returns to the end with a count of what arrived meanwhile. Pair it
- * with `M3MessageBar`, whose height it leaves clear. Long-press (or right-click) emits `hold` for a
- * message menu; tapping an image emits `press`.
+ * with `M3MessageBar`, whose height it leaves clear. Tapping an image emits `press`.
+ *
+ * Long-press (or right-click) lifts the bubble out of a dimmed screen with a pill of `reactions`
+ * above it and the message's `actions` under it, emitting `react` and `action`; the reactions sit
+ * on the bubble's edge, drawn from each message's `reactions`, and `applyReaction` computes the
+ * next ones. Without either prop the long-press emits `hold` instead, for a menu of your own.
  *
  * It renders every message it is given: page older history in rather than passing thousands.
  */
@@ -42,6 +49,12 @@ const props = withDefaults(
     statusLabels?: Partial<Record<MessageStatus, string>>;
     typingLabel?: (author: string | undefined) => string;
     unreadLabel?: (count: number) => string;
+    /** The emoji a long-press offers. */
+    reactions?: readonly string[];
+    actions?: readonly MessageAction[];
+    reactLabel?: string;
+    menuLabel?: string;
+    reactionsLabel?: (reactions: readonly MessageReaction[]) => string;
   }>(),
   {
     authors: false,
@@ -52,6 +65,16 @@ const props = withDefaults(
     latestLabel: "Jump to the latest message",
     typingLabel: (author: string | undefined) => (author ? `${author} is typing` : "Typing"),
     unreadLabel: (count: number) => (count === 1 ? "1 new message" : `${count} new messages`),
+    reactions: () => [],
+    actions: () => [],
+    reactLabel: "React",
+    menuLabel: "Message actions",
+    reactionsLabel: (reactions: readonly MessageReaction[]) =>
+      reactions
+        .map((reaction) =>
+          (reaction.count ?? 1) > 1 ? `${reaction.emoji} ${reaction.count}` : reaction.emoji,
+        )
+        .join(", "),
   },
 );
 
@@ -59,6 +82,8 @@ const emit = defineEmits<{
   hold: [message: ChatMessage, event: MouseEvent];
   press: [message: ChatMessage];
   retry: [message: ChatMessage];
+  react: [message: ChatMessage, emoji: string | null];
+  action: [message: ChatMessage, id: string];
 }>();
 
 defineSlots<{ before?: () => unknown; empty?: () => unknown }>();
@@ -72,6 +97,7 @@ const STATUS: Record<MessageStatus, string> = {
 };
 
 const root = useTemplateRef<HTMLElement>("root");
+const lift = useTemplateRef<InstanceType<typeof ChatLiftLayer>>("lift");
 const haptics = useHaptics();
 const revealed = shallowRef<string | number | null>(null);
 
@@ -108,8 +134,15 @@ function toggle(key: string | number) {
   revealed.value = revealed.value === key ? null : key;
 }
 
+const lifts = computed(() => props.reactions.length > 0 || props.actions.length > 0);
+
 function hold(message: ChatMessage, event: MouseEvent) {
   haptics.confirm();
+  const bubble = (event.target as Element | null)?.closest<HTMLElement>(".m3-chat-bubble");
+  if (lifts.value && bubble && lift.value) {
+    void lift.value.open(bubble, message);
+    return;
+  }
   emit("hold", message, event);
 }
 </script>
@@ -131,6 +164,9 @@ function hold(message: ChatMessage, event: MouseEvent) {
           :speaker="speaker(row)"
           :status-label="statusLabel(row)"
           :retry-label="props.retryLabel"
+          :reactions-label="
+            row.message.reactions?.length ? props.reactionsLabel(row.message.reactions) : ''
+          "
           @toggle="toggle(row.key)"
           @hold="hold(row.message, $event)"
           @press="emit('press', row.message)"
@@ -145,6 +181,16 @@ function hold(message: ChatMessage, event: MouseEvent) {
       :author="typist.author"
       :avatar="typist.avatar"
       :label="props.typingLabel(typist.author)"
+    />
+    <ChatLiftLayer
+      v-if="lifts"
+      ref="lift"
+      :reactions="props.reactions"
+      :actions="props.actions"
+      :react-label="props.reactLabel"
+      :menu-label="props.menuLabel"
+      @react="(message, emoji) => emit('react', message, emoji)"
+      @action="(message, id) => emit('action', message, id)"
     />
     <div class="m3-messages__dock">
       <Transition name="m3-messages-jump">

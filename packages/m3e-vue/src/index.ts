@@ -1,6 +1,7 @@
 import "./styles/base.css";
 
 export { default as M3ActionSheetHost } from "./components/sheet/M3ActionSheetHost.vue";
+export { default as M3AttachSheet } from "./components/sheet/M3AttachSheet.vue";
 export { default as M3Badge } from "./components/badge/M3Badge.vue";
 export { default as M3BarChart } from "./components/chart/M3BarChart.vue";
 export { default as M3BottomSheet } from "./components/sheet/M3BottomSheet.vue";
@@ -207,4 +208,15 @@ export { groupKey } from "./utils/listIndex.js";
 export type { TreeNode } from "./utils/tree.js";
 export type { ColumnMenuLabels, DataColumn, DataGroup, DataSort } from "./utils/dataTable.js";
 export type { ChartSeries } from "./components/chart/palette.js";
-export type { ChatMessage, MessageImage, MessageStatus } from "./utils/messages.js";
+export {
+  applyReaction,
+  ownReaction,
+  reactionTotal,
+  type ChatMessage,
+  type MessageImage,
+  type MessageReaction,
+  type MessageStatus,
+} from "./utils/messages.js";
+export type { MessageAction } from "./components/messages/types.js";
+export type { AttachOption } from "./components/sheet/attach.js";
+export { liftPlacement, type LiftPlacement } from "./utils/messageLift.js";

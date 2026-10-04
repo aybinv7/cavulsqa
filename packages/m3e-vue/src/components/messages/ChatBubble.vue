@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ChatAvatar from "./ChatAvatar.vue";
+import ChatReactions from "./ChatReactions.vue";
 import M3Glyph from "../icon/M3Glyph.vue";
 import { computed } from "vue";
 import { isJumboEmoji, toDate, type MessageRow } from "../../utils/messages.js";
@@ -13,6 +14,7 @@ const props = defineProps<{
   speaker: string;
   statusLabel: string;
   retryLabel: string;
+  reactionsLabel: string;
 }>();
 
 const emit = defineEmits<{
@@ -74,34 +76,45 @@ const imageStyle = computed(() => {
         >{{ message.author }}</span
       >
       <div
-        class="m3-chat-bubble"
-        :class="{
-          'm3-chat-bubble--jumbo': jumbo,
-          'm3-chat-bubble--failed': failed,
-          'm3-chat-bubble--image': message.image,
-        }"
-        @click="emit('toggle')"
-        @contextmenu.prevent="emit('hold', $event)"
+        class="m3-chat-row__bubble"
+        :class="{ 'm3-chat-row__bubble--reacted': message.reactions?.length }"
       >
-        <span class="m3-visually-hidden">{{ props.speaker }}, {{ props.row.time }}:</span>
-        <button
-          v-if="message.image"
-          type="button"
-          class="m3-chat-bubble__image"
-          :style="imageStyle"
-          @click.stop="emit('press')"
+        <div
+          class="m3-chat-bubble"
+          :class="{
+            'm3-chat-bubble--jumbo': jumbo,
+            'm3-chat-bubble--failed': failed,
+            'm3-chat-bubble--image': message.image,
+          }"
+          @click="emit('toggle')"
+          @contextmenu.prevent="emit('hold', $event)"
         >
-          <img
-            :src="message.image.src"
-            :alt="message.image.alt ?? ''"
-            :width="message.image.width"
-            :height="message.image.height"
-            loading="lazy"
-            decoding="async"
-            draggable="false"
-          />
-        </button>
-        <p v-if="message.text" class="m3-chat-bubble__text">{{ message.text }}</p>
+          <span class="m3-visually-hidden">{{ props.speaker }}, {{ props.row.time }}:</span>
+          <button
+            v-if="message.image"
+            type="button"
+            class="m3-chat-bubble__image"
+            :style="imageStyle"
+            @click.stop="emit('press')"
+          >
+            <img
+              :src="message.image.src"
+              :alt="message.image.alt ?? ''"
+              :width="message.image.width"
+              :height="message.image.height"
+              loading="lazy"
+              decoding="async"
+              draggable="false"
+            />
+          </button>
+          <p v-if="message.text" class="m3-chat-bubble__text">{{ message.text }}</p>
+        </div>
+        <ChatReactions
+          v-if="message.reactions?.length"
+          class="m3-chat-row__reactions"
+          :reactions="message.reactions"
+          :label="props.reactionsLabel"
+        />
       </div>
       <button
         v-if="failed"
@@ -171,6 +184,26 @@ const imageStyle = computed(() => {
   color: var(--md-sys-color-on-surface-variant);
   font: var(--md-sys-typescale-label-medium-weight) var(--md-sys-typescale-label-medium-size) /
     var(--md-sys-typescale-label-medium-line-height) var(--md-sys-typescale-label-medium-font);
+}
+
+.m3-chat-row__bubble {
+  position: relative;
+  max-width: 100%;
+}
+
+.m3-chat-row__bubble--reacted {
+  margin-bottom: 24px;
+}
+
+.m3-chat-row__reactions {
+  position: absolute;
+  bottom: -21px;
+  inset-inline-end: 6px;
+  z-index: 1;
+}
+
+.m3-chat-row--sent .m3-chat-row__reactions {
+  inset-inline: 6px auto;
 }
 
 .m3-chat-bubble {

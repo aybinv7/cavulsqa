@@ -7,6 +7,16 @@ export interface MessageImage {
   alt?: string;
 }
 
+export interface MessageReaction {
+  emoji: string;
+  /** How many people chose it; 1 when left out. */
+  count?: number;
+  /** Whether the device owner is one of them. */
+  mine?: boolean;
+  /** When it was last chosen - one chosen moments ago springs in rather than just appearing. */
+  at?: Date | string | number;
+}
+
 export interface ChatMessage {
   id: string | number;
   /** True for the device owner's own messages, drawn at the end edge. */
@@ -17,6 +27,7 @@ export interface ChatMessage {
   avatar?: string;
   status?: MessageStatus;
   image?: MessageImage;
+  reactions?: readonly MessageReaction[];
 }
 
 export interface DayRow {
@@ -188,4 +199,41 @@ export function hashPick(name: string | undefined, count: number): number {
   let hash = 0;
   for (const char of name ?? "") hash = (hash * 31 + char.codePointAt(0)!) | 0;
   return Math.abs(hash) % Math.max(1, count);
+}
+
+/** The emoji the device owner reacted with, if any. */
+export function ownReaction(reactions: readonly MessageReaction[] | undefined): string | null {
+  return reactions?.find((reaction) => reaction.mine)?.emoji ?? null;
+}
+
+/**
+ * The reactions after the owner chooses `emoji`, or takes theirs off with `null`. One reaction per
+ * person, as in every messaging app: choosing another moves the owner's from the old one, which
+ * disappears if nobody else chose it.
+ */
+export function applyReaction(
+  reactions: readonly MessageReaction[] | undefined,
+  emoji: string | null,
+  at: Date | string | number = Date.now(),
+): MessageReaction[] {
+  const next: MessageReaction[] = [];
+  for (const reaction of reactions ?? []) {
+    if (!reaction.mine) {
+      next.push(reaction);
+      continue;
+    }
+    const count = (reaction.count ?? 1) - 1;
+    if (count > 0) next.push({ ...reaction, count, mine: false });
+  }
+  if (emoji === null) return next;
+  const index = next.findIndex((reaction) => reaction.emoji === emoji);
+  const existing = next[index];
+  if (existing) next[index] = { ...existing, count: (existing.count ?? 1) + 1, mine: true, at };
+  else next.push({ emoji, count: 1, mine: true, at });
+  return next;
+}
+
+/** Everyone's reactions on a message, counted. */
+export function reactionTotal(reactions: readonly MessageReaction[] | undefined): number {
+  return (reactions ?? []).reduce((sum, reaction) => sum + Math.max(1, reaction.count ?? 1), 0);
 }

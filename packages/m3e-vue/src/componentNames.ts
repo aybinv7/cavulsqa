@@ -1,5 +1,6 @@
 export const COMPONENT_NAMES = [
   "M3ActionSheetHost",
+  "M3AttachSheet",
   "M3Badge",
   "M3BarChart",
   "M3BottomSheet",
