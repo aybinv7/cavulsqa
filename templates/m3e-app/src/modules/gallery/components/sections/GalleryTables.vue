@@ -7,6 +7,14 @@
         :selected="dense"
         @update:selected="dense = $event"
       />
+      <M3Chip
+        v-for="count in ORDER_COUNTS"
+        :key="count"
+        kind="filter"
+        :label="t('gallery.tables.rowCount', { count: count.toLocaleString(locale) })"
+        :selected="size === count"
+        @update:selected="size = count"
+      />
       <span class="type-body-medium ms-auto text-on-surface-variant">{{
         t("gallery.tables.selected", { count: selected.length }, selected.length)
       }}</span>
@@ -18,7 +26,7 @@
       v-model:pinned="layout.pinned"
       v-model:hidden="layout.hidden"
       class="-mx-2"
-      :rows="ORDERS"
+      :rows="orders"
       :columns="columns"
       :row-key="orderKey"
       :label="t('gallery.tables.orders')"
@@ -56,36 +64,19 @@
 <script setup lang="ts">
 import type { DataColumn, DataSort } from "@cavulsqa/m3e-vue";
 import GalleryBlock from "@/modules/gallery/components/GalleryBlock.vue";
-import { WILAYAS } from "@/modules/gallery/composables/wilayas";
-
-type Status = "draft" | "confirmed" | "delivered";
-
-interface Order {
-  ref: string;
-  customer: string;
-  wilaya: string;
-  date: string;
-  status: Status;
-  totalCents: number;
-}
-
-const STATUSES: Status[] = ["draft", "confirmed", "delivered"];
-const CUSTOMERS = ["Oran Market", "Blida Gros", "Épicerie Saïd", "Annaba Fresh", "Tlemcen Dist."];
-
-const ORDERS: Order[] = Array.from({ length: 30 }, (_, index) => ({
-  ref: `SO-${1001 + index}`,
-  customer: CUSTOMERS[(index * 3) % CUSTOMERS.length]!,
-  wilaya: WILAYAS[(index * 11) % WILAYAS.length]!,
-  date: `2026-09-${String(1 + (index % 28)).padStart(2, "0")}`,
-  status: STATUSES[(index * 7) % STATUSES.length]!,
-  totalCents: ((index * 7919) % 90000) * 100 + 150000,
-}));
+import { ORDER_COUNTS, makeOrders, type Order } from "@/modules/gallery/composables/demoOrders";
 
 const { t, locale } = useI18n();
 const snackbar = useSnackbar();
 const sort = ref<DataSort | null>({ key: "date", direction: "descending" });
 const selected = ref<(string | number)[]>([]);
 const dense = ref(false);
+const size = ref<(typeof ORDER_COUNTS)[number]>(ORDER_COUNTS[0]);
+const orders = shallowRef<Order[]>(makeOrders(size.value));
+watch(size, (count) => {
+  selected.value = [];
+  orders.value = makeOrders(count);
+});
 const layout = useLocalStorage<{ group: string | null; pinned: string[]; hidden: string[] }>(
   "gallery.orders.layout",
   { group: null, pinned: [], hidden: [] },
@@ -144,11 +135,14 @@ function selectGroupLabel(label: string) {
   return t("gallery.tables.selectGroup", { label });
 }
 
-const total = computed(() =>
-  ORDERS.filter(
-    (order) => selected.value.length === 0 || selected.value.includes(order.ref),
-  ).reduce((sum, order) => sum + order.totalCents, 0),
-);
+const total = computed(() => {
+  const chosen = new Set(selected.value);
+  let sum = 0;
+  for (const order of orders.value) {
+    if (chosen.size === 0 || chosen.has(order.ref)) sum += order.totalCents;
+  }
+  return sum;
+});
 
 function openOrder(order: Order) {
   void snackbar.show(t("gallery.tables.opened", { ref: order.ref }));

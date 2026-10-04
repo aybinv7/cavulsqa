@@ -929,7 +929,8 @@
         "columns": "Colonnes"
       },
       "groupCount": "{count} commande | {count} commandes",
-      "selectGroup": "Sélectionner les commandes {label}"
+      "selectGroup": "Sélectionner les commandes {label}",
+      "rowCount": "{count} lignes"
     },
     "charts": {
       "line": "Ventes mensuelles",

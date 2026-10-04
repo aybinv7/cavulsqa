@@ -929,7 +929,8 @@
         "columns": "Columns"
       },
       "groupCount": "{count} order | {count} orders",
-      "selectGroup": "Select every {label} order"
+      "selectGroup": "Select every {label} order",
+      "rowCount": "{count} rows"
     },
     "charts": {
       "line": "Monthly sales",

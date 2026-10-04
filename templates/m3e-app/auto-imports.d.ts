@@ -21,6 +21,7 @@ declare global {
   const LOCALES: typeof import('./src/plugins/i18n.plugin').LOCALES
   const LOGIN_SECTION: typeof import('./src/modules/gallery/composables/useGallerySections').LOGIN_SECTION
   const ONBOARDING_SECTION: typeof import('./src/modules/gallery/composables/useGallerySections').ONBOARDING_SECTION
+  const ORDER_COUNTS: typeof import('./src/modules/gallery/composables/demoOrders').ORDER_COUNTS
   const ORDER_STATUSES: typeof import('./src/modules/demo/composables/useOrderStatus').ORDER_STATUSES
   const STATUS_LOOK: typeof import('./src/modules/demo/composables/useOrderStatus').STATUS_LOOK
   const TABS_SECTION: typeof import('./src/modules/gallery/composables/useGallerySections').TABS_SECTION
@@ -88,6 +89,7 @@ declare global {
   const lazyRoute: typeof import('./src/shared/utils/lazyRoute').lazyRoute
   const m3e: typeof import('./src/plugins/m3e.plugin').m3e
   const makeDestructurable: typeof import('@vueuse/core').makeDestructurable
+  const makeOrders: typeof import('./src/modules/gallery/composables/demoOrders').makeOrders
   const markRaw: typeof import('vue').markRaw
   const marksAround: typeof import('./src/modules/gallery/composables/routePlan').marksAround
   const marksBetween: typeof import('./src/modules/gallery/composables/routePlan').marksBetween
@@ -410,11 +412,14 @@ declare global {
   export type { CaseComparison } from './src/modules/demo/composables/useBenchmark'
   import('./src/modules/demo/composables/useBenchmark')
   // @ts-ignore
-  export type { OrderStatus, StatusLook } from './src/modules/demo/composables/useOrderStatus'
+  export type { StatusLook } from './src/modules/demo/composables/useOrderStatus'
   import('./src/modules/demo/composables/useOrderStatus')
   // @ts-ignore
   export type { BusEntry, PipelineResult } from './src/modules/demo/composables/useReactiveDemo'
   import('./src/modules/demo/composables/useReactiveDemo')
+  // @ts-ignore
+  export type { OrderStatus, Order } from './src/modules/gallery/composables/demoOrders'
+  import('./src/modules/gallery/composables/demoOrders')
   // @ts-ignore
   export type { VisitState, Visit } from './src/modules/gallery/composables/routePlan'
   import('./src/modules/gallery/composables/routePlan')
@@ -446,6 +451,7 @@ declare module 'vue' {
     readonly LOCALES: UnwrapRef<typeof import('./src/plugins/i18n.plugin')['LOCALES']>
     readonly LOGIN_SECTION: UnwrapRef<typeof import('./src/modules/gallery/composables/useGallerySections')['LOGIN_SECTION']>
     readonly ONBOARDING_SECTION: UnwrapRef<typeof import('./src/modules/gallery/composables/useGallerySections')['ONBOARDING_SECTION']>
+    readonly ORDER_COUNTS: UnwrapRef<typeof import('./src/modules/gallery/composables/demoOrders')['ORDER_COUNTS']>
     readonly ORDER_STATUSES: UnwrapRef<typeof import('./src/modules/demo/composables/useOrderStatus')['ORDER_STATUSES']>
     readonly STATUS_LOOK: UnwrapRef<typeof import('./src/modules/demo/composables/useOrderStatus')['STATUS_LOOK']>
     readonly TABS_SECTION: UnwrapRef<typeof import('./src/modules/gallery/composables/useGallerySections')['TABS_SECTION']>
@@ -512,6 +518,7 @@ declare module 'vue' {
     readonly lazyRoute: UnwrapRef<typeof import('./src/shared/utils/lazyRoute')['lazyRoute']>
     readonly m3e: UnwrapRef<typeof import('./src/plugins/m3e.plugin')['m3e']>
     readonly makeDestructurable: UnwrapRef<typeof import('@vueuse/core')['makeDestructurable']>
+    readonly makeOrders: UnwrapRef<typeof import('./src/modules/gallery/composables/demoOrders')['makeOrders']>
     readonly markRaw: UnwrapRef<typeof import('vue')['markRaw']>
     readonly marksAround: UnwrapRef<typeof import('./src/modules/gallery/composables/routePlan')['marksAround']>
     readonly marksBetween: UnwrapRef<typeof import('./src/modules/gallery/composables/routePlan')['marksBetween']>
