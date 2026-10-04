@@ -277,6 +277,11 @@ donut for parts of one whole (at most ~6 segments). Feed them aggregates from SQ
 - run it again wherever stored HTML is rendered with `v-html`). Use a plain multiline `M3TextField`
   unless formatting is the point.
 
+**`M3SignaturePad`** - proof of delivery: `v-model:strokes` (fractions of the pad, so a draft or a
+rotation redraws it sharp), `height`, `label`, `placeholder`; ref methods `undo()`, `clear()`,
+`toDataURL(type, background)` for the upload, `toSvg()`. Always pair it with a typed name - signing
+has no keyboard path.
+
 **`M3ColorPicker`** - `v-model` `#rrggbb`, hue / chroma / tone sliders in HCT with previewing tracks,
 a hex field, optional `swatches`. Put it in a sheet with a draft and apply on confirm when the
 colour drives something expensive, such as the app theme.

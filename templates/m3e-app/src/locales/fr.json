@@ -599,7 +599,18 @@
         "numbered": "Liste numérotée",
         "link": "Lien",
         "clear": "Effacer la mise en forme"
-      }
+      },
+      "signature": "Signature",
+      "signatureNote": "Preuve de livraison : un trait qui s'épaissit lentement, gardé en brouillon, exporté en PNG. Un nom saisi l'accompagne pour qui ne peut pas signer à l'écran.",
+      "signatureLabel": "Signature du client",
+      "signHere": "Signez ici",
+      "undo": "Annuler",
+      "clearSignature": "Effacer",
+      "receivedBy": "Reçu par",
+      "receivedByNote": "Le nom de la personne qui a signé",
+      "confirmDelivery": "Confirmer la livraison",
+      "exported": "La signature exportée",
+      "delivered": "Livraison confirmée par {name}"
     },
     "carousels": {
       "multiBrowse": "Multi-navigation",

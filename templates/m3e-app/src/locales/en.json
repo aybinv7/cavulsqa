@@ -599,7 +599,18 @@
         "numbered": "Numbered list",
         "link": "Link",
         "clear": "Clear formatting"
-      }
+      },
+      "signature": "Signature",
+      "signatureNote": "Proof of delivery: ink that thickens when slow, kept as a draft, exported as a PNG. A typed name stands beside it for anyone who cannot sign on screen.",
+      "signatureLabel": "Customer signature",
+      "signHere": "Sign here",
+      "undo": "Undo",
+      "clearSignature": "Clear",
+      "receivedBy": "Received by",
+      "receivedByNote": "The name of the person who signed",
+      "confirmDelivery": "Confirm delivery",
+      "exported": "The exported signature",
+      "delivered": "Delivery confirmed by {name}"
     },
     "carousels": {
       "multiBrowse": "Multi-browse",

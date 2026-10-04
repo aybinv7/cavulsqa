@@ -141,10 +141,13 @@
       {{ t("gallery.inputs.stored", { n: report.length }) }}
     </p>
   </GalleryBlock>
+
+  <GalleryProofOfDelivery />
 </template>
 
 <script setup lang="ts">
 import GalleryBlock from "@/modules/gallery/components/GalleryBlock.vue";
+import GalleryProofOfDelivery from "@/modules/gallery/components/GalleryProofOfDelivery.vue";
 import { WILAYA_OPTIONS } from "@/modules/gallery/composables/wilayas";
 
 const { t } = useI18n();
