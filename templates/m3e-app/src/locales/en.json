@@ -1012,14 +1012,55 @@
         "event": "Event"
       },
       "attachFailed": "Couldn't read {name}",
-      "attachUnavailable": "{label} isn't part of this demo",
       "react": "React",
       "messageActions": "Message actions",
       "reactionCount": "{emoji} from {count} person | {emoji} from {count} people",
       "reactionsTitle": "Reactions",
       "allReactions": "All",
       "removeReaction": "Tap to remove",
-      "othersReacted": "{count} other | {count} others"
+      "othersReacted": "{count} other | {count} others",
+      "location": {
+        "here": "Current location",
+        "depot": "Oran depot",
+        "sendDepot": "Send depot",
+        "denied": "Location access is off",
+        "unavailable": "Couldn't find your location",
+        "timeout": "Finding your location took too long",
+        "unsupported": "This device can't share its location"
+      },
+      "contact": {
+        "title": "Share a contact",
+        "search": "Search customers",
+        "empty": "No customers yet",
+        "failed": "Couldn't load customers"
+      },
+      "poll": {
+        "title": "New poll",
+        "question": "Question",
+        "option": "Option {number}",
+        "remove": "Remove option {number}",
+        "add": "Add option",
+        "repeated": "Already an option",
+        "multiple": "Allow several answers",
+        "multipleHint": "Everyone can pick more than one"
+      },
+      "invite": {
+        "title": "New event",
+        "name": "Event name",
+        "date": "Date",
+        "time": "Time",
+        "place": "Place (optional)"
+      },
+      "cards": {
+        "openLocation": "Open in maps",
+        "openContact": "Show their orders",
+        "pollSingle": "Choose one",
+        "pollMultiple": "Choose any",
+        "votes": "{count} vote | {count} votes",
+        "going": "Going",
+        "maybe": "Maybe",
+        "no": "Can't go"
+      }
     },
     "onboarding": {
       "title": "Welcome tour",

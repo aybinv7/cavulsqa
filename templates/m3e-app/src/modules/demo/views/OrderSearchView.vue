@@ -5,7 +5,7 @@
         v-model="term"
         :placeholder="t('demo.searchPlaceholder')"
         :clear-label="t('gallery.inputs.clear')"
-        autofocus
+        :autofocus="!term"
       />
     </div>
 
@@ -55,10 +55,10 @@ import { formatMoney, statusLook } from "@/modules/demo/composables/useOrderStat
 import { getDatabase } from "@/shared/database/database";
 import { useReactiveQuery } from "@/shared/database/queries";
 
-defineProps<{ f7router: Router.Router }>();
+const props = defineProps<{ f7route: Router.Route; f7router: Router.Router }>();
 const { t } = useI18n();
 const { open } = useContainerTransform();
-const term = ref("");
+const term = ref(typeof props.f7route.query.q === "string" ? props.f7route.query.q : "");
 
 /**
  * Populated before anything is typed - an empty search screen gives no sense of what is

@@ -1012,14 +1012,55 @@
         "event": "حدث"
       },
       "attachFailed": "تعذّرت قراءة \u2068{name}\u2069",
-      "attachUnavailable": "\u2068{label}\u2069 غير متاح في هذا العرض التوضيحي",
       "react": "تفاعل",
       "messageActions": "إجراءات الرسالة",
       "reactionCount": "\u2068{emoji}\u2069 من لا أحد | \u2068{emoji}\u2069 من شخص واحد | \u2068{emoji}\u2069 من شخصين | \u2068{emoji}\u2069 من {count} أشخاص | \u2068{emoji}\u2069 من {count} شخصًا | \u2068{emoji}\u2069 من {count} شخص",
       "reactionsTitle": "التفاعلات",
       "allReactions": "الكل",
       "removeReaction": "اضغط للإزالة",
-      "othersReacted": "لا أحد آخر | شخص آخر | شخصان آخران | {count} أشخاص آخرين | {count} شخصًا آخر | {count} شخص آخر"
+      "othersReacted": "لا أحد آخر | شخص آخر | شخصان آخران | {count} أشخاص آخرين | {count} شخصًا آخر | {count} شخص آخر",
+      "location": {
+        "here": "الموقع الحالي",
+        "depot": "مستودع وهران",
+        "sendDepot": "إرسال المستودع",
+        "denied": "الوصول إلى الموقع متوقف",
+        "unavailable": "تعذّر تحديد موقعك",
+        "timeout": "استغرق تحديد موقعك وقتًا طويلًا",
+        "unsupported": "لا يستطيع هذا الجهاز مشاركة موقعه"
+      },
+      "contact": {
+        "title": "مشاركة جهة اتصال",
+        "search": "البحث عن عميل",
+        "empty": "لا يوجد عملاء بعد",
+        "failed": "تعذّر تحميل العملاء"
+      },
+      "poll": {
+        "title": "استطلاع جديد",
+        "question": "السؤال",
+        "option": "الخيار {number}",
+        "remove": "إزالة الخيار {number}",
+        "add": "إضافة خيار",
+        "repeated": "هذا الخيار موجود",
+        "multiple": "السماح بعدة إجابات",
+        "multipleHint": "يمكن لكل شخص اختيار أكثر من إجابة"
+      },
+      "invite": {
+        "title": "حدث جديد",
+        "name": "اسم الحدث",
+        "date": "التاريخ",
+        "time": "الوقت",
+        "place": "المكان (اختياري)"
+      },
+      "cards": {
+        "openLocation": "فتح في الخرائط",
+        "openContact": "عرض طلباته",
+        "pollSingle": "اختر إجابة واحدة",
+        "pollMultiple": "اختر إجابة أو أكثر",
+        "votes": "لا أصوات | صوت واحد | صوتان | {count} أصوات | {count} صوتًا | {count} صوت",
+        "going": "سأحضر",
+        "maybe": "ربما",
+        "no": "لن أحضر"
+      }
     },
     "onboarding": {
       "title": "التعريف بالتطبيق",

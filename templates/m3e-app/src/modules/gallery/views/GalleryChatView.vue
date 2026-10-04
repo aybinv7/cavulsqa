@@ -27,10 +27,13 @@
       :all-reactions-label="t('gallery.chat.allReactions')"
       :remove-reaction-label="t('gallery.chat.removeReaction')"
       :others-label="othersLabel"
+      :card-labels="cardLabels"
       @react="react"
       @action="onAction"
-      @press="openPhoto"
+      @press="openMessage"
       @retry="retry"
+      @vote="vote"
+      @rsvp="rsvp"
     >
       <template #before>
         <M3InfiniteScroll
@@ -74,7 +77,16 @@
         @text="send"
         @recent="sendPhoto"
         @failed="onFailed"
-        @unavailable="onUnavailable"
+        @compose="compose"
+      />
+      <ChatPollComposer v-model:open="pollOpen" @send="sendPoll" />
+      <ChatInviteComposer v-model:open="inviteOpen" @send="sendInvite" />
+      <ChatContactPicker
+        v-model:open="contactOpen"
+        :customers="customers"
+        :loading="customersLoading"
+        :failed="customersFailed"
+        @pick="sendContact"
       />
 
       <M3PhotoBrowser
@@ -92,31 +104,79 @@
 import type {
   ChatMessage,
   MessageAction,
+  MessageCardLabels,
   MessageReaction,
   MessageStatus,
   PhotoItem,
 } from "@cavulsqa/m3e-vue";
+import type { Router } from "framework7/types";
 import { markRaw } from "vue";
 import CopyIcon from "~icons/material-symbols/content-copy-outline-rounded";
 import DeleteIcon from "~icons/material-symbols/delete-outline-rounded";
 import ChatAttachSheet from "@/modules/gallery/components/chat/ChatAttachSheet.vue";
+import ChatContactPicker from "@/modules/gallery/components/chat/ChatContactPicker.vue";
+import ChatInviteComposer from "@/modules/gallery/components/chat/ChatInviteComposer.vue";
+import ChatPollComposer from "@/modules/gallery/components/chat/ChatPollComposer.vue";
+import type { ComposeKind } from "@/modules/gallery/composables/composeKind";
+import { mapsLink } from "@/modules/gallery/composables/currentPosition";
+import { openExternal } from "@/modules/gallery/composables/openExternal";
+import { useChatCustomers } from "@/modules/gallery/composables/useChatCustomers";
 import { useChatDemo } from "@/modules/gallery/composables/useChatDemo";
+import { useLocationShare } from "@/modules/gallery/composables/useLocationShare";
 import { usePhotoScenes } from "@/modules/gallery/composables/usePhotoScenes";
 
+const props = defineProps<{ f7router: Router.Router }>();
 const { t, locale } = useI18n();
 const snackbar = useSnackbar();
 const { photos } = usePhotoScenes((kind) => t(`gallery.carousels.scenes.${kind}`));
 const REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "🙏", "🔥"] as const;
 
-const { messages, typing, draft, send, sendPhoto, sendImage, react, retry, remove, loadOlder } =
-  useChatDemo((index) => {
-    const photo = photos.value[index % Math.max(1, photos.value.length)];
-    if (!photo?.width || !photo.height) return null;
-    return { src: photo.src, width: photo.width, height: photo.height, alt: photo.alt };
-  });
+const {
+  messages,
+  typing,
+  draft,
+  send,
+  sendPhoto,
+  sendImage,
+  sendLocation,
+  sendContact,
+  sendPoll,
+  sendInvite,
+  vote,
+  rsvp,
+  react,
+  retry,
+  remove,
+  loadOlder,
+} = useChatDemo((index) => {
+  const photo = photos.value[index % Math.max(1, photos.value.length)];
+  if (!photo?.width || !photo.height) return null;
+  return { src: photo.src, width: photo.width, height: photo.height, alt: photo.alt };
+});
 
 const browserOpen = ref(false);
 const attachOpen = ref(false);
+const pollOpen = ref(false);
+const inviteOpen = ref(false);
+const contactOpen = ref(false);
+
+const {
+  customers,
+  loading: customersLoading,
+  failed: customersFailed,
+} = useChatCustomers(contactOpen);
+const { share: shareLocation } = useLocationShare(sendLocation);
+
+const cardLabels = computed<MessageCardLabels>(() => ({
+  openLocation: t("gallery.chat.cards.openLocation"),
+  openContact: t("gallery.chat.cards.openContact"),
+  pollSingle: t("gallery.chat.cards.pollSingle"),
+  pollMultiple: t("gallery.chat.cards.pollMultiple"),
+  votes: (count: number) => t("gallery.chat.cards.votes", { count }, count),
+  going: t("gallery.chat.cards.going"),
+  maybe: t("gallery.chat.cards.maybe"),
+  no: t("gallery.chat.cards.no"),
+}));
 
 const actions = computed<MessageAction[]>(() => [
   {
@@ -158,6 +218,20 @@ function unreadLabel(count: number) {
   return t("gallery.chat.unread", { count }, count);
 }
 
+function compose(kind: ComposeKind) {
+  if (kind === "location") void shareLocation();
+  else if (kind === "contact") contactOpen.value = true;
+  else if (kind === "poll") pollOpen.value = true;
+  else inviteOpen.value = true;
+}
+
+function openMessage(message: ChatMessage) {
+  if (message.location) openExternal(mapsLink(message.location.lat, message.location.lng));
+  else if (message.contact)
+    props.f7router.navigate(`/demo/search/?q=${encodeURIComponent(message.contact.name)}`);
+  else if (message.image) openPhoto(message);
+}
+
 function openPhoto(message: ChatMessage) {
   const index = shared.value.findIndex((photo) => photo.src === message.image?.src);
   photoIndex.value = Math.max(0, index);
@@ -182,10 +256,6 @@ function othersLabel(count: number) {
 
 function onFailed(name: string) {
   void snackbar.show({ message: t("gallery.chat.attachFailed", { name }) });
-}
-
-function onUnavailable(label: string) {
-  void snackbar.show({ message: t("gallery.chat.attachUnavailable", { label }) });
 }
 
 async function onAction(message: ChatMessage, id: string) {

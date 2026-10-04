@@ -32,6 +32,7 @@ import FileIcon from "~icons/material-symbols/description-outline-rounded";
 import GalleryIcon from "~icons/material-symbols/photo-library-outline-rounded";
 import LocationIcon from "~icons/material-symbols/location-on-outline-rounded";
 import ChatRecentPhotos from "@/modules/gallery/components/chat/ChatRecentPhotos.vue";
+import type { ComposeKind } from "@/modules/gallery/composables/composeKind";
 import { useLocalAttachments } from "@/modules/gallery/composables/useLocalAttachments";
 
 defineProps<{ photos: readonly PhotoItem[] }>();
@@ -42,7 +43,7 @@ const emit = defineEmits<{
   text: [text: string];
   recent: [index: number];
   failed: [name: string];
-  unavailable: [label: string];
+  compose: [kind: ComposeKind];
 }>();
 
 const { t, locale } = useI18n();
@@ -80,7 +81,7 @@ function choose(id: string) {
     }
     return;
   }
-  emit("unavailable", t(`gallery.chat.attachOptions.${id}`));
+  if (id === "location" || id === "contact" || id === "poll" || id === "event") emit("compose", id);
 }
 
 function pickRecent(index: number) {

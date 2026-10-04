@@ -1,10 +1,18 @@
 import {
   applyReaction,
+  applyRsvp,
+  applyVote,
   type ChatMessage,
+  type MessageContact,
+  type MessageInvite,
+  type MessageLocation,
   type MessageImage,
+  type MessagePoll,
   type MessageReaction,
   type MessageStatus,
+  type RsvpAnswer,
 } from "@cavulsqa/m3e-vue";
+import { teammateAnswer, teammateVote } from "@/modules/gallery/composables/chatTeam";
 
 const AMINA = "Amina Benali";
 const KARIM = "Karim Haddad";
@@ -162,7 +170,10 @@ export function useChatDemo(photo: (index: number) => MessageImage | null) {
     });
   }
 
-  function post(message: Omit<ChatMessage, "id" | "sent" | "at" | "status">) {
+  type Outgoing = Omit<ChatMessage, "id" | "sent" | "at" | "status">;
+
+  /** Posts without a reply: the team answers a poll or an invite instead of writing back. */
+  function postQuietly(message: Outgoing) {
     const next: ChatMessage = {
       ...message,
       id: id(),
@@ -172,6 +183,11 @@ export function useChatDemo(photo: (index: number) => MessageImage | null) {
     };
     messages.value = [...messages.value, next];
     deliver(next.id);
+    return next.id;
+  }
+
+  function post(message: Outgoing) {
+    postQuietly(message);
     reply();
   }
 
@@ -187,6 +203,51 @@ export function useChatDemo(photo: (index: number) => MessageImage | null) {
 
   function sendImage(image: MessageImage) {
     post({ image });
+  }
+
+  function sendLocation(location: MessageLocation) {
+    post({ location });
+  }
+
+  function sendContact(contact: MessageContact) {
+    post({ contact });
+  }
+
+  /** A poll the team answers: one vote soon, another a little later. */
+  function sendPoll(poll: MessagePoll) {
+    const next = postQuietly({ poll });
+    later(1800, () => update(next, (entry) => withPoll(entry, (value) => teammateVote(value, 0))));
+    later(3400, () => update(next, (entry) => withPoll(entry, (value) => teammateVote(value, 1))));
+  }
+
+  /** An invite the team answers: one is going, one may come. */
+  function sendInvite(invite: MessageInvite) {
+    const next = postQuietly({ invite });
+    later(1800, () =>
+      update(next, (entry) => withInvite(entry, (value) => teammateAnswer(value, "going"))),
+    );
+    later(3400, () =>
+      update(next, (entry) => withInvite(entry, (value) => teammateAnswer(value, "maybe"))),
+    );
+  }
+
+  function vote(message: ChatMessage, optionId: string) {
+    update(message.id, (entry) => withPoll(entry, (value) => applyVote(value, optionId)));
+  }
+
+  function rsvp(message: ChatMessage, answer: RsvpAnswer) {
+    update(message.id, (entry) => withInvite(entry, (value) => applyRsvp(value, answer)));
+  }
+
+  function withPoll(message: ChatMessage, change: (poll: MessagePoll) => MessagePoll): ChatMessage {
+    return message.poll ? { ...message, poll: change(message.poll) } : message;
+  }
+
+  function withInvite(
+    message: ChatMessage,
+    change: (invite: MessageInvite) => MessageInvite,
+  ): ChatMessage {
+    return message.invite ? { ...message, invite: change(message.invite) } : message;
   }
 
   function retry(message: ChatMessage) {
@@ -224,6 +285,12 @@ export function useChatDemo(photo: (index: number) => MessageImage | null) {
     send,
     sendPhoto,
     sendImage,
+    sendLocation,
+    sendContact,
+    sendPoll,
+    sendInvite,
+    vote,
+    rsvp,
     react,
     retry,
     remove,

@@ -24,6 +24,7 @@ declare global {
   const ONBOARDING_SECTION: typeof import('./src/modules/gallery/composables/useGallerySections').ONBOARDING_SECTION
   const ORDER_COUNTS: typeof import('./src/modules/gallery/composables/demoOrders').ORDER_COUNTS
   const ORDER_STATUSES: typeof import('./src/modules/demo/composables/useOrderStatus').ORDER_STATUSES
+  const PositionError: typeof import('./src/modules/gallery/composables/currentPosition').PositionError
   const STATUS_LOOK: typeof import('./src/modules/demo/composables/useOrderStatus').STATUS_LOOK
   const TABS_SECTION: typeof import('./src/modules/gallery/composables/useGallerySections').TABS_SECTION
   const TONE_CLASSES: typeof import('./src/shared/utils/tone').TONE_CLASSES
@@ -50,6 +51,7 @@ declare global {
   const createStore: typeof import('framework7/lite').createStore
   const createTemplatePromise: typeof import('@vueuse/core').createTemplatePromise
   const createUnrefFn: typeof import('@vueuse/core').createUnrefFn
+  const currentPosition: typeof import('./src/modules/gallery/composables/currentPosition').currentPosition
   const customRef: typeof import('vue').customRef
   const debouncedRef: typeof import('@vueuse/core').debouncedRef
   const debouncedWatch: typeof import('@vueuse/core').debouncedWatch
@@ -92,6 +94,7 @@ declare global {
   const m3e: typeof import('./src/plugins/m3e.plugin').m3e
   const makeDestructurable: typeof import('@vueuse/core').makeDestructurable
   const makeOrders: typeof import('./src/modules/gallery/composables/demoOrders').makeOrders
+  const mapsLink: typeof import('./src/modules/gallery/composables/currentPosition').mapsLink
   const markRaw: typeof import('vue').markRaw
   const marksAround: typeof import('./src/modules/gallery/composables/routePlan').marksAround
   const marksBetween: typeof import('./src/modules/gallery/composables/routePlan').marksBetween
@@ -117,6 +120,7 @@ declare global {
   const onUnmounted: typeof import('vue').onUnmounted
   const onUpdated: typeof import('vue').onUpdated
   const onWatcherCleanup: typeof import('vue').onWatcherCleanup
+  const openExternal: typeof import('./src/modules/gallery/composables/openExternal').openExternal
   const parseThemeSettings: typeof import('./src/shared/utils/theme/themeSettings').parseThemeSettings
   const passwordScore: typeof import('./src/modules/gallery/composables/fieldFormats').passwordScore
   const pausableWatch: typeof import('@vueuse/core').pausableWatch
@@ -152,6 +156,8 @@ declare global {
   const statusLook: typeof import('./src/modules/demo/composables/useOrderStatus').statusLook
   const syncRef: typeof import('@vueuse/core').syncRef
   const syncRefs: typeof import('@vueuse/core').syncRefs
+  const teammateAnswer: typeof import('./src/modules/gallery/composables/chatTeam').teammateAnswer
+  const teammateVote: typeof import('./src/modules/gallery/composables/chatTeam').teammateVote
   const templateRef: typeof import('@vueuse/core').templateRef
   const textDirection: typeof import('./src/shared/utils/textDirection').textDirection
   const theme: typeof import('framework7-vue').theme
@@ -202,6 +208,7 @@ declare global {
   const useBroadcastChannel: typeof import('@vueuse/core').useBroadcastChannel
   const useBrowserLocation: typeof import('@vueuse/core').useBrowserLocation
   const useCached: typeof import('@vueuse/core').useCached
+  const useChatCustomers: typeof import('./src/modules/gallery/composables/useChatCustomers').useChatCustomers
   const useChatDemo: typeof import('./src/modules/gallery/composables/useChatDemo').useChatDemo
   const useClipboard: typeof import('@vueuse/core').useClipboard
   const useClipboardItems: typeof import('@vueuse/core').useClipboardItems
@@ -268,6 +275,7 @@ declare global {
   const useLastChanged: typeof import('@vueuse/core').useLastChanged
   const useLocalAttachments: typeof import('./src/modules/gallery/composables/useLocalAttachments').useLocalAttachments
   const useLocalStorage: typeof import('@vueuse/core').useLocalStorage
+  const useLocationShare: typeof import('./src/modules/gallery/composables/useLocationShare').useLocationShare
   const useMagicKeys: typeof import('@vueuse/core').useMagicKeys
   const useManualRefHistory: typeof import('@vueuse/core').useManualRefHistory
   const useMediaControls: typeof import('@vueuse/core').useMediaControls
@@ -423,6 +431,12 @@ declare global {
   export type { BusEntry, PipelineResult } from './src/modules/demo/composables/useReactiveDemo'
   import('./src/modules/demo/composables/useReactiveDemo')
   // @ts-ignore
+  export type { ComposeKind } from './src/modules/gallery/composables/composeKind'
+  import('./src/modules/gallery/composables/composeKind')
+  // @ts-ignore
+  export type { PositionError, PositionFailure } from './src/modules/gallery/composables/currentPosition'
+  import('./src/modules/gallery/composables/currentPosition')
+  // @ts-ignore
   export type { OrderStatus, Order } from './src/modules/gallery/composables/demoOrders'
   import('./src/modules/gallery/composables/demoOrders')
   // @ts-ignore
@@ -459,6 +473,7 @@ declare module 'vue' {
     readonly ONBOARDING_SECTION: UnwrapRef<typeof import('./src/modules/gallery/composables/useGallerySections')['ONBOARDING_SECTION']>
     readonly ORDER_COUNTS: UnwrapRef<typeof import('./src/modules/gallery/composables/demoOrders')['ORDER_COUNTS']>
     readonly ORDER_STATUSES: UnwrapRef<typeof import('./src/modules/demo/composables/useOrderStatus')['ORDER_STATUSES']>
+    readonly PositionError: UnwrapRef<typeof import('./src/modules/gallery/composables/currentPosition')['PositionError']>
     readonly STATUS_LOOK: UnwrapRef<typeof import('./src/modules/demo/composables/useOrderStatus')['STATUS_LOOK']>
     readonly TABS_SECTION: UnwrapRef<typeof import('./src/modules/gallery/composables/useGallerySections')['TABS_SECTION']>
     readonly TONE_CLASSES: UnwrapRef<typeof import('./src/shared/utils/tone')['TONE_CLASSES']>
@@ -484,6 +499,7 @@ declare module 'vue' {
     readonly createSharedComposable: UnwrapRef<typeof import('@vueuse/core')['createSharedComposable']>
     readonly createTemplatePromise: UnwrapRef<typeof import('@vueuse/core')['createTemplatePromise']>
     readonly createUnrefFn: UnwrapRef<typeof import('@vueuse/core')['createUnrefFn']>
+    readonly currentPosition: UnwrapRef<typeof import('./src/modules/gallery/composables/currentPosition')['currentPosition']>
     readonly customRef: UnwrapRef<typeof import('vue')['customRef']>
     readonly debouncedRef: UnwrapRef<typeof import('@vueuse/core')['debouncedRef']>
     readonly debouncedWatch: UnwrapRef<typeof import('@vueuse/core')['debouncedWatch']>
@@ -526,6 +542,7 @@ declare module 'vue' {
     readonly m3e: UnwrapRef<typeof import('./src/plugins/m3e.plugin')['m3e']>
     readonly makeDestructurable: UnwrapRef<typeof import('@vueuse/core')['makeDestructurable']>
     readonly makeOrders: UnwrapRef<typeof import('./src/modules/gallery/composables/demoOrders')['makeOrders']>
+    readonly mapsLink: UnwrapRef<typeof import('./src/modules/gallery/composables/currentPosition')['mapsLink']>
     readonly markRaw: UnwrapRef<typeof import('vue')['markRaw']>
     readonly marksAround: UnwrapRef<typeof import('./src/modules/gallery/composables/routePlan')['marksAround']>
     readonly marksBetween: UnwrapRef<typeof import('./src/modules/gallery/composables/routePlan')['marksBetween']>
@@ -551,6 +568,7 @@ declare module 'vue' {
     readonly onUnmounted: UnwrapRef<typeof import('vue')['onUnmounted']>
     readonly onUpdated: UnwrapRef<typeof import('vue')['onUpdated']>
     readonly onWatcherCleanup: UnwrapRef<typeof import('vue')['onWatcherCleanup']>
+    readonly openExternal: UnwrapRef<typeof import('./src/modules/gallery/composables/openExternal')['openExternal']>
     readonly parseThemeSettings: UnwrapRef<typeof import('./src/shared/utils/theme/themeSettings')['parseThemeSettings']>
     readonly passwordScore: UnwrapRef<typeof import('./src/modules/gallery/composables/fieldFormats')['passwordScore']>
     readonly pausableWatch: UnwrapRef<typeof import('@vueuse/core')['pausableWatch']>
@@ -585,6 +603,8 @@ declare module 'vue' {
     readonly statusLook: UnwrapRef<typeof import('./src/modules/demo/composables/useOrderStatus')['statusLook']>
     readonly syncRef: UnwrapRef<typeof import('@vueuse/core')['syncRef']>
     readonly syncRefs: UnwrapRef<typeof import('@vueuse/core')['syncRefs']>
+    readonly teammateAnswer: UnwrapRef<typeof import('./src/modules/gallery/composables/chatTeam')['teammateAnswer']>
+    readonly teammateVote: UnwrapRef<typeof import('./src/modules/gallery/composables/chatTeam')['teammateVote']>
     readonly templateRef: UnwrapRef<typeof import('@vueuse/core')['templateRef']>
     readonly textDirection: UnwrapRef<typeof import('./src/shared/utils/textDirection')['textDirection']>
     readonly throttledRef: UnwrapRef<typeof import('@vueuse/core')['throttledRef']>
@@ -632,6 +652,7 @@ declare module 'vue' {
     readonly useBroadcastChannel: UnwrapRef<typeof import('@vueuse/core')['useBroadcastChannel']>
     readonly useBrowserLocation: UnwrapRef<typeof import('@vueuse/core')['useBrowserLocation']>
     readonly useCached: UnwrapRef<typeof import('@vueuse/core')['useCached']>
+    readonly useChatCustomers: UnwrapRef<typeof import('./src/modules/gallery/composables/useChatCustomers')['useChatCustomers']>
     readonly useChatDemo: UnwrapRef<typeof import('./src/modules/gallery/composables/useChatDemo')['useChatDemo']>
     readonly useClipboard: UnwrapRef<typeof import('@vueuse/core')['useClipboard']>
     readonly useClipboardItems: UnwrapRef<typeof import('@vueuse/core')['useClipboardItems']>
@@ -697,6 +718,7 @@ declare module 'vue' {
     readonly useLastChanged: UnwrapRef<typeof import('@vueuse/core')['useLastChanged']>
     readonly useLocalAttachments: UnwrapRef<typeof import('./src/modules/gallery/composables/useLocalAttachments')['useLocalAttachments']>
     readonly useLocalStorage: UnwrapRef<typeof import('@vueuse/core')['useLocalStorage']>
+    readonly useLocationShare: UnwrapRef<typeof import('./src/modules/gallery/composables/useLocationShare')['useLocationShare']>
     readonly useMagicKeys: UnwrapRef<typeof import('@vueuse/core')['useMagicKeys']>
     readonly useManualRefHistory: UnwrapRef<typeof import('@vueuse/core')['useManualRefHistory']>
     readonly useMediaControls: UnwrapRef<typeof import('@vueuse/core')['useMediaControls']>

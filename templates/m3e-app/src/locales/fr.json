@@ -1012,14 +1012,55 @@
         "event": "Événement"
       },
       "attachFailed": "Impossible de lire {name}",
-      "attachUnavailable": "{label} ne fait pas partie de cette démo",
       "react": "Réagir",
       "messageActions": "Actions sur le message",
       "reactionCount": "{emoji} de {count} personne | {emoji} de {count} personnes",
       "reactionsTitle": "Réactions",
       "allReactions": "Toutes",
       "removeReaction": "Appuyez pour retirer",
-      "othersReacted": "{count} autre | {count} autres"
+      "othersReacted": "{count} autre | {count} autres",
+      "location": {
+        "here": "Position actuelle",
+        "depot": "Dépôt d'Oran",
+        "sendDepot": "Envoyer le dépôt",
+        "denied": "L'accès à la position est désactivé",
+        "unavailable": "Position introuvable",
+        "timeout": "La recherche de position a pris trop de temps",
+        "unsupported": "Cet appareil ne peut pas partager sa position"
+      },
+      "contact": {
+        "title": "Partager un contact",
+        "search": "Rechercher un client",
+        "empty": "Aucun client pour l'instant",
+        "failed": "Impossible de charger les clients"
+      },
+      "poll": {
+        "title": "Nouveau sondage",
+        "question": "Question",
+        "option": "Option {number}",
+        "remove": "Retirer l'option {number}",
+        "add": "Ajouter une option",
+        "repeated": "Option déjà proposée",
+        "multiple": "Plusieurs réponses",
+        "multipleHint": "Chacun peut en choisir plusieurs"
+      },
+      "invite": {
+        "title": "Nouvel événement",
+        "name": "Nom de l'événement",
+        "date": "Date",
+        "time": "Heure",
+        "place": "Lieu (facultatif)"
+      },
+      "cards": {
+        "openLocation": "Ouvrir dans Maps",
+        "openContact": "Voir ses commandes",
+        "pollSingle": "Un seul choix",
+        "pollMultiple": "Plusieurs choix",
+        "votes": "{count} vote | {count} votes",
+        "going": "J'y vais",
+        "maybe": "Peut-être",
+        "no": "Je ne peux pas"
+      }
     },
     "onboarding": {
       "title": "Visite guidée",
