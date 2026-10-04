@@ -271,6 +271,10 @@
       "login": {
         "title": "Sign-in screen",
         "subtitle": "Validation and a remembered email"
+      },
+      "agenda": {
+        "title": "Agenda",
+        "subtitle": "A week strip over the day's visits"
       }
     },
     "buttons": {
@@ -978,6 +982,19 @@
       "welcome": "Signed in as {email}",
       "restored": "Restored from your last visit",
       "hint": "Demo: any email, with the password demo."
+    },
+    "agenda": {
+      "title": "Route agenda",
+      "today": "Go to today",
+      "days": "Days of the week",
+      "visits": "{count} visit | {count} visits",
+      "weekend": "No visits",
+      "weekendText": "The weekend: the route starts again on Sunday.",
+      "states": {
+        "done": "Done",
+        "next": "Next",
+        "planned": "Planned"
+      }
     }
   },
   "settings": {

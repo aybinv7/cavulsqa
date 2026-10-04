@@ -271,6 +271,10 @@
       "login": {
         "title": "Écran de connexion",
         "subtitle": "Validation et e-mail mémorisé"
+      },
+      "agenda": {
+        "title": "Agenda",
+        "subtitle": "Une semaine au-dessus des visites du jour"
       }
     },
     "buttons": {
@@ -978,6 +982,19 @@
       "welcome": "Connecté en tant que {email}",
       "restored": "Restauré depuis votre dernière visite",
       "hint": "Démo : n'importe quel e-mail, avec le mot de passe demo."
+    },
+    "agenda": {
+      "title": "Agenda de tournée",
+      "today": "Aller à aujourd'hui",
+      "days": "Jours de la semaine",
+      "visits": "{count} visite | {count} visites",
+      "weekend": "Aucune visite",
+      "weekendText": "C'est le week-end : la tournée reprend dimanche.",
+      "states": {
+        "done": "Fait",
+        "next": "Suivant",
+        "planned": "Prévu"
+      }
     }
   },
   "settings": {

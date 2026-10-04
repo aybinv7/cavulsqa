@@ -24,6 +24,7 @@
 <script setup lang="ts">
 import type { Router } from "framework7/types";
 import {
+  AGENDA_SECTION,
   CHAT_SECTION,
   CONTACTS_SECTION,
   LOGIN_SECTION,
@@ -43,6 +44,7 @@ const entries = [
   CHAT_SECTION,
   ONBOARDING_SECTION,
   LOGIN_SECTION,
+  AGENDA_SECTION,
   ...sections.slice(9),
 ];
 </script>

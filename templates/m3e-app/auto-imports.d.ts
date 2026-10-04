@@ -8,6 +8,7 @@
 // biome-ignore lint: disable
 export {}
 declare global {
+  const AGENDA_SECTION: typeof import('./src/modules/gallery/composables/useGallerySections').AGENDA_SECTION
   const AppContextKey: typeof import('./src/shared/composables/theme/useAppTheme').AppContextKey
   const CHAT_SECTION: typeof import('./src/modules/gallery/composables/useGallerySections').CHAT_SECTION
   const CONTACTS_SECTION: typeof import('./src/modules/gallery/composables/useGallerySections').CONTACTS_SECTION
@@ -85,6 +86,7 @@ declare global {
   const m3e: typeof import('./src/plugins/m3e.plugin').m3e
   const makeDestructurable: typeof import('@vueuse/core').makeDestructurable
   const markRaw: typeof import('vue').markRaw
+  const marksAround: typeof import('./src/modules/gallery/composables/routePlan').marksAround
   const nextTick: typeof import('vue').nextTick
   const onActivated: typeof import('vue').onActivated
   const onBeforeMount: typeof import('vue').onBeforeMount
@@ -351,6 +353,7 @@ declare global {
   const useWindowScroll: typeof import('@vueuse/core').useWindowScroll
   const useWindowSize: typeof import('@vueuse/core').useWindowSize
   const utils: typeof import('framework7/lite').utils
+  const visitsFor: typeof import('./src/modules/gallery/composables/routePlan').visitsFor
   const watch: typeof import('vue').watch
   const watchArray: typeof import('@vueuse/core').watchArray
   const watchAtMost: typeof import('@vueuse/core').watchAtMost
@@ -404,6 +407,9 @@ declare global {
   export type { BusEntry, PipelineResult } from './src/modules/demo/composables/useReactiveDemo'
   import('./src/modules/demo/composables/useReactiveDemo')
   // @ts-ignore
+  export type { VisitState, Visit } from './src/modules/gallery/composables/routePlan'
+  import('./src/modules/gallery/composables/routePlan')
+  // @ts-ignore
   export type { GallerySection } from './src/modules/gallery/composables/useGallerySections'
   import('./src/modules/gallery/composables/useGallerySections')
   // @ts-ignore
@@ -416,6 +422,7 @@ import { UnwrapRef } from 'vue'
 declare module 'vue' {
   interface GlobalComponents {}
   interface ComponentCustomProperties {
+    readonly AGENDA_SECTION: UnwrapRef<typeof import('./src/modules/gallery/composables/useGallerySections')['AGENDA_SECTION']>
     readonly CHAT_SECTION: UnwrapRef<typeof import('./src/modules/gallery/composables/useGallerySections')['CHAT_SECTION']>
     readonly CONTACTS_SECTION: UnwrapRef<typeof import('./src/modules/gallery/composables/useGallerySections')['CONTACTS_SECTION']>
     readonly CONTRAST_LEVELS: UnwrapRef<typeof import('./src/shared/utils/theme/themeSettings')['CONTRAST_LEVELS']>
@@ -491,6 +498,7 @@ declare module 'vue' {
     readonly m3e: UnwrapRef<typeof import('./src/plugins/m3e.plugin')['m3e']>
     readonly makeDestructurable: UnwrapRef<typeof import('@vueuse/core')['makeDestructurable']>
     readonly markRaw: UnwrapRef<typeof import('vue')['markRaw']>
+    readonly marksAround: UnwrapRef<typeof import('./src/modules/gallery/composables/routePlan')['marksAround']>
     readonly nextTick: UnwrapRef<typeof import('vue')['nextTick']>
     readonly onActivated: UnwrapRef<typeof import('vue')['onActivated']>
     readonly onBeforeMount: UnwrapRef<typeof import('vue')['onBeforeMount']>
@@ -751,6 +759,7 @@ declare module 'vue' {
     readonly useWindowScroll: UnwrapRef<typeof import('@vueuse/core')['useWindowScroll']>
     readonly useWindowSize: UnwrapRef<typeof import('@vueuse/core')['useWindowSize']>
     readonly utils: UnwrapRef<typeof import('framework7/lite')['utils']>
+    readonly visitsFor: UnwrapRef<typeof import('./src/modules/gallery/composables/routePlan')['visitsFor']>
     readonly watch: UnwrapRef<typeof import('vue')['watch']>
     readonly watchArray: UnwrapRef<typeof import('@vueuse/core')['watchArray']>
     readonly watchAtMost: UnwrapRef<typeof import('@vueuse/core')['watchAtMost']>

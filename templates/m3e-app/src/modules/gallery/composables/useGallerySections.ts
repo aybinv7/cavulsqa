@@ -15,6 +15,7 @@ import ChartIcon from "~icons/material-symbols/monitoring-rounded";
 import ContactsIcon from "~icons/material-symbols/contacts-outline-rounded";
 import ChatIcon from "~icons/material-symbols/forum-outline-rounded";
 import LoginIcon from "~icons/material-symbols/login-rounded";
+import AgendaIcon from "~icons/material-symbols/event-note-outline-rounded";
 import OnboardingIcon from "~icons/material-symbols/swipe-rounded";
 import CalendarIcon from "~icons/material-symbols/calendar-today-outline-rounded";
 import SpeedIcon from "~icons/material-symbols/speed-rounded";
@@ -210,6 +211,18 @@ export const LOGIN_SECTION: GallerySection = {
   subtitleKey: "gallery.sections.login.subtitle",
   component: { render: () => null },
   path: "/gallery/login/",
+};
+
+/** A week strip pinned under the app bar over the chosen day's visits. */
+export const AGENDA_SECTION: GallerySection = {
+  id: "agenda",
+  icon: AgendaIcon,
+  shape: "cookie9Sided",
+  tone: "primary",
+  titleKey: "gallery.sections.agenda.title",
+  subtitleKey: "gallery.sections.agenda.subtitle",
+  component: { render: () => null },
+  path: "/gallery/agenda/",
 };
 
 export function findSection(id: string): GallerySection | undefined {

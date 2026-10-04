@@ -172,6 +172,11 @@ a prop. **`M3Calendar`** - the grid alone, inline or docked in a card: `v-model:
 (dialog) or dial + wheel (sheet), `hour12` (else the locale decides), `minuteStep`. The dial is
 **`M3ClockDial`**: 24-hour faces put 00 and 13-23 on the inner ring. → time-pickers/specs
 
+**`M3WeekStrip`** - the head of an agenda: `v-model` `IsoDate`, `label`, `marks` (`{ [IsoDate]:
+count }` for the dots), `markLabel`, `locale`, `firstDay`. Swipes week to week endlessly; pin it
+under the app bar through `AppPage`'s `#bottom`, the day's items in a list below. Inset with
+`--m3-week-strip-inset`, never padding.
+
 **`M3WheelPicker`** - Framework7's picker: drums over one band, `columns` of `{ key, label,
 options, flex, align, loop }`, `v-model` keyed by column; `loop` rolls a drum over at its ends. Built like Framework7's: native scroll-snap, flat rows, gradient fades in `--m3-wheel-surface`
 (the colour behind it) - no per-row 3D or masks, which made it lag on phones - and a
