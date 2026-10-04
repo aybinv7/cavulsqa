@@ -61,6 +61,7 @@ declare global {
   const features: typeof import('./src/modules/home/composables/useHomeFeatures').features
   const findFeature: typeof import('./src/modules/home/composables/useHomeFeatures').findFeature
   const findSection: typeof import('./src/modules/gallery/composables/useGallerySections').findSection
+  const formatMobile: typeof import('./src/modules/gallery/composables/fieldFormats').formatMobile
   const formatMoney: typeof import('./src/modules/demo/composables/useOrderStatus').formatMoney
   const framework7Parameters: typeof import('./src/plugins/framework7.plugin').framework7Parameters
   const getCurrentInstance: typeof import('vue').getCurrentInstance
@@ -78,6 +79,7 @@ declare global {
   const injectLocal: typeof import('@vueuse/core').injectLocal
   const installNavigationGuard: typeof import('./src/shared/composables/navigation/useNavigationGuard').installNavigationGuard
   const isDefined: typeof import('@vueuse/core').isDefined
+  const isMobile: typeof import('./src/modules/gallery/composables/fieldFormats').isMobile
   const isProxy: typeof import('vue').isProxy
   const isReactive: typeof import('vue').isReactive
   const isReadonly: typeof import('vue').isReadonly
@@ -90,6 +92,7 @@ declare global {
   const marksAround: typeof import('./src/modules/gallery/composables/routePlan').marksAround
   const marksBetween: typeof import('./src/modules/gallery/composables/routePlan').marksBetween
   const marksForMonth: typeof import('./src/modules/gallery/composables/routePlan').marksForMonth
+  const mobileDigits: typeof import('./src/modules/gallery/composables/fieldFormats').mobileDigits
   const nextTick: typeof import('vue').nextTick
   const onActivated: typeof import('vue').onActivated
   const onBeforeMount: typeof import('vue').onBeforeMount
@@ -111,6 +114,7 @@ declare global {
   const onUpdated: typeof import('vue').onUpdated
   const onWatcherCleanup: typeof import('vue').onWatcherCleanup
   const parseThemeSettings: typeof import('./src/shared/utils/theme/themeSettings').parseThemeSettings
+  const passwordScore: typeof import('./src/modules/gallery/composables/fieldFormats').passwordScore
   const pausableWatch: typeof import('@vueuse/core').pausableWatch
   const provide: typeof import('vue').provide
   const provideLocal: typeof import('@vueuse/core').provideLocal
@@ -481,6 +485,7 @@ declare module 'vue' {
     readonly features: UnwrapRef<typeof import('./src/modules/home/composables/useHomeFeatures')['features']>
     readonly findFeature: UnwrapRef<typeof import('./src/modules/home/composables/useHomeFeatures')['findFeature']>
     readonly findSection: UnwrapRef<typeof import('./src/modules/gallery/composables/useGallerySections')['findSection']>
+    readonly formatMobile: UnwrapRef<typeof import('./src/modules/gallery/composables/fieldFormats')['formatMobile']>
     readonly formatMoney: UnwrapRef<typeof import('./src/modules/demo/composables/useOrderStatus')['formatMoney']>
     readonly framework7Parameters: UnwrapRef<typeof import('./src/plugins/framework7.plugin')['framework7Parameters']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
@@ -498,6 +503,7 @@ declare module 'vue' {
     readonly injectLocal: UnwrapRef<typeof import('@vueuse/core')['injectLocal']>
     readonly installNavigationGuard: UnwrapRef<typeof import('./src/shared/composables/navigation/useNavigationGuard')['installNavigationGuard']>
     readonly isDefined: UnwrapRef<typeof import('@vueuse/core')['isDefined']>
+    readonly isMobile: UnwrapRef<typeof import('./src/modules/gallery/composables/fieldFormats')['isMobile']>
     readonly isProxy: UnwrapRef<typeof import('vue')['isProxy']>
     readonly isReactive: UnwrapRef<typeof import('vue')['isReactive']>
     readonly isReadonly: UnwrapRef<typeof import('vue')['isReadonly']>
@@ -510,6 +516,7 @@ declare module 'vue' {
     readonly marksAround: UnwrapRef<typeof import('./src/modules/gallery/composables/routePlan')['marksAround']>
     readonly marksBetween: UnwrapRef<typeof import('./src/modules/gallery/composables/routePlan')['marksBetween']>
     readonly marksForMonth: UnwrapRef<typeof import('./src/modules/gallery/composables/routePlan')['marksForMonth']>
+    readonly mobileDigits: UnwrapRef<typeof import('./src/modules/gallery/composables/fieldFormats')['mobileDigits']>
     readonly nextTick: UnwrapRef<typeof import('vue')['nextTick']>
     readonly onActivated: UnwrapRef<typeof import('vue')['onActivated']>
     readonly onBeforeMount: UnwrapRef<typeof import('vue')['onBeforeMount']>
@@ -531,6 +538,7 @@ declare module 'vue' {
     readonly onUpdated: UnwrapRef<typeof import('vue')['onUpdated']>
     readonly onWatcherCleanup: UnwrapRef<typeof import('vue')['onWatcherCleanup']>
     readonly parseThemeSettings: UnwrapRef<typeof import('./src/shared/utils/theme/themeSettings')['parseThemeSettings']>
+    readonly passwordScore: UnwrapRef<typeof import('./src/modules/gallery/composables/fieldFormats')['passwordScore']>
     readonly pausableWatch: UnwrapRef<typeof import('@vueuse/core')['pausableWatch']>
     readonly provide: UnwrapRef<typeof import('vue')['provide']>
     readonly provideLocal: UnwrapRef<typeof import('@vueuse/core')['provideLocal']>

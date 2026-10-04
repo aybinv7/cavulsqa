@@ -1,4 +1,8 @@
 <template>
+  <InputsAccount />
+  <InputsVerification />
+  <InputsTags />
+
   <GalleryBlock
     :title="t('gallery.inputs.searchView')"
     :note="t('gallery.inputs.searchViewNote')"
@@ -148,6 +152,9 @@
 <script setup lang="ts">
 import GalleryBlock from "@/modules/gallery/components/GalleryBlock.vue";
 import GalleryProofOfDelivery from "@/modules/gallery/components/GalleryProofOfDelivery.vue";
+import InputsAccount from "@/modules/gallery/components/inputs/InputsAccount.vue";
+import InputsTags from "@/modules/gallery/components/inputs/InputsTags.vue";
+import InputsVerification from "@/modules/gallery/components/inputs/InputsVerification.vue";
 import { WILAYA_OPTIONS } from "@/modules/gallery/composables/wilayas";
 
 const { t } = useI18n();
