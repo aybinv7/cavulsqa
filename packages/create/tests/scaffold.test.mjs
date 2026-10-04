@@ -53,8 +53,12 @@ describe.each(TEMPLATES)("%s", (templateName) => {
     const read = (file) => readFileSync(join(app, file), "utf8");
 
     expect(JSON.parse(read("package.json")).name).toBe("caputa");
-    expect(read("capacitor.config.ts")).toContain('appId: "com.example.caputa"');
-    expect(read("capacitor.config.ts")).toContain('appName: "Caputa"');
+    expect(read("capacitor.config.ts")).toContain(
+      'appId: process.env.VITE_APP_ID || "com.example.caputa"',
+    );
+    expect(read("capacitor.config.ts")).toContain('appName: process.env.VITE_APP_NAME || "Caputa"');
+    expect(read(".env.example")).toMatch(/^VITE_APP_ID=com\.example\.caputa$/m);
+    expect(read(".env.example")).toMatch(/^VITE_APP_NAME=Caputa$/m);
     expect(read("vite.config.ts")).toContain('__APP_NAME__: JSON.stringify("Caputa")');
     expect(read("index.html")).toContain("<title>Caputa</title>");
   });
