@@ -1,0 +1,90 @@
+/*
+ * Framework7's core stylesheet sizes every bare `button` to `width: 100%`. A component that leaves
+ * width to its content would inherit that, so the package undoes it at zero specificity: any width a
+ * component sets still wins.
+ */
+:where(button[class*="m3-"]) {
+  width: auto;
+}
+
+.m3-state {
+  position: relative;
+  isolation: isolate;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.m3-state::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: currentColor;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--md-sys-motion-spring-fast-effects-duration, 150ms)
+    var(--md-sys-motion-spring-fast-effects, ease);
+}
+
+@media (hover: hover) {
+  .m3-state:hover::before {
+    opacity: var(--md-sys-state-hover-opacity, 0.08);
+  }
+}
+
+.m3-state:focus-visible::before {
+  opacity: var(--md-sys-state-focus-opacity, 0.1);
+}
+
+.m3-state:active::before,
+.m3-state[data-pressed]::before {
+  opacity: var(--md-sys-state-pressed-opacity, 0.1);
+}
+
+.m3-state:disabled::before,
+.m3-state[aria-disabled="true"]::before {
+  opacity: 0;
+}
+
+.m3-focus-ring:focus-visible {
+  outline: 3px solid var(--md-sys-color-secondary);
+  outline-offset: 2px;
+}
+
+.m3-target::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max(100%, 48px);
+  height: max(100%, 48px);
+  transform: translate(-50%, -50%);
+}
+
+.m3-ripple-layer {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.m3-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: currentColor;
+  pointer-events: none;
+  opacity: var(--md-sys-state-pressed-opacity, 0.1);
+  transform: scale(0);
+}
+
+.m3-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
