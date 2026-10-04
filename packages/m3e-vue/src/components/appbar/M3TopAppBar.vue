@@ -9,6 +9,10 @@ import { useScrollContainer, type ScrollTarget } from "../../composables/useScro
  * `surface-container` colour once content scrolls beneath it. Place it first in the scrolling
  * container (a Framework7 `.page-content`); it pads itself for the status bar.
  *
+ * `#bottom` holds what pins under the bar - Framework7's subnavbar: tabs, a segmented filter. It
+ * sits below a flexible bar's big title and sticks under the bar once that title has scrolled
+ * away, taking the bar's colour with it.
+ *
  * Tapping the bar anywhere but its buttons scrolls the content back to the top - the Android
  * stand-in for iOS's status-bar tap, which Android keeps for its own shade. `scrollToTop` turns it
  * off.
@@ -31,6 +35,7 @@ const props = withDefaults(
 
 const bar = useTemplateRef<HTMLElement>("bar");
 const expanded = useTemplateRef<HTMLElement>("expanded");
+const bottom = useTemplateRef<HTMLElement>("bottom");
 const flexible = computed(() => props.variant !== "small");
 
 const reduced = useReducedMotion();
@@ -43,6 +48,7 @@ const container = useScrollContainer(
     const element = bar.value;
     if (!element) return;
     element.toggleAttribute("data-scrolled", scrollTop > 0);
+    bottom.value?.toggleAttribute("data-scrolled", scrollTop > 0);
     if (!flexible.value) return;
     const range = expanded.value?.offsetHeight ?? 1;
     const collapse = Math.min(1, scrollTop / Math.max(1, range));
@@ -93,6 +99,7 @@ function onTap(event: MouseEvent) {
     <h1 class="m3-app-bar-expanded__title">{{ props.title }}</h1>
     <p v-if="props.subtitle" class="m3-app-bar-expanded__subtitle">{{ props.subtitle }}</p>
   </div>
+  <div v-if="$slots.bottom" ref="bottom" class="m3-app-bar-bottom"><slot name="bottom" /></div>
 </template>
 
 <style scoped>
@@ -109,6 +116,20 @@ function onTap(event: MouseEvent) {
 }
 
 .m3-app-bar[data-scrolled] {
+  background: var(--md-sys-color-surface-container);
+}
+
+.m3-app-bar-bottom {
+  --m3-tabs-container: transparent;
+  position: sticky;
+  top: calc(env(safe-area-inset-top) + 64px);
+  z-index: 3;
+  background: var(--md-sys-color-surface);
+  transition: background-color var(--md-sys-motion-spring-default-effects-duration)
+    var(--md-sys-motion-spring-default-effects);
+}
+
+.m3-app-bar-bottom[data-scrolled] {
   background: var(--md-sys-color-surface-container);
 }
 

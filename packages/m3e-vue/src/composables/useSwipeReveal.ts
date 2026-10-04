@@ -14,12 +14,19 @@ export interface SwipeRevealOptions {
 const SLOP = 8;
 
 /**
+ * Moves a nested swipe has already taken. Listeners run innermost first as a move bubbles, so a
+ * carousel or a swipeable row inside a swipeable pager claims the gesture and the pager, seeing
+ * the claim, stands down instead of dragging along with it.
+ */
+const claimed = new WeakSet<Event>();
+
+/**
  * A horizontal drag on a list row that leaves vertical scrolling to the browser. The row is
  * `touch-action: pan-y`, so the page scrolls natively and only a sideways drag reaches script -
  * through passive pointer events, with no blocking `touchmove` listener for the scroll to wait on.
  * The first movement past the slop decides: mostly vertical and the gesture is abandoned, mostly
  * horizontal and the pointer is captured. The click that ends a drag is swallowed, so swiping a
- * clickable row never opens it.
+ * clickable row never opens it. The innermost swipeable element under the finger wins.
  */
 export function useSwipeReveal(options: SwipeRevealOptions) {
   const tracker = createVelocityTracker();
@@ -52,6 +59,10 @@ export function useSwipeReveal(options: SwipeRevealOptions) {
     const dx = event.clientX - startX;
     const dy = event.clientY - startY;
     if (state === "pending") {
+      if (claimed.has(event)) {
+        state = "idle";
+        return;
+      }
       if (Math.hypot(dx, dy) < SLOP) return;
       if (Math.abs(dy) >= Math.abs(dx)) {
         state = "idle";
@@ -63,6 +74,7 @@ export function useSwipeReveal(options: SwipeRevealOptions) {
       startX = event.clientX;
       tracker.reset();
     }
+    claimed.add(event);
     const moved = (event.clientX - startX) * sign;
     tracker.add(event.clientX * sign, event.timeStamp);
     offset = base + moved;

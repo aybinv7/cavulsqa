@@ -1,24 +1,41 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, provide, shallowRef, useTemplateRef, watch } from "vue";
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  provide,
+  shallowRef,
+  useTemplateRef,
+  watch,
+} from "vue";
 import { useElementSize } from "../../composables/useElementSize.js";
 import { useHaptics } from "../../composables/services.js";
 import { TABS } from "./context.js";
+import type { TabPager } from "./pager.js";
 
 /**
  * Primary or secondary tabs with one indicator that springs to the selected tab. Fixed tabs share
  * the row equally; primary tabs get a 3dp rounded indicator as wide as the tab's content, secondary
- * tabs a 2dp one across the whole tab. Arrow keys move between tabs. `scrollable` keeps every tab at its natural width and
- * brings the selected one into view.
+ * tabs a 2dp one across the whole tab. Arrow keys move between tabs. `scrollable` keeps every tab
+ * at its natural width and brings the selected one into view. With `M3TabPanels`, pass both the
+ * same `pager` and the indicator follows the pages while they are swiped.
  *
  * @see https://m3.material.io/components/tabs/specs
  */
 const props = withDefaults(
-  defineProps<{ variant?: "primary" | "secondary"; scrollable?: boolean; label?: string }>(),
+  defineProps<{
+    variant?: "primary" | "secondary";
+    scrollable?: boolean;
+    label?: string;
+    pager?: TabPager;
+  }>(),
   { variant: "primary", scrollable: false },
 );
 
 const selected = defineModel<string>();
 const root = useTemplateRef<HTMLElement>("root");
+const bar = useTemplateRef<HTMLElement>("bar");
 const { width } = useElementSize(root);
 const haptics = useHaptics();
 const indicator = shallowRef({ left: 0, width: 0, ready: false });
@@ -36,6 +53,17 @@ const tabElements = () => [
   ...(root.value?.querySelectorAll<HTMLElement>(":scope > [role=tab]") ?? []),
 ];
 
+function spanOf(list: HTMLElement, tab: HTMLElement): { left: number; width: number } {
+  const target =
+    props.variant === "primary"
+      ? (tab.querySelector<HTMLElement>("[data-tab-content]") ?? tab)
+      : tab;
+  const listRect = list.getBoundingClientRect();
+  const rect = target.getBoundingClientRect();
+  const width = Math.max(24, rect.width);
+  return { left: rect.left - listRect.left + list.scrollLeft + (rect.width - width) / 2, width };
+}
+
 function measure() {
   const list = root.value;
   const tab = tabElements().find((element) => element.dataset.value === selected.value);
@@ -43,14 +71,8 @@ function measure() {
     indicator.value = { ...indicator.value, width: 0 };
     return;
   }
-  const target =
-    props.variant === "primary"
-      ? (tab.querySelector<HTMLElement>("[data-tab-content]") ?? tab)
-      : tab;
-  const listRect = list.getBoundingClientRect();
-  const rect = target.getBoundingClientRect();
-  const contentWidth = Math.max(24, rect.width);
-  const left = rect.left - listRect.left + list.scrollLeft + (rect.width - contentWidth) / 2;
+  const { left, width: contentWidth } = spanOf(list, tab);
+  if (bar.value) bar.value.style.transition = "";
   const first = !indicator.value.ready;
   indicator.value = { left, width: contentWidth, ready: indicator.value.ready };
   if (first) requestAnimationFrame(() => (indicator.value = { ...indicator.value, ready: true }));
@@ -82,6 +104,33 @@ function onKeydown(event: KeyboardEvent) {
   tabs[next]!.click();
 }
 
+function follow(position: number) {
+  const list = root.value;
+  const tabs = tabElements();
+  const element = bar.value;
+  if (!list || !element || tabs.length === 0) return;
+  const clamped = Math.min(tabs.length - 1, Math.max(0, position));
+  const lower = Math.floor(clamped);
+  const upper = Math.min(tabs.length - 1, lower + 1);
+  const fraction = clamped - lower;
+  const a = spanOf(list, tabs[lower]!);
+  const b = spanOf(list, tabs[upper]!);
+  element.style.transition = "none";
+  element.style.width = `${a.width + (b.width - a.width) * fraction}px`;
+  element.style.transform = `translateX(${a.left + (b.left - a.left) * fraction}px)`;
+}
+
+let unfollow: (() => void) | undefined;
+watch(
+  () => props.pager,
+  (pager) => {
+    unfollow?.();
+    unfollow = pager?.follow(follow);
+  },
+  { immediate: true },
+);
+onBeforeUnmount(() => unfollow?.());
+
 watch([selected, width, () => props.variant], () => void nextTick(measure));
 onMounted(() => void nextTick(measure));
 </script>
@@ -97,6 +146,7 @@ onMounted(() => void nextTick(measure));
   >
     <slot />
     <span
+      ref="bar"
       class="m3-tabs__indicator"
       :class="{ 'm3-tabs__indicator--ready': indicator.ready }"
       aria-hidden="true"

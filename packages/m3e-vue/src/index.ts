@@ -59,6 +59,8 @@ export { default as M3Stepper } from "./components/stepper/M3Stepper.vue";
 export { default as M3SwipeAction } from "./components/list/M3SwipeAction.vue";
 export { default as M3Switch } from "./components/selection/M3Switch.vue";
 export { default as M3Tab } from "./components/tabs/M3Tab.vue";
+export { default as M3TabPanel } from "./components/tabs/M3TabPanel.vue";
+export { default as M3TabPanels } from "./components/tabs/M3TabPanels.vue";
 export { default as M3Tabs } from "./components/tabs/M3Tabs.vue";
 export { default as M3TextField } from "./components/textfield/M3TextField.vue";
 export { default as M3TimePicker } from "./components/datetime/M3TimePicker.vue";
@@ -154,3 +156,4 @@ export type { DatePickerMode, TimePickerMode } from "./components/datetime/types
 export type { SheetDetent } from "./utils/detents.js";
 export { moveItem } from "./utils/sortable.js";
 export type { PhotoItem } from "./components/photo/types.js";
+export { createTabPager, type TabPager } from "./components/tabs/pager.js";
