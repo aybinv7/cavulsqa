@@ -12,7 +12,11 @@ export function framework7Parameters(): Framework7Parameters {
   return {
     name: "App",
     theme: "md",
-    darkMode: false,
+    // Framework7 sets or clears `dark` on <html> at init, and F7App turns an unset value into
+    // `false`, which cleared the dark mode `startTheme` applied before mount. Handing it the mode
+    // already applied keeps them in agreement; the theme's own watcher owns the class afterwards.
+    darkMode:
+      typeof document !== "undefined" && document.documentElement.classList.contains("dark"),
     routes,
     touch: {
       tapHold: true,
