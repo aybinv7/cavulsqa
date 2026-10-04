@@ -20,6 +20,7 @@ export {
   type ExtraColorOptions,
   type ExtraRole,
 } from "./color/roles.js";
+export { expandHex, hctToHex, hexToHct, maxChroma, type HctColor } from "./color/hct.js";
 
 export type { Bounds, Cubic, Point } from "./shape/geometry.js";
 export { roundedPolygon, type CornerRounding, type Vertex } from "./shape/roundedPolygon.js";
