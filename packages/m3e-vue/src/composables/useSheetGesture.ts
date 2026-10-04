@@ -1,4 +1,5 @@
 import { onScopeDispose, watch, type Ref } from "vue";
+import { scrolledAncestor } from "../utils/scroll.js";
 import { createVelocityTracker } from "./useVelocity.js";
 
 export interface SheetGestureOptions {
@@ -17,15 +18,6 @@ export interface SheetGestureOptions {
 }
 
 const SLOP = 6;
-
-function scrolledAncestor(target: EventTarget | null, root: HTMLElement): boolean {
-  let node = target instanceof Element ? target : null;
-  while (node && node !== root) {
-    if (node instanceof HTMLElement && node.scrollTop > 0) return true;
-    node = node.parentElement;
-  }
-  return false;
-}
 
 /**
  * Drag a sheet down to dismiss it, from its handle or from content that is scrolled to the top.
