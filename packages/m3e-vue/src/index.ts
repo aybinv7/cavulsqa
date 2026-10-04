@@ -26,10 +26,12 @@ export { default as M3ExposedDropdown } from "./components/textfield/M3ExposedDr
 export { default as M3Fab } from "./components/button/M3Fab.vue";
 export { default as M3FabMenu } from "./components/button/M3FabMenu.vue";
 export { default as M3FabMenuItem } from "./components/button/M3FabMenuItem.vue";
+export { default as M3FabMorph } from "./components/button/M3FabMorph.vue";
 export { default as M3FloatingToolbar } from "./components/toolbar/M3FloatingToolbar.vue";
 export { default as M3FullScreenDialog } from "./components/dialog/M3FullScreenDialog.vue";
 export { default as M3Glyph } from "./components/icon/M3Glyph.vue";
 export { default as M3IconButton } from "./components/button/M3IconButton.vue";
+export { default as M3Image } from "./components/image/M3Image.vue";
 export { default as M3InfiniteScroll } from "./components/list/M3InfiniteScroll.vue";
 export { default as M3LinearProgress } from "./components/progress/M3LinearProgress.vue";
 export { default as M3LineChart } from "./components/chart/M3LineChart.vue";
@@ -48,7 +50,11 @@ export { default as M3NavigationBar } from "./components/navigation/M3Navigation
 export { default as M3NavigationItem } from "./components/navigation/M3NavigationItem.vue";
 export { default as M3NavigationRail } from "./components/navigation/M3NavigationRail.vue";
 export { default as M3NotificationHost } from "./components/snackbar/M3NotificationHost.vue";
+export { default as M3PageIndicator } from "./components/pager/M3PageIndicator.vue";
+export { default as M3Pager } from "./components/pager/M3Pager.vue";
+export { default as M3PagerPage } from "./components/pager/M3PagerPage.vue";
 export { default as M3PhotoBrowser } from "./components/photo/M3PhotoBrowser.vue";
+export { default as M3Popover } from "./components/popover/M3Popover.vue";
 export { default as M3PullToRefresh } from "./components/progress/M3PullToRefresh.vue";
 export { default as M3Radio } from "./components/selection/M3Radio.vue";
 export { default as M3RangeSlider } from "./components/slider/M3RangeSlider.vue";
@@ -123,6 +129,12 @@ export { useFrame, subscribeFrame, type FrameCallback } from "./composables/useF
 export { useInView } from "./composables/useInView.js";
 export { useElementSize, type ElementSize } from "./composables/useElementSize.js";
 export { useFocusTrap } from "./composables/useFocusTrap.js";
+export {
+  useFormDraft,
+  localDraftStorage,
+  type DraftStorage,
+  type FormDraftOptions,
+} from "./composables/useFormDraft.js";
 export { useOverlay, type UseOverlayOptions } from "./composables/useOverlay.js";
 export { useScrollContainer, type ScrollTarget } from "./composables/useScrollContainer.js";
 export { vRipple } from "./directives/ripple.js";
