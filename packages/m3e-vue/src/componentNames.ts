@@ -1,6 +1,7 @@
 export const COMPONENT_NAMES = [
   "M3ActionSheetHost",
   "M3Badge",
+  "M3BarChart",
   "M3BottomSheet",
   "M3Button",
   "M3ButtonGroup",
@@ -19,6 +20,7 @@ export const COMPONENT_NAMES = [
   "M3DialogHost",
   "M3Divider",
   "M3DockedToolbar",
+  "M3DonutChart",
   "M3ExposedDropdown",
   "M3Fab",
   "M3FabMenu",
@@ -29,6 +31,7 @@ export const COMPONENT_NAMES = [
   "M3IconButton",
   "M3InfiniteScroll",
   "M3LinearProgress",
+  "M3LineChart",
   "M3List",
   "M3ListGroup",
   "M3ListIndex",
