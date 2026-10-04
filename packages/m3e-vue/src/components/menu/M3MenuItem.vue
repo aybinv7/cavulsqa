@@ -1,13 +1,21 @@
 <script setup lang="ts">
 import M3Glyph from "../icon/M3Glyph.vue";
+import M3Menu from "./M3Menu.vue";
+import { shallowRef, useSlots, useTemplateRef } from "vue";
 import { vRipple } from "../../directives/ripple.js";
 import { useMenu } from "./context.js";
 
 /**
  * One menu item: 44dp, a leading icon in `#icon`, optional supporting text and a trailing text
  * such as a shortcut. `selected` gives it the tertiary container and rounder corners; `checkable`
- * makes it a `menuitemcheckbox`. Choosing it closes the menu unless `keepOpen` is set.
+ * makes it a `menuitemcheckbox`. Choosing it closes the menu, and every menu it cascades from,
+ * unless `keepOpen` is set.
+ *
+ * Items in `#submenu` make it a cascading item: a trailing arrow, and a menu beside it that opens on
+ * tap, mouse hover or the arrow key toward it.
  */
+defineOptions({ inheritAttrs: false });
+
 const props = withDefaults(
   defineProps<{
     label: string;
@@ -18,31 +26,63 @@ const props = withDefaults(
     disabled?: boolean;
     keepOpen?: boolean;
     tone?: "default" | "destructive";
+    submenuLabel?: string;
   }>(),
   { selected: false, checkable: false, disabled: false, keepOpen: false, tone: "default" },
 );
 
 const emit = defineEmits<{ select: [] }>();
+const slots = useSlots();
 const menu = useMenu();
+const button = useTemplateRef<HTMLButtonElement>("button");
+const subOpen = shallowRef(false);
+
+const hasSubmenu = () => Boolean(slots.submenu);
 
 function choose() {
   if (props.disabled) return;
+  if (hasSubmenu()) {
+    subOpen.value = !subOpen.value;
+    return;
+  }
   emit("select");
-  if (!props.keepOpen) menu.close();
+  if (!props.keepOpen) menu.closeAll();
+}
+
+function onPointerEnter(event: PointerEvent) {
+  if (event.pointerType === "mouse" && hasSubmenu() && !props.disabled) subOpen.value = true;
+}
+
+function onKeydown(event: KeyboardEvent) {
+  if (!hasSubmenu() || props.disabled) return;
+  const rtl = getComputedStyle(event.currentTarget as Element).direction === "rtl";
+  if (event.key !== (rtl ? "ArrowLeft" : "ArrowRight")) return;
+  event.preventDefault();
+  event.stopPropagation();
+  subOpen.value = true;
 }
 </script>
 
 <template>
   <button
+    ref="button"
     v-ripple="!props.disabled"
+    v-bind="$attrs"
     type="button"
     class="m3-menu-item m3-state"
-    :class="[`m3-menu-item--${props.tone}`, { 'm3-menu-item--selected': props.selected }]"
+    :class="[
+      `m3-menu-item--${props.tone}`,
+      { 'm3-menu-item--selected': props.selected, 'm3-menu-item--expanded': subOpen },
+    ]"
     :role="props.checkable ? 'menuitemcheckbox' : 'menuitem'"
     :aria-checked="props.checkable ? props.selected : undefined"
+    :aria-haspopup="$slots.submenu ? 'menu' : undefined"
+    :aria-expanded="$slots.submenu ? subOpen : undefined"
     :disabled="props.disabled"
     tabindex="-1"
     @click="choose"
+    @pointerenter="onPointerEnter"
+    @keydown="onKeydown"
   >
     <span v-if="$slots.icon" class="m3-menu-item__icon" aria-hidden="true"
       ><slot name="icon"
@@ -53,14 +93,25 @@ function choose() {
     </span>
     <span v-if="props.trailingText" class="m3-menu-item__trailing">{{ props.trailingText }}</span>
     <M3Glyph name="check" v-if="props.selected && props.checkable" class="m3-menu-item__check" />
+    <M3Glyph v-if="$slots.submenu" name="chevronRight" class="m3-menu-item__cascade" />
   </button>
+  <M3Menu
+    v-if="$slots.submenu"
+    v-model:open="subOpen"
+    :anchor="button"
+    placement="end"
+    :variant="menu.variant()"
+    :label="props.submenuLabel ?? props.label"
+  >
+    <slot name="submenu" />
+  </M3Menu>
 </template>
 
 <style scoped>
 .m3-menu-item {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   box-sizing: border-box;
   width: 100%;
   min-height: 44px;
@@ -70,9 +121,9 @@ function choose() {
   border-radius: 4px;
   background: none;
   color: inherit;
-  font: var(--md-sys-typescale-body-large-weight) var(--md-sys-typescale-body-large-size) /
-    var(--md-sys-typescale-body-large-line-height) var(--md-sys-typescale-body-large-font);
-  letter-spacing: var(--md-sys-typescale-body-large-tracking);
+  font: var(--md-sys-typescale-label-large-weight) var(--md-sys-typescale-label-large-size) /
+    var(--md-sys-typescale-label-large-line-height) var(--md-sys-typescale-label-large-font);
+  letter-spacing: var(--md-sys-typescale-label-large-tracking);
   text-align: start;
   cursor: pointer;
   transition:
@@ -95,6 +146,10 @@ function choose() {
 .m3-menu-item:focus-visible {
   outline: 3px solid var(--md-sys-color-secondary);
   outline-offset: -3px;
+}
+
+.m3-menu-item--expanded {
+  background-color: color-mix(in srgb, currentColor 10%, transparent);
 }
 
 .m3-menu-item--selected {
@@ -150,6 +205,18 @@ function choose() {
   color: var(--md-sys-color-on-surface-variant);
   font: var(--md-sys-typescale-body-medium-weight) var(--md-sys-typescale-body-medium-size) /
     var(--md-sys-typescale-body-medium-line-height) var(--md-sys-typescale-body-medium-font);
+}
+
+.m3-menu-item__cascade {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin-inline-end: -4px;
+  fill: var(--md-sys-color-on-surface-variant);
+}
+
+:global([dir="rtl"] .m3-menu-item__cascade) {
+  transform: scaleX(-1);
 }
 
 .m3-menu-item__check {

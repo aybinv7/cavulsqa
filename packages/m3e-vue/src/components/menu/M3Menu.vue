@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import { nextTick, onScopeDispose, provide, shallowRef, useTemplateRef, watch } from "vue";
 import { useOverlay } from "../../composables/useOverlay.js";
-import { MENU } from "./context.js";
+import { placeSubmenu } from "../../utils/menuPlacement.js";
+import { MENU, useParentMenu, type MenuContext, type SubmenuHandle } from "./context.js";
 
 /**
  * The Expressive vertical menu, anchored to an element: it opens below (or above, when there is
  * no room) and springs open from that edge. Items take the arrow keys; Escape, Android back, a tap
  * outside or choosing an item close it. Wrap items in `M3MenuGroup` for the segmented layout.
+ *
+ * `placement="end"` opens it beside its anchor instead - how an `M3MenuItem` with a `#submenu`
+ * cascades. A submenu closes alone on Escape, Android back or the arrow toward its parent; choosing
+ * an item in it closes the whole chain.
  *
  * @see https://m3.material.io/components/menus/specs
  */
@@ -17,8 +22,9 @@ const props = withDefaults(
     align?: "start" | "end";
     label?: string;
     teleport?: string | HTMLElement;
+    placement?: "below" | "end";
   }>(),
-  { variant: "standard", align: "start", teleport: "body" },
+  { variant: "standard", align: "start", teleport: "body", placement: "below" },
 );
 
 const open = defineModel<boolean>("open", { default: false });
@@ -26,9 +32,39 @@ const panel = useTemplateRef<HTMLElement>("panel");
 const position = shallowRef({ top: 0, left: 0, maxHeight: 0, origin: "top" as "top" | "bottom" });
 const MARGIN = 8;
 const GAP = 4;
+const SUBMENU_GAP = 2;
+
+const parent = useParentMenu();
+const children = new Set<SubmenuHandle>();
 
 useOverlay({ open, dismissible: true, onClose: () => (open.value = false) });
-provide(MENU, { close: () => (open.value = false), variant: () => props.variant });
+
+function contains(node: Node): boolean {
+  if (panel.value?.contains(node)) return true;
+  for (const child of children) if (child.contains(node)) return true;
+  return false;
+}
+
+const self: SubmenuHandle = { contains, close: () => (open.value = false) };
+const detachFromParent = parent?.attach(self);
+
+const context: MenuContext = {
+  closeAll() {
+    open.value = false;
+    parent?.closeAll();
+  },
+  variant: () => props.variant,
+  contains,
+  attach(child) {
+    children.add(child);
+    return () => children.delete(child);
+  },
+  opened(child) {
+    for (const other of children) if (other !== child) other.close();
+  },
+};
+
+provide(MENU, context);
 
 const items = () => [
   ...(panel.value?.querySelectorAll<HTMLElement>("[role^=menuitem]:not([disabled])") ?? []),
@@ -40,6 +76,18 @@ function place() {
   if (!anchor || !menu) return;
   const rect = anchor.getBoundingClientRect();
   const viewport = { width: window.innerWidth, height: window.innerHeight };
+  if (props.placement === "end") {
+    const surface = anchor.closest(".m3-menu-group, .m3-menu")?.getBoundingClientRect() ?? rect;
+    const item = { left: surface.left, top: rect.top, right: surface.right, bottom: rect.bottom };
+    const rtl = getComputedStyle(anchor).direction === "rtl";
+    const size = {
+      width: menu.offsetWidth,
+      height: Math.min(menu.scrollHeight, viewport.height - 16),
+    };
+    const spot = placeSubmenu(item, size, viewport, rtl, SUBMENU_GAP);
+    position.value = { ...spot, maxHeight: viewport.height - 16, origin: "top" };
+    return;
+  }
   const below = viewport.height - rect.bottom - GAP - MARGIN;
   const above = rect.top - GAP - MARGIN;
   const height = menu.scrollHeight;
@@ -58,7 +106,8 @@ function place() {
 
 function onPointerDown(event: PointerEvent) {
   const target = event.target as Node;
-  if (panel.value?.contains(target) || props.anchor?.contains(target)) return;
+  if (contains(target) || props.anchor?.contains(target)) return;
+  if (parent?.contains(target)) return;
   open.value = false;
 }
 
@@ -73,6 +122,12 @@ function onKeydown(event: KeyboardEvent) {
     End: list.length - 1,
   };
   if (event.key === "Tab") {
+    context.closeAll();
+    return;
+  }
+  const rtl = getComputedStyle(event.currentTarget as Element).direction === "rtl";
+  if (parent && event.key === (rtl ? "ArrowRight" : "ArrowLeft")) {
+    event.preventDefault();
     open.value = false;
     return;
   }
@@ -89,10 +144,12 @@ const detach = () => {
 watch(open, async (value) => {
   if (!value) {
     detach();
+    for (const child of children) child.close();
     if (props.anchor?.isConnected && panel.value?.contains(document.activeElement))
       props.anchor.focus();
     return;
   }
+  parent?.opened(self);
   await nextTick();
   place();
   items()[0]?.focus({ preventScroll: true });
@@ -100,7 +157,10 @@ watch(open, async (value) => {
   window.addEventListener("resize", place);
 });
 
-onScopeDispose(detach);
+onScopeDispose(() => {
+  detach();
+  detachFromParent?.();
+});
 </script>
 
 <template>
@@ -182,7 +242,7 @@ onScopeDispose(detach);
 .m3-menu-enter-from,
 .m3-menu-leave-to {
   opacity: 0;
-  transform: scaleY(0.6);
+  transform: scale(0.8);
 }
 
 @media (prefers-reduced-motion: reduce) {
