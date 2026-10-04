@@ -86,6 +86,35 @@
     <M3ListItem :headline="t('gallery.surfaces.storage')" trailing-text="12.4 GB" />
   </M3List>
 
+  <SectionHeader :title="t('gallery.tree.title')" />
+  <p class="type-body-small m-0 px-8 pb-3 text-on-surface-variant">{{ t("gallery.tree.note") }}</p>
+  <div class="mx-4">
+    <M3Tree
+      v-model:selected="category"
+      v-model:expanded="categoriesOpen"
+      :items="categories"
+      :load="loadChildren"
+      :label="t('gallery.tree.categories')"
+      :loading-label="t('gallery.loading')"
+    >
+      <template #icon="{ node, expanded }">
+        <i-ms-folder-open-outline-rounded v-if="expanded" />
+        <i-ms-folder-outline-rounded v-else-if="node.children || node.lazy" />
+        <i-ms-inventory-2-outline-rounded v-else />
+      </template>
+    </M3Tree>
+  </div>
+  <SectionHeader :title="t('gallery.tree.permissions')" />
+  <div class="mx-4">
+    <M3Tree
+      v-model:checked="granted"
+      v-model:expanded="permissionsOpen"
+      mode="check"
+      :items="permissions"
+      :label="t('gallery.tree.permissions')"
+    />
+  </div>
+
   <SectionHeader :title="t('gallery.surfaces.timeline')" />
   <div class="px-6 pb-2">
     <M3Timeline :label="t('gallery.surfaces.tracking')">
@@ -131,12 +160,18 @@
 <script setup lang="ts">
 import { moveItem } from "@cavulsqa/m3e-vue";
 import GalleryBlock from "@/modules/gallery/components/GalleryBlock.vue";
+import { useTreeDemo } from "@/modules/gallery/composables/useTreeDemo";
 
 const { t } = useI18n();
 const snackbar = useSnackbar();
 const CARDS = ["elevated", "filled", "outlined"] as const;
 const ITEMS = ["inbox", "drafts", "archive"] as const;
 const QUESTIONS = ["offline", "sync", "storage", "export"] as const;
+const { categories, permissions, loadChildren } = useTreeDemo();
+const category = ref<string | null>("orange");
+const categoriesOpen = ref(["drinks", "juice"]);
+const granted = ref(["sales.read", "sales.create", "stock.read"]);
+const permissionsOpen = ref(["sales"]);
 const STEPS = [
   { id: "placed", time: "08:12", state: "done" },
   { id: "confirmed", time: "08:40", state: "done" },

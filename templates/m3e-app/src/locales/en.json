@@ -745,6 +745,35 @@
     "contacts": {
       "title": "Customers A–Z",
       "jump": "Jump to letter"
+    },
+    "tree": {
+      "title": "Treeview",
+      "note": "Framework7's treeview: the chevron opens a branch, a row selects. Dairy loads its products the first time it opens. Arrow keys walk the tree.",
+      "categories": "Product categories",
+      "permissions": "Permissions",
+      "products": "{count} products",
+      "loadsLater": "Loads when opened",
+      "nodes": {
+        "drinks": "Drinks",
+        "water": "Water",
+        "juice": "Juice",
+        "orange": "Orange juice",
+        "apple": "Apple juice",
+        "soda": "Soda",
+        "dairy": "Dairy",
+        "milk": "Milk",
+        "yoghurt": "Yoghurt",
+        "cheese": "Cheese",
+        "grocery": "Grocery",
+        "pasta": "Pasta",
+        "oil": "Oil",
+        "sales": "Sales",
+        "stock": "Stock",
+        "read": "View",
+        "create": "Create",
+        "cancel": "Cancel",
+        "adjust": "Adjust"
+      }
     }
   },
   "settings": {

@@ -745,6 +745,35 @@
     "contacts": {
       "title": "Clients de A à Z",
       "jump": "Aller à la lettre"
+    },
+    "tree": {
+      "title": "Arborescence",
+      "note": "L'arborescence de Framework7 : le chevron ouvre une branche, une ligne se sélectionne. Produits laitiers charge ses produits à la première ouverture. Les flèches parcourent l'arbre.",
+      "categories": "Catégories de produits",
+      "permissions": "Autorisations",
+      "products": "{count} produits",
+      "loadsLater": "Se charge à l'ouverture",
+      "nodes": {
+        "drinks": "Boissons",
+        "water": "Eau",
+        "juice": "Jus",
+        "orange": "Jus d'orange",
+        "apple": "Jus de pomme",
+        "soda": "Soda",
+        "dairy": "Produits laitiers",
+        "milk": "Lait",
+        "yoghurt": "Yaourt",
+        "cheese": "Fromage",
+        "grocery": "Épicerie",
+        "pasta": "Pâtes",
+        "oil": "Huile",
+        "sales": "Ventes",
+        "stock": "Stock",
+        "read": "Consulter",
+        "create": "Créer",
+        "cancel": "Annuler",
+        "adjust": "Ajuster"
+      }
     }
   },
   "settings": {

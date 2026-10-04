@@ -77,6 +77,11 @@ Items are laid out full size and masked, so put a full-bleed picture in the slot
 parallax; fade labels with `--m3-carousel-item-progress` and slide them with
 `--m3-carousel-mask-start`. The slot's `scrollTo` brings a tapped item forward. → carousel/specs
 
+**`M3Tree`** - Framework7's treeview from data: `items` (`{ id, label, supporting?, children?,
+lazy? }`), `label`, `mode` select (`v-model:selected`) | check (`v-model:checked` leaf ids,
+tri-state branches), `v-model:expanded`, `load` for lazy children, `#icon="{ node, expanded }"`,
+`#trailing`. Categories, charts of accounts, permission sets.
+
 **`M3Card`** - `variant` elevated | filled | outlined; `clickable` makes the whole card one target -
 then put no other buttons inside. → cards/specs
 
