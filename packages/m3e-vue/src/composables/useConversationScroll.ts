@@ -1,4 +1,4 @@
-import { onMounted, onScopeDispose, shallowRef, watch, type Ref } from "vue";
+import { nextTick, onMounted, onScopeDispose, shallowRef, watch, type Ref } from "vue";
 import { scrollableAncestor } from "../utils/scroll.js";
 
 type Key = string | number;
@@ -183,5 +183,16 @@ export function useConversationScroll(options: ConversationScrollOptions) {
     if (frame) cancelAnimationFrame(frame);
   });
 
-  return { atEnd, far, unread, fresh, jump: () => toEnd(true) };
+  /**
+   * Runs `change` - more history rendered above, say - and puts the message the reader was looking
+   * at back where it was, so content growing above them does not move what they are reading.
+   */
+  async function hold(change: () => void) {
+    const mark = anchor();
+    change();
+    await nextTick();
+    restore(mark);
+  }
+
+  return { atEnd, far, unread, fresh, hold, jump: () => toEnd(true) };
 }

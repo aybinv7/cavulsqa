@@ -3,9 +3,10 @@ import ChatBubble from "./ChatBubble.vue";
 import ChatLiftLayer from "./ChatLiftLayer.vue";
 import ChatTyping from "./ChatTyping.vue";
 import M3Glyph from "../icon/M3Glyph.vue";
-import { computed, shallowRef, useTemplateRef } from "vue";
+import { computed, onMounted, onScopeDispose, shallowRef, useTemplateRef, watch } from "vue";
 import { useHaptics } from "../../composables/services.js";
 import { useConversationScroll } from "../../composables/useConversationScroll.js";
+import { scrollableAncestor } from "../../utils/scroll.js";
 import {
   conversationRows,
   type ChatMessage,
@@ -33,7 +34,10 @@ import type { MessageAction } from "./types.js";
  * on the bubble's edge, drawn from each message's `reactions`, and `applyReaction` computes the
  * next ones. Without either prop the long-press emits `hold` instead, for a menu of your own.
  *
- * It renders every message it is given: page older history in rather than passing thousands.
+ * It renders the newest `windowSize` rows and more, a chunk at a time, as the reader scrolls up
+ * toward them - the place they are reading stays put - so a new message costs the same in a
+ * thread of two thousand as in one of twenty. Back at the end it drops the rows far above again.
+ * The `#before` slot (older pages) appears once everything given is rendered.
  */
 const props = withDefaults(
   defineProps<{
@@ -55,6 +59,8 @@ const props = withDefaults(
     reactLabel?: string;
     menuLabel?: string;
     reactionsLabel?: (reactions: readonly MessageReaction[]) => string;
+    /** How many rows render from the end; more render as the reader scrolls up. */
+    windowSize?: number;
   }>(),
   {
     authors: false,
@@ -67,6 +73,7 @@ const props = withDefaults(
     unreadLabel: (count: number) => (count === 1 ? "1 new message" : `${count} new messages`),
     reactions: () => [],
     actions: () => [],
+    windowSize: 60,
     reactLabel: "React",
     menuLabel: "Message actions",
     reactionsLabel: (reactions: readonly MessageReaction[]) =>
@@ -110,11 +117,101 @@ const owners = computed(() => {
   return own;
 });
 
-const { far, unread, fresh, jump } = useConversationScroll({
+const {
+  atEnd,
+  far,
+  unread,
+  fresh,
+  hold: holdPlace,
+  jump,
+} = useConversationScroll({
   root,
   keys: () => props.messages.map((message) => message.id),
   isOwn: (key) => owners.value.has(key),
 });
+
+const CHUNK = 40;
+const SLACK = 20;
+const REACH = 1200;
+const DAY_SNAP = 20;
+
+const sentinel = useTemplateRef<HTMLElement>("sentinel");
+const renderFrom = shallowRef(0);
+const shown = computed(() =>
+  renderFrom.value > 0 ? rows.value.slice(renderFrom.value) : rows.value,
+);
+
+/** Where a window starting near `index` begins: at that day's divider when it is close above. */
+function snap(index: number): number {
+  const from = Math.max(0, index);
+  for (let at = from; at >= Math.max(0, from - DAY_SNAP); at--) {
+    if (rows.value[at]?.kind === "day") return at;
+  }
+  return from;
+}
+
+/** The first rendered row by key, so history added above it does not move the window. */
+let startKey: string | number | null = null;
+
+function startAt(index: number) {
+  renderFrom.value = index;
+  startKey = index > 0 ? (rows.value[index]?.key ?? null) : null;
+}
+
+const tail = () => snap(rows.value.length - props.windowSize);
+const oversized = () => rows.value.length - renderFrom.value > props.windowSize + SLACK;
+
+watch(
+  () => props.messages,
+  (next, previous) => {
+    const first = previous?.[0]?.id;
+    if (first === undefined || !next.some((message) => message.id === first)) {
+      startAt(tail());
+      return;
+    }
+    if (startKey !== null) {
+      const at = rows.value.findIndex((row) => row.key === startKey);
+      startAt(at >= 0 ? at : tail());
+    }
+    if (atEnd.value && oversized()) startAt(tail());
+  },
+  { immediate: true },
+);
+
+watch(atEnd, (end) => {
+  if (end && oversized()) startAt(tail());
+});
+
+let growing = false;
+
+function near(): boolean {
+  const element = sentinel.value;
+  if (!element) return false;
+  const container = scrollableAncestor(element);
+  const top = container ? container.getBoundingClientRect().top : 0;
+  return element.getBoundingClientRect().bottom > top - REACH;
+}
+
+async function grow() {
+  if (growing || renderFrom.value === 0) return;
+  growing = true;
+  await holdPlace(() => startAt(snap(renderFrom.value - CHUNK)));
+  growing = false;
+  if (renderFrom.value > 0 && near()) requestAnimationFrame(() => void grow());
+}
+
+let observer: IntersectionObserver | null = null;
+onMounted(() => {
+  if (typeof IntersectionObserver === "undefined" || !sentinel.value) return;
+  observer = new IntersectionObserver(
+    (entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) void grow();
+    },
+    { root: scrollableAncestor(sentinel.value), rootMargin: `${REACH}px 0px 0px 0px` },
+  );
+  observer.observe(sentinel.value);
+});
+onScopeDispose(() => observer?.disconnect());
 
 const typist = computed(() => (typeof props.typing === "object" ? props.typing : {}));
 const jumpLabel = computed(() =>
@@ -149,9 +246,10 @@ function hold(message: ChatMessage, event: MouseEvent) {
 
 <template>
   <div ref="root" class="m3-messages">
-    <slot name="before" />
+    <slot v-if="renderFrom === 0" name="before" />
+    <div ref="sentinel" class="m3-messages__sentinel" aria-hidden="true" />
     <ol class="m3-messages__log" role="log" :aria-label="props.label">
-      <template v-for="row in rows" :key="row.key">
+      <template v-for="row in shown" :key="row.key">
         <li v-if="row.kind === 'day'" class="m3-messages__day">
           <span>{{ row.label }}</span>
         </li>
@@ -217,6 +315,11 @@ function hold(message: ChatMessage, event: MouseEvent) {
   min-height: var(--m3-messages-min-height, 0);
   padding-top: 8px;
   padding-bottom: calc(var(--m3-message-bar-height, 0px) + 12px);
+}
+
+.m3-messages__sentinel {
+  height: 1px;
+  margin-bottom: -1px;
 }
 
 .m3-messages__log {

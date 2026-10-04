@@ -241,3 +241,80 @@ describe("M3DataTable column menu", () => {
     expect(headers().some((text) => text.includes("City"))).toBe(false);
   });
 });
+
+describe("M3DataTable windowing", () => {
+  interface Line {
+    ref: string;
+    total: number;
+  }
+  const many = (count: number): Line[] =>
+    Array.from({ length: count }, (_, index) => ({ ref: `SO-${index + 1}`, total: index }));
+  const columns = [
+    { key: "ref", label: "Ref", sortable: true },
+    { key: "total", label: "Total", numeric: true, sortable: true },
+  ];
+  const frame = () => new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
+
+  function table(rows: Line[], extra: Record<string, unknown> = {}) {
+    return mount(M3DataTable, {
+      props: {
+        rows,
+        columns,
+        rowKey: (row: Line) => row.ref,
+        label: "Orders",
+        maxHeight: "400px",
+        columnMenu: false,
+        ...extra,
+      } as never,
+      global: { plugins: [createM3e({ reducedMotion: true })] },
+      attachTo: document.body,
+    });
+  }
+
+  test("past the threshold only a window of rows is built, the spacers carry the rest", async () => {
+    const wrapper = table(many(5000));
+    await nextTick();
+    const rendered = wrapper.findAll("tbody tr[aria-rowindex]");
+    expect(rendered.length).toBeGreaterThan(5);
+    expect(rendered.length).toBeLessThan(60);
+    expect(wrapper.get("table").attributes("aria-rowcount")).toBe("5001");
+    expect(rendered[0]!.attributes("aria-rowindex")).toBe("2");
+    const spacer = wrapper.findAll(".m3-data-table__spacer td").at(-1)!;
+    const end = rendered.length;
+    expect(spacer.attributes("style")).toContain(`height: ${(5000 - end) * 52}px`);
+    wrapper.unmount();
+  });
+
+  test("scrolling moves the window and the top spacer grows to match", async () => {
+    const wrapper = table(many(5000));
+    await nextTick();
+    const scroller = wrapper.get(".m3-data-table").element as HTMLElement;
+    scroller.scrollTop = 52 * 1000;
+    scroller.dispatchEvent(new Event("scroll"));
+    await frame();
+    await nextTick();
+    const first = Number(wrapper.get("tbody tr[aria-rowindex]").attributes("aria-rowindex"));
+    expect(first).toBeGreaterThan(900);
+    expect(first).toBeLessThan(1001);
+    const top = wrapper.get(".m3-data-table__spacer td").attributes("style");
+    expect(top).toContain(`height: ${(first - 2) * 52}px`);
+    expect(wrapper.text()).toContain(`SO-${first - 1}`);
+    wrapper.unmount();
+  });
+
+  test("sorting five thousand rows keeps the window and the order", async () => {
+    const wrapper = table(many(5000), { sort: { key: "total", direction: "descending" } });
+    await nextTick();
+    expect(wrapper.get("tbody tr[aria-rowindex]").text()).toContain("SO-5000");
+    wrapper.unmount();
+  });
+
+  test("a small table renders every row and no spacer", async () => {
+    const wrapper = table(many(40));
+    await nextTick();
+    expect(wrapper.findAll("tbody tr")).toHaveLength(40);
+    expect(wrapper.find(".m3-data-table__spacer").exists()).toBe(false);
+    expect(wrapper.get("table").attributes("aria-rowcount")).toBeUndefined();
+    wrapper.unmount();
+  });
+});

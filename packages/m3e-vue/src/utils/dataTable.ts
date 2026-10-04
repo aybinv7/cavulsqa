@@ -82,15 +82,17 @@ export function sortRows<T>(
   const collator = new Intl.Collator(locale, { numeric: true, sensitivity: "base" });
   const sign = sort.direction === "ascending" ? 1 : -1;
   return rows
-    .map((row, index) => ({ row, index, value: cellValue(row, column) }))
+    .map((row, index) => {
+      const value = cellValue(row, column);
+      const empty = value === null || value === undefined || value === "";
+      return { row, index, value, empty, text: empty ? "" : textOf(value, locale) };
+    })
     .sort((a, b) => {
-      const emptyA = a.value === null || a.value === undefined || a.value === "";
-      const emptyB = b.value === null || b.value === undefined || b.value === "";
-      if (emptyA || emptyB) return emptyA === emptyB ? a.index - b.index : emptyA ? 1 : -1;
+      if (a.empty || b.empty) return a.empty === b.empty ? a.index - b.index : a.empty ? 1 : -1;
       const order =
         typeof a.value === "number" && typeof b.value === "number"
           ? a.value - b.value
-          : collator.compare(textOf(a.value, locale), textOf(b.value, locale));
+          : collator.compare(a.text, b.text);
       return order === 0 ? a.index - b.index : order * sign;
     })
     .map((entry) => entry.row);

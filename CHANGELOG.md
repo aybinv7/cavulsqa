@@ -91,6 +91,18 @@ Android share sheet. It must be published before the next creator release.
 - Stacked notifications with expand and clear-all; `useHideOnScroll` and an enter-always top app
   bar (`scrollBehavior`).
 
+**Scale, measured on a Huawei P30 Pro before release:**
+
+- `M3DataTable` renders only the rows in view past `virtualAfter` lines (120), between spacer rows;
+  columns only widen while it scrolls, and `aria-rowcount` / `aria-rowindex` keep the true size for
+  screen readers. At 5,000 rows: showing them 11.4s to 118ms, sorting 21.9s to 105ms, grouping
+  14.7s to 207ms, opening a column menu 1.1s to 85ms. Sorting reads each cell's text once instead of
+  in every comparison, and selecting a group no longer scans the selection per row.
+- `M3Messages` renders the newest `windowSize` rows (60) and more as the reader scrolls up, holding
+  the message they are reading in place; back at the end it drops the rows far above. In a
+  2,000-message thread: opening 2.8s to 130ms, a new message 545ms to 99ms, the worst frame while
+  scrolling back 1.5s to 99ms. `useConversationScroll` exposes `hold(change)` for the same purpose.
+
 **Packaging, found by installing the tarballs into a fresh project at the top of every peer range:**
 
 - `@cavulsqa/m3e` bundles `@material/material-color-utilities` instead of importing it. Its 0.4.0
@@ -248,6 +260,8 @@ menu; `f7-app` stays the default.
   the end of a page the content shrank under the finger, the scroll position clamped, the bar came
   back and the page jumped - a loop that fought every scroll near the bottom. Scroll-hiding now only
   slides the bar; the row is released for the keyboard and pushed pages.
+- The gallery's data table switches between 30, 1,000 and 5,000 rows, so scale can be checked on
+  any device.
 - Generated apps depend on the 1.3.0 libraries.
 
 ### 2.9.3

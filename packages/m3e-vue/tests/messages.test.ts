@@ -313,3 +313,72 @@ describe("M3MessageBar", () => {
     expect(parent.style.getPropertyValue("--m3-message-bar-height")).toBe("");
   });
 });
+
+describe("M3Messages windowing", () => {
+  const thread = (count: number, from = 0) =>
+    Array.from({ length: count }, (_, index) => ({
+      id: `m${from + index}`,
+      sent: (from + index) % 3 === 0,
+      at: new Date(2026, 9, 4, 8, 0).getTime() + (from + index) * 60_000,
+      text: `message ${from + index}`,
+      author: (from + index) % 3 === 0 ? undefined : "Amina",
+    }));
+
+  function chat(initial: ChatMessage[], extra: Record<string, unknown> = {}) {
+    const messages = shallowRef(initial);
+    const wrapper = mount(
+      {
+        setup: () => () =>
+          h(
+            M3Messages,
+            { messages: messages.value, label: "Team", windowSize: 50, ...extra },
+            { before: () => h("div", { class: "older" }, "older") },
+          ),
+      },
+      { global: { plugins }, attachTo: document.body },
+    );
+    return { wrapper, messages };
+  }
+
+  test("a long thread renders only its newest rows", async () => {
+    const { wrapper } = chat(thread(2000));
+    await nextTick();
+    const bubbles = wrapper.findAll(".m3-chat-bubble");
+    expect(bubbles.length).toBeGreaterThanOrEqual(50);
+    expect(bubbles.length).toBeLessThanOrEqual(71);
+    expect(bubbles.at(-1)!.text()).toContain("message 1999");
+    expect(wrapper.find(".older").exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  test("arrivals at the end keep the window bounded", async () => {
+    const { wrapper, messages } = chat(thread(2000));
+    await nextTick();
+    for (let round = 0; round < 3; round++) {
+      messages.value = [...messages.value, ...thread(15, 2000 + round * 15)];
+      await nextTick();
+    }
+    const bubbles = wrapper.findAll(".m3-chat-bubble");
+    expect(bubbles.at(-1)!.text()).toContain("message 2044");
+    expect(bubbles.length).toBeLessThanOrEqual(91);
+    wrapper.unmount();
+  });
+
+  test("a different conversation starts its own window", async () => {
+    const { wrapper, messages } = chat(thread(2000));
+    await nextTick();
+    messages.value = thread(30, 5000);
+    await nextTick();
+    expect(wrapper.findAll(".m3-chat-bubble")).toHaveLength(30);
+    expect(wrapper.find(".older").exists()).toBe(true);
+    wrapper.unmount();
+  });
+
+  test("a short thread renders whole, with its history slot", async () => {
+    const { wrapper } = chat(thread(20));
+    await nextTick();
+    expect(wrapper.findAll(".m3-chat-bubble")).toHaveLength(20);
+    expect(wrapper.find(".older").exists()).toBe(true);
+    wrapper.unmount();
+  });
+});

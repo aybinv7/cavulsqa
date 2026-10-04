@@ -2,7 +2,22 @@
 import DataTableColumnMenu from "./DataTableColumnMenu.vue";
 import M3Checkbox from "../selection/M3Checkbox.vue";
 import M3Glyph from "../icon/M3Glyph.vue";
-import { computed, nextTick, onBeforeUnmount, onMounted, shallowRef, watch } from "vue";
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  onScopeDispose,
+  shallowRef,
+  useTemplateRef,
+  watch,
+} from "vue";
+import { useScrollContainer } from "../../composables/useScrollContainer.js";
+import {
+  leadingRange,
+  prefixOffsets,
+  type VirtualRange,
+} from "../../composables/useVirtualRange.js";
 import {
   cellText,
   cellValue,
@@ -29,7 +44,10 @@ import {
  * keep a person's layout. `:column-menu="false"` makes a header sort on tap instead.
  *
  * It is a real table. Wide tables scroll sideways; with `max-height` the table scrolls inside
- * itself and the header stays in view. `#cell` renders a custom cell (`{ row, column, value, text }`),
+ * itself and the header stays in view. Past `virtualAfter` lines (rows and group rows) only the
+ * rows in view are rendered, between spacer rows - every row is one fixed height, so the arithmetic
+ * is exact - and columns only ever widen while it scrolls, so nothing jitters. Five thousand rows
+ * sort and group without building five thousand rows of DOM. `#cell` renders a custom cell (`{ row, column, value, text }`),
  * `#empty` an empty table, `#footer` a row of totals or a pager.
  */
 const props = withDefaults(
@@ -52,6 +70,8 @@ const props = withDefaults(
     emptyText?: string;
     emptyGroupLabel?: string;
     menuLabels?: Partial<ColumnMenuLabels>;
+    /** Lines (rows and group rows) past which only the visible ones render; `Infinity` never. */
+    virtualAfter?: number;
   }>(),
   {
     selectable: false,
@@ -66,6 +86,7 @@ const props = withDefaults(
     emptyText: "Nothing to show",
     emptyGroupLabel: "-",
     menuLabels: () => ({}),
+    virtualAfter: 120,
   },
 );
 
@@ -131,6 +152,99 @@ const lines = computed<Line[]>(() => {
       : entry.rows.map((row) => ({ kind: "row" as const, key: props.rowKey(row), row }))),
   ]);
 });
+
+const ROW_HEIGHT = { standard: 52, dense: 40 } as const;
+const OVERSCAN = 8;
+const LEAD_FRAMES = 6;
+
+const root = useTemplateRef<HTMLElement>("root");
+const body = useTemplateRef<HTMLElement>("body");
+const rowHeight = computed(() => (props.dense ? ROW_HEIGHT.dense : ROW_HEIGHT.standard));
+const windowed = computed(() => lines.value.length > props.virtualAfter);
+const scrollTop = shallowRef(0);
+const viewport = shallowRef(0);
+const bodyTop = shallowRef(0);
+const lead = shallowRef(0);
+
+const scroller = useScrollContainer(
+  root,
+  () => (props.maxHeight ? root.value : undefined),
+  (top, delta) => {
+    scrollTop.value = top;
+    const limit = viewport.value;
+    lead.value = Math.max(-limit, Math.min(limit, Math.round(delta * LEAD_FRAMES)));
+  },
+);
+
+const lineOffsets = computed(() => {
+  const height = rowHeight.value;
+  return prefixOffsets(lines.value.length, () => height);
+});
+
+const range = computed<VirtualRange>((previous) => {
+  const count = lines.value.length;
+  if (!windowed.value) return { start: 0, end: count };
+  const next = leadingRange(
+    lineOffsets.value,
+    scrollTop.value - bodyTop.value,
+    viewport.value || rowHeight.value * 12,
+    OVERSCAN,
+    lead.value,
+  );
+  return previous && previous.start === next.start && previous.end === next.end ? previous : next;
+});
+
+const shown = computed(() =>
+  windowed.value ? lines.value.slice(range.value.start, range.value.end) : lines.value,
+);
+const padTop = computed(() => (windowed.value ? range.value.start * rowHeight.value : 0));
+const padBottom = computed(() =>
+  windowed.value ? (lines.value.length - range.value.end) * rowHeight.value : 0,
+);
+
+/** Where the rows start inside the scroller, and how much of it is on screen. */
+function place() {
+  const container = scroller.value;
+  const rows = body.value;
+  if (!container || !rows) return;
+  bodyTop.value =
+    rows.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop;
+  viewport.value = container.clientHeight;
+}
+
+const widths = shallowRef<Readonly<Record<string, number>>>({});
+
+/**
+ * While rows come and go a column may widen to fit them, never narrow: a table whose columns
+ * jitter as it scrolls reads as broken.
+ */
+function ratchet() {
+  if (!windowed.value) {
+    if (Object.keys(widths.value).length) widths.value = {};
+    return;
+  }
+  let changed = false;
+  const next: Record<string, number> = { ...widths.value };
+  for (const column of visible.value) {
+    const width = headers.get(column.key)?.offsetWidth ?? 0;
+    if (width > (next[column.key] ?? 0)) {
+      next[column.key] = width;
+      changed = true;
+    }
+  }
+  if (changed) widths.value = next;
+}
+
+function headerStyle(column: DataColumn<T>) {
+  const floor = widths.value[column.key];
+  return [
+    {
+      width: column.width,
+      minWidth: floor === undefined ? column.width : `max(${column.width ?? "0px"}, ${floor}px)`,
+    },
+    pinStyle(column),
+  ];
+}
 
 const selectedSet = computed(() => new Set(selected.value));
 const allSelected = computed(
@@ -233,8 +347,9 @@ function groupState(rows: readonly T[]) {
 
 function toggleGroupSelection(rows: readonly T[]) {
   const keys = rows.map((row) => props.rowKey(row));
+  const inGroup = new Set(keys);
   const all = groupState(rows).all;
-  const rest = selected.value.filter((key) => !keys.includes(key));
+  const rest = selected.value.filter((key) => !inGroup.has(key));
   selected.value = all ? rest : [...rest, ...keys];
 }
 
@@ -253,10 +368,38 @@ function summaryText(column: DataColumn<T>, rows: readonly T[]): string {
   return new Intl.NumberFormat(props.locale, { maximumFractionDigits: 2 }).format(value);
 }
 
+function relayout() {
+  ratchet();
+  measure();
+}
+
 watch(group, () => (collapsed.value = new Set()));
 watch([visible, pinnedKeys, () => props.rows.length], () => void nextTick(measure));
+watch([() => props.rows, visible], () => (widths.value = {}));
+watch([range, windowed, rowHeight], () => void nextTick(relayout), { flush: "post" });
+watch([windowed, () => lines.value.length, rowHeight], () => void nextTick(place), {
+  flush: "post",
+});
+
+let observer: ResizeObserver | null = null;
+watch(
+  scroller,
+  (container) => {
+    observer?.disconnect();
+    if (!container || typeof ResizeObserver === "undefined") return;
+    observer = new ResizeObserver(() => place());
+    observer.observe(container);
+    if (root.value && root.value !== container) observer.observe(root.value);
+  },
+  { flush: "post" },
+);
+onScopeDispose(() => observer?.disconnect());
+
 onMounted(() => {
-  void nextTick(measure);
+  void nextTick(() => {
+    place();
+    relayout();
+  });
   window.addEventListener("resize", measure);
 });
 onBeforeUnmount(() => window.removeEventListener("resize", measure));
@@ -264,6 +407,7 @@ onBeforeUnmount(() => window.removeEventListener("resize", measure));
 
 <template>
   <div
+    ref="root"
     class="m3-data-table"
     :class="{
       'm3-data-table--dense': props.dense,
@@ -271,9 +415,13 @@ onBeforeUnmount(() => window.removeEventListener("resize", measure));
       'm3-data-table--pinning': pinnedKeys.length > 0,
       'm3-data-table--selectable': props.selectable,
     }"
-    :style="{ maxHeight: props.maxHeight }"
+    :style="{ maxHeight: props.maxHeight, '--m3-data-table-row': `${rowHeight}px` }"
   >
-    <table class="m3-data-table__table" :aria-label="props.label">
+    <table
+      class="m3-data-table__table"
+      :aria-label="props.label"
+      :aria-rowcount="windowed ? lines.length + 1 : undefined"
+    >
       <thead>
         <tr>
           <th
@@ -296,7 +444,7 @@ onBeforeUnmount(() => window.removeEventListener("resize", measure));
             :ref="(element) => setHeader(column.key, element)"
             scope="col"
             :class="[{ 'm3-data-table__cell--numeric': column.numeric }, pinClass(column)]"
-            :style="[{ width: column.width, minWidth: column.width }, pinStyle(column)]"
+            :style="headerStyle(column)"
             :aria-sort="ariaSort(column)"
           >
             <button
@@ -332,11 +480,15 @@ onBeforeUnmount(() => window.removeEventListener("resize", measure));
           </th>
         </tr>
       </thead>
-      <tbody>
-        <template v-for="line in lines" :key="line.key">
+      <tbody ref="body">
+        <tr v-if="padTop > 0" class="m3-data-table__spacer" aria-hidden="true">
+          <td :colspan="span" :style="{ height: `${padTop}px` }" />
+        </tr>
+        <template v-for="(line, index) in shown" :key="line.key">
           <tr
             v-if="line.kind === 'group'"
             class="m3-data-table__group"
+            :aria-rowindex="windowed ? range.start + index + 2 : undefined"
             :class="{ 'm3-data-table__group--collapsed': collapsed.has(line.key.slice(6)) }"
             @click="toggleGroup(line.key)"
           >
@@ -379,6 +531,7 @@ onBeforeUnmount(() => window.removeEventListener("resize", measure));
           <tr
             v-else
             :class="{ 'm3-data-table__row--selected': selectedSet.has(line.key) }"
+            :aria-rowindex="windowed ? range.start + index + 2 : undefined"
             :aria-selected="props.selectable ? selectedSet.has(line.key) : undefined"
             @click="emit('row-click', line.row)"
           >
@@ -406,6 +559,9 @@ onBeforeUnmount(() => window.removeEventListener("resize", measure));
             </td>
           </tr>
         </template>
+        <tr v-if="padBottom > 0" class="m3-data-table__spacer" aria-hidden="true">
+          <td :colspan="span" :style="{ height: `${padBottom}px` }" />
+        </tr>
         <tr v-if="sorted.length === 0" class="m3-data-table__empty">
           <td :colspan="span">
             <slot name="empty">{{ props.emptyText }}</slot>
@@ -437,7 +593,6 @@ onBeforeUnmount(() => window.removeEventListener("resize", measure));
 
 <style scoped>
 .m3-data-table {
-  --m3-data-table-row: 52px;
   --m3-data-table-header: 56px;
   --m3-data-table-surface: var(--md-sys-color-surface-container-lowest);
   overflow: auto;
@@ -449,8 +604,12 @@ onBeforeUnmount(() => window.removeEventListener("resize", measure));
 }
 
 .m3-data-table--dense {
-  --m3-data-table-row: 40px;
   --m3-data-table-header: 44px;
+}
+
+.m3-data-table .m3-data-table__spacer td {
+  padding: 0;
+  border: 0;
 }
 
 .m3-data-table__table {
