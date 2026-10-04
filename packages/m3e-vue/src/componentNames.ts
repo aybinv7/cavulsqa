@@ -50,6 +50,7 @@ export const COMPONENT_NAMES = [
   "M3SnackbarHost",
   "M3SplitButton",
   "M3StandardBottomSheet",
+  "M3Stepper",
   "M3SwipeAction",
   "M3Switch",
   "M3Tab",
