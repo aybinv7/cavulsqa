@@ -36,6 +36,7 @@ export const COMPONENT_NAMES = [
   "M3NavigationRail",
   "M3PullToRefresh",
   "M3Radio",
+  "M3RangeSlider",
   "M3SearchBar",
   "M3SearchView",
   "M3Shape",

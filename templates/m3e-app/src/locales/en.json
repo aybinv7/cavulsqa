@@ -420,7 +420,13 @@
         "rated": "Top rated"
       },
       "addEvent": "Add to calendar",
-      "remove": "Remove"
+      "remove": "Remove",
+      "range": "Range slider",
+      "rangeNote": "Two handles; a press moves the nearer one. The price pair keeps 1,000 apart; the hours snap to ticks.",
+      "priceFrom": "Minimum price",
+      "priceTo": "Maximum price",
+      "opensAt": "Opens at",
+      "closesAt": "Closes at"
     },
     "inputs": {
       "search": "Search bar",

@@ -420,7 +420,13 @@
         "rated": "Mieux notés"
       },
       "addEvent": "Ajouter à l'agenda",
-      "remove": "Retirer"
+      "remove": "Retirer",
+      "range": "Curseur de plage",
+      "rangeNote": "Deux poignées ; un appui déplace la plus proche. Les prix restent à 1 000 d’écart ; les heures s’aimantent aux graduations.",
+      "priceFrom": "Prix minimum",
+      "priceTo": "Prix maximum",
+      "opensAt": "Ouvre à",
+      "closesAt": "Ferme à"
     },
     "inputs": {
       "search": "Barre de recherche",

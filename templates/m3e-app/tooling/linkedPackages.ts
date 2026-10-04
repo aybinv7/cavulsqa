@@ -45,7 +45,8 @@ function exportedFiles(packageDir: string): string[] {
  * imports, so a rebuild paired new JavaScript with old scoped styles. Here every change or
  * deletion under a linked `dist` - through both of Vite's HMR hooks - is held back until writing
  * stops and every exported file exists again with the same size on two checks in a row (a file that
- * exists can still be half written); then the cached CSS is dropped and the page reloads once.
+ * exists can still be half written); then every cached module from a linked `dist`, and all
+ * cached CSS, is dropped and the page reloads once.
  */
 export function linkedRebuilds(root: string, names: readonly string[]): Plugin {
   const packages = names.map((name) => realpathSync(join(root, "node_modules", name)));
@@ -70,7 +71,9 @@ export function linkedRebuilds(root: string, names: readonly string[]): Plugin {
       return;
     }
     for (const module of server.moduleGraph.idToModuleMap.values()) {
-      if (module.file?.endsWith(".css")) server.moduleGraph.invalidateModule(module);
+      const file = module.file;
+      if (file && (file.endsWith(".css") || inDist(file)))
+        server.moduleGraph.invalidateModule(module);
     }
     server.ws.send({ type: "full-reload" });
   };

@@ -44,6 +44,39 @@
     <M3Slider v-model="brightness" :label="t('gallery.selection.brightness')" size="l" />
   </GalleryBlock>
 
+  <GalleryBlock
+    :title="t('gallery.selection.range')"
+    :note="t('gallery.selection.rangeNote')"
+    stack
+  >
+    <M3RangeSlider
+      v-model:start="priceFrom"
+      v-model:end="priceTo"
+      :min="0"
+      :max="20000"
+      :step="500"
+      :min-distance="1000"
+      :start-label="t('gallery.selection.priceFrom')"
+      :end-label="t('gallery.selection.priceTo')"
+      :format="(v) => money.format(v)"
+    />
+    <p class="type-body-medium m-0 text-on-surface-variant">
+      {{ money.format(priceFrom) }} – {{ money.format(priceTo) }}
+    </p>
+    <M3RangeSlider
+      v-model:start="hourFrom"
+      v-model:end="hourTo"
+      :min="6"
+      :max="22"
+      :step="1"
+      ticks
+      size="s"
+      :start-label="t('gallery.selection.opensAt')"
+      :end-label="t('gallery.selection.closesAt')"
+      :format="(v) => `${v}:00`"
+    />
+  </GalleryBlock>
+
   <GalleryBlock :title="t('gallery.selection.chips')" :note="t('gallery.selection.chipsNote')">
     <M3Chip
       v-for="filter in FILTERS"
@@ -84,6 +117,11 @@ const cup = ref<(typeof SIZES)[number]>("medium");
 const volume = ref(40);
 const steps = ref(4);
 const brightness = ref(70);
+const priceFrom = ref(2000);
+const priceTo = ref(12000);
+const hourFrom = ref(8);
+const hourTo = ref(18);
+const money = new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 });
 const filters = ref(new Set<(typeof FILTERS)[number]>(["open"]));
 const tags = ref(["Alger", "Oran", "Constantine"]);
 

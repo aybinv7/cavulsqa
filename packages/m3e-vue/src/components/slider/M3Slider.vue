@@ -146,6 +146,7 @@ function onKeydown(event: KeyboardEvent) {
       <span
         v-for="index in tickCount"
         :key="index"
+        :class="{ 'm3-slider__tick--active': (index - 1) / (tickCount - 1) <= ratio }"
         :style="{ insetInlineStart: `${((index - 1) / (tickCount - 1)) * 100}%` }"
       />
     </span>
@@ -236,7 +237,7 @@ function onKeydown(event: KeyboardEvent) {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: var(--md-sys-color-on-secondary-container);
+  background: var(--md-sys-color-primary);
   translate: 0 -50%;
 }
 
@@ -251,8 +252,12 @@ function onKeydown(event: KeyboardEvent) {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: var(--md-sys-color-on-secondary-container);
+  background: var(--md-sys-color-primary);
   translate: -50% -50%;
+}
+
+.m3-slider__ticks > .m3-slider__tick--active {
+  background: var(--md-sys-color-secondary-container);
 }
 
 .m3-slider__handle {
