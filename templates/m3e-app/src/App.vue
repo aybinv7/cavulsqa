@@ -55,7 +55,13 @@
     </M3NavigationBar>
 
     <M3SnackbarHost :close-label="t('shell.dismiss')" />
-    <M3NotificationHost :close-label="t('shell.dismiss')" :label="t('shell.notification')" />
+    <M3NotificationHost
+      :close-label="t('shell.dismiss')"
+      :label="t('shell.notification')"
+      :more-label="notificationsMore"
+      :less-label="t('shell.notificationsLess')"
+      :clear-label="t('shell.notificationsClear')"
+    />
     <M3DialogHost />
     <M3ActionSheetHost />
   </F7App>
@@ -71,8 +77,12 @@ const { t } = useI18n();
 const parameters = framework7Parameters();
 const windowClass = useWindowClass();
 const { active, show } = useActiveTab();
-const { isVisible } = useNavigationVisibility();
+const { isVisible, setScrollHidden } = useNavigationVisibility();
 const railExpanded = useLocalStorage("app-rail-expanded", false);
+
+function notificationsMore(count: number) {
+  return t("shell.notificationsMore", { count }, count);
+}
 
 const rail = computed(() => windowClass.value !== "compact");
 const navVisible = computed(() => !rail.value && isVisible.value);
@@ -91,6 +101,8 @@ watchEffect(() => {
 function selectTab(id: string | undefined) {
   if (id) show(id);
 }
+
+watch(active, () => setScrollHidden(false));
 
 /** M3: tapping the current destination returns to its root, or scrolls its root to the top. */
 function reselect(id: string) {

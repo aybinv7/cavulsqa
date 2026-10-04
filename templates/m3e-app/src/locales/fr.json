@@ -13,7 +13,10 @@
     "dismiss": "Fermer",
     "routeFailed": "Cette page n'a pas pu s'ouvrir",
     "reload": "Recharger",
-    "notification": "Notification"
+    "notification": "Notification",
+    "notificationsMore": "{count} de plus | {count} de plus",
+    "notificationsLess": "Réduire",
+    "notificationsClear": "Tout effacer"
   },
   "home": {
     "title": "Aperçu",
@@ -463,7 +466,7 @@
       "whatsThis": "Qu'est-ce que c'est ?",
       "gotIt": "Compris",
       "notification": "Notification dans l'app",
-      "notificationNote": "La notification de Framework7 : elle tombe du haut, s'ouvre au toucher, s'envole d'un glissement de côté ou vers le haut, et s'arrête tant qu'on la touche.",
+      "notificationNote": "La notification de Framework7 : elle arrive du haut, s'ouvre d'un appui, s'envole d'un glissement latéral ou vers le haut, et se met en pause sous le doigt. Plusieurs s'empilent, la plus récente devant - touchez la pastille pour les déplier.",
       "notifyOrder": "Nouvelle commande",
       "notifySync": "Synchro terminée",
       "ordersSource": "Commandes",
@@ -490,7 +493,10 @@
       "cases": "{n} cartons",
       "quantity": "Quantité",
       "quantityNote": "Prix palette dès 24 cartons.",
-      "draftRestored": "Votre brouillon non enregistré a été restauré."
+      "draftRestored": "Votre brouillon non enregistré a été restauré.",
+      "notifyBurst": "Trois d'un coup",
+      "burstTitle": "Nouvelle commande de {shop}",
+      "burstText": "Synchronisée depuis le terrain à l'instant."
     },
     "selection": {
       "stepper": "Compteur",

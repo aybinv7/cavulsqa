@@ -13,7 +13,10 @@
     "dismiss": "Dismiss",
     "routeFailed": "This page could not open",
     "reload": "Reload",
-    "notification": "Notification"
+    "notification": "Notification",
+    "notificationsMore": "{count} more | {count} more",
+    "notificationsLess": "Show less",
+    "notificationsClear": "Clear all"
   },
   "home": {
     "title": "Overview",
@@ -463,7 +466,7 @@
       "whatsThis": "What's this?",
       "gotIt": "Got it",
       "notification": "In-app notification",
-      "notificationNote": "Framework7's notification: drops in from the top, opens on tap, flies away when swiped sideways or up, and pauses while touched.",
+      "notificationNote": "Framework7's notification: drops in from the top, opens on tap, flies away when swiped sideways or up, and pauses while touched. Several stack, newest in front - tap the pill to spread them out.",
       "notifyOrder": "New order",
       "notifySync": "Sync done",
       "ordersSource": "Orders",
@@ -490,7 +493,10 @@
       "cases": "{n} cases",
       "quantity": "Quantity",
       "quantityNote": "Pallet price from 24 cases.",
-      "draftRestored": "Your unsaved draft was restored."
+      "draftRestored": "Your unsaved draft was restored.",
+      "notifyBurst": "Three at once",
+      "burstTitle": "New order from {shop}",
+      "burstText": "Synced from the field just now."
     },
     "selection": {
       "stepper": "Stepper",

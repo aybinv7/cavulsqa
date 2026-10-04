@@ -1,11 +1,14 @@
 import { computed, onMounted, onUnmounted, shallowRef, type ComputedRef } from "vue";
 
 const keyboardOpen = shallowRef(false);
+const scrollHidden = shallowRef(false);
 const hiddenRequests = shallowRef(0);
 
 export interface NavigationVisibility {
   isVisible: ComputedRef<boolean>;
   setKeyboardOpen: (open: boolean) => void;
+  /** Hide-on-scroll: the page on screen is scrolling its content down. */
+  setScrollHidden: (hidden: boolean) => void;
   /** Hides the bar until the returned function is called. Calls are counted, not toggled. */
   hide: () => () => void;
 }
@@ -16,9 +19,14 @@ export interface NavigationVisibility {
  */
 export function useNavigationVisibility(): NavigationVisibility {
   return {
-    isVisible: computed(() => !keyboardOpen.value && hiddenRequests.value === 0),
+    isVisible: computed(
+      () => !keyboardOpen.value && !scrollHidden.value && hiddenRequests.value === 0,
+    ),
     setKeyboardOpen: (open) => {
       keyboardOpen.value = open;
+    },
+    setScrollHidden: (hidden) => {
+      if (scrollHidden.value !== hidden) scrollHidden.value = hidden;
     },
     hide: () => {
       hiddenRequests.value += 1;

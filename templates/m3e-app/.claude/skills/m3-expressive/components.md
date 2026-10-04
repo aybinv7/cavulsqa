@@ -38,6 +38,13 @@ peer actions on one screen; variants of one action are a FAB menu.
 
 ## Navigation
 
+**Scroll behaviour** - `src/app/scroll.config.ts` sets it for the whole app: `topAppBar:
+"enterAlways"` slides a small top app bar away with the content and back on the way up (the status
+strip stays covered, `#bottom` and sticky `M3ListGroup` titles move with it); `navigationBar:
+"hideOnScroll"` slides the navigation bar off while scrolling down. `AppPage` wires both; a page
+passes `scrollBehavior` to override the top bar. Outside `AppPage`, `M3TopAppBar`'s
+`scrollBehavior` and `useHideOnScroll(scroller)` give the same behaviour.
+
 **`M3Breadcrumbs`** - `items` (`{ label, href? }`), `@select`, `max` (the middle collapses into a
 menu past it), `label`. The last item is the current page. Fades the edge it overflows past.
 

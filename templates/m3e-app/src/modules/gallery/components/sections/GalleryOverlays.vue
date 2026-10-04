@@ -153,6 +153,7 @@
     <M3Button variant="outlined" @click="notifySync">{{
       t("gallery.overlays.notifySync")
     }}</M3Button>
+    <M3Button variant="text" @click="notifyBurst">{{ t("gallery.overlays.notifyBurst") }}</M3Button>
   </GalleryBlock>
 
   <GalleryBlock :title="t('gallery.overlays.snackbar')" :note="t('gallery.overlays.snackbarNote')">
@@ -299,6 +300,22 @@ function notifySync() {
     title: t("gallery.overlays.syncTitle"),
     icon: markRaw(CloudDoneIcon),
     duration: 3000,
+  });
+}
+
+function notifyBurst() {
+  const visits = ["Supérette El Feth", "Alimentation Bachir", "Market Ennour"];
+  visits.forEach((shop, index) => {
+    setTimeout(() => {
+      void notification.show({
+        source: t("gallery.overlays.ordersSource"),
+        meta: t("gallery.overlays.now"),
+        title: t("gallery.overlays.burstTitle", { shop }),
+        text: t("gallery.overlays.burstText"),
+        icon: markRaw(ShoppingIcon),
+        duration: 8000,
+      });
+    }, index * 600);
   });
 }
 
