@@ -28,7 +28,14 @@
         </span>
       </SectionHeader>
 
-      <DemoOrderList v-if="orders.length" :orders="orders" @open="openOrder" @more="orderActions" />
+      <DemoOrderList
+        v-if="orders.length"
+        :orders="orders"
+        @open="openOrder"
+        @more="orderActions"
+        @advance="(order) => run(() => advance(order.id))"
+        @delete="deleteOrder"
+      />
       <EmptyState
         v-else
         shape="cookie6Sided"
@@ -180,7 +187,11 @@ async function orderActions(order: OrderRow) {
     groups,
   });
   if (choice === "advance") await run(() => advance(order.id));
-  if (choice === "delete" && (await run(() => remove(order.id)))) {
+  if (choice === "delete") await deleteOrder(order);
+}
+
+async function deleteOrder(order: OrderRow) {
+  if (await run(() => remove(order.id))) {
     void snackbar.show(t("demo.deleted", { reference: order.reference }));
   }
 }

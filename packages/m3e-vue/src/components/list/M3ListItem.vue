@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import { computed, useSlots } from "vue";
+import { computed, provide, useSlots, useTemplateRef } from "vue";
 import { vRipple } from "../../directives/ripple.js";
+import { useListSwipe } from "../../composables/useListSwipe.js";
+import { LIST_SWIPE } from "./swipeContext.js";
+import type { SwipeSide } from "../../utils/swipe.js";
 
 /**
  * One list item: optional overline, a headline, supporting text, and `leading` / `trailing` slots
@@ -10,6 +13,11 @@ import { vRipple } from "../../directives/ripple.js";
  * `#action` holds a control with its own target - an overflow button, a switch - and is rendered
  * beside the row's tap target, never inside it: a button inside a button is invalid HTML, and
  * WebViews resolve the nested tap unpredictably.
+ *
+ * `#swipe-start` / `#swipe-end` take `M3SwipeAction`s revealed by dragging the row sideways -
+ * Framework7's swipeout in Material form. `v-model:swiped` is the open side; `swipe-full` lets a
+ * long swipe fire the outermost action. Vertical scrolling stays native: the row only claims a drag
+ * that starts sideways.
  */
 const props = withDefaults(
   defineProps<{
@@ -26,6 +34,7 @@ const props = withDefaults(
     tone?: "default" | "destructive";
     /** `div` when a parent already supplies the list-item role, as `M3VirtualList` rows do. */
     as?: "li" | "div";
+    swipeFull?: "start" | "end" | "both";
   }>(),
   {
     clickable: false,
@@ -38,7 +47,30 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{ click: [event: MouseEvent] }>();
+const swiped = defineModel<SwipeSide | null>("swiped", { default: null });
 const slots = useSlots();
+const item = useTemplateRef<HTMLElement>("item");
+const row = useTemplateRef<HTMLElement>("row");
+const swipeStart = useTemplateRef<HTMLElement>("swipeStart");
+const swipeEnd = useTemplateRef<HTMLElement>("swipeEnd");
+const swipeable = computed(() => Boolean(slots["swipe-start"] || slots["swipe-end"]));
+
+const swipeActions = new Map<HTMLElement, () => void>();
+provide(LIST_SWIPE, {
+  close: () => (swiped.value = null),
+  register: (element, run) => swipeActions.set(element, run),
+  unregister: (element) => swipeActions.delete(element),
+});
+useListSwipe({
+  item,
+  row,
+  start: swipeStart,
+  end: swipeEnd,
+  swiped,
+  full: () => props.swipeFull,
+  enabled: () => swipeable.value && !props.disabled,
+  fire: (action) => swipeActions.get(action)?.(),
+});
 
 const interactive = computed(() => props.clickable || Boolean(props.href));
 const tag = computed(() => (props.href ? "a" : interactive.value ? "button" : "div"));
@@ -58,6 +90,7 @@ function onClick(event: MouseEvent) {
 <template>
   <component
     :is="props.as"
+    ref="item"
     class="m3-list-item"
     :class="[
       `m3-list-item--lines-${lines}`,
@@ -66,37 +99,56 @@ function onClick(event: MouseEvent) {
         'm3-list-item--selected': props.selected,
         'm3-list-item--disabled': props.disabled,
         'm3-list-item--with-action': $slots.action,
+        'm3-list-item--swipe': swipeable,
       },
     ]"
   >
-    <component
-      :is="tag"
-      v-ripple="interactive && !props.disabled"
-      class="m3-list-item__surface"
-      :class="{ 'm3-state m3-focus-ring': interactive }"
-      :href="props.href && !props.disabled ? props.href : undefined"
-      :type="tag === 'button' ? 'button' : undefined"
-      :disabled="tag === 'button' ? props.disabled : undefined"
-      :aria-current="props.selected && props.href ? 'page' : undefined"
-      :aria-pressed="props.selected && tag === 'button' ? true : undefined"
-      @click="onClick"
+    <div
+      v-if="$slots['swipe-start']"
+      ref="swipeStart"
+      class="m3-list-item__swipe m3-list-item__swipe--start"
+      :inert="swiped !== 'start'"
     >
-      <span v-if="$slots.leading" class="m3-list-item__leading"><slot name="leading" /></span>
-      <span class="m3-list-item__text">
-        <span v-if="props.overline" class="m3-list-item__overline">{{ props.overline }}</span>
-        <span class="m3-list-item__headline"
-          ><slot>{{ props.headline }}</slot></span
-        >
-        <span v-if="props.supporting || $slots.supporting" class="m3-list-item__supporting">
-          <slot name="supporting">{{ props.supporting }}</slot>
+      <slot name="swipe-start" />
+    </div>
+    <div
+      v-if="$slots['swipe-end']"
+      ref="swipeEnd"
+      class="m3-list-item__swipe m3-list-item__swipe--end"
+      :inert="swiped !== 'end'"
+    >
+      <slot name="swipe-end" />
+    </div>
+    <div ref="row" class="m3-list-item__row">
+      <component
+        :is="tag"
+        v-ripple="interactive && !props.disabled"
+        class="m3-list-item__surface"
+        :class="{ 'm3-state m3-focus-ring': interactive }"
+        :href="props.href && !props.disabled ? props.href : undefined"
+        :type="tag === 'button' ? 'button' : undefined"
+        :disabled="tag === 'button' ? props.disabled : undefined"
+        :aria-current="props.selected && props.href ? 'page' : undefined"
+        :aria-pressed="props.selected && tag === 'button' ? true : undefined"
+        @click="onClick"
+      >
+        <span v-if="$slots.leading" class="m3-list-item__leading"><slot name="leading" /></span>
+        <span class="m3-list-item__text">
+          <span v-if="props.overline" class="m3-list-item__overline">{{ props.overline }}</span>
+          <span class="m3-list-item__headline"
+            ><slot>{{ props.headline }}</slot></span
+          >
+          <span v-if="props.supporting || $slots.supporting" class="m3-list-item__supporting">
+            <slot name="supporting">{{ props.supporting }}</slot>
+          </span>
         </span>
-      </span>
-      <span v-if="props.trailingText" class="m3-list-item__trailing-text">{{
-        props.trailingText
-      }}</span>
-      <span v-if="$slots.trailing" class="m3-list-item__trailing"><slot name="trailing" /></span>
-    </component>
-    <span v-if="$slots.action" class="m3-list-item__action"><slot name="action" /></span>
+        <span v-if="props.trailingText" class="m3-list-item__trailing-text">{{
+          props.trailingText
+        }}</span>
+        <span v-if="$slots.trailing" class="m3-list-item__trailing"><slot name="trailing" /></span>
+      </component>
+      <span v-if="$slots.action" class="m3-list-item__action"><slot name="action" /></span>
+    </div>
   </component>
 </template>
 
@@ -107,6 +159,58 @@ function onClick(event: MouseEvent) {
   --m3-list-item-end: 0px;
   position: relative;
   display: block;
+}
+
+.m3-list-item__row {
+  position: relative;
+  z-index: 1;
+}
+
+.m3-list-item--swipe {
+  overflow: hidden;
+  border-start-start-radius: var(--m3-list-item-start);
+  border-start-end-radius: var(--m3-list-item-start);
+  border-end-start-radius: var(--m3-list-item-end);
+  border-end-end-radius: var(--m3-list-item-end);
+}
+
+.m3-list-item--swipe .m3-list-item__row {
+  background: var(--m3-swipe-surface, var(--md-sys-color-surface));
+  touch-action: pan-y;
+}
+
+.m3-list-item__swipe {
+  position: absolute;
+  inset-block: 0;
+  z-index: 0;
+  display: flex;
+  width: 0;
+  overflow: hidden;
+}
+
+.m3-list-item__swipe--start {
+  inset-inline-start: 0;
+}
+
+.m3-list-item__swipe--end {
+  inset-inline-end: 0;
+}
+
+.m3-list-item--swipe.m3-list-item--swiping,
+.m3-list-item--swiping .m3-list-item__surface {
+  border-radius: 16px;
+}
+
+.m3-list-item__swipe--armed.m3-list-item__swipe--start :deep(.m3-swipe-action:first-child),
+.m3-list-item__swipe--armed.m3-list-item__swipe--end :deep(.m3-swipe-action:last-child) {
+  flex-grow: 100;
+}
+
+.m3-list-item__swipe--armed.m3-list-item__swipe--start
+  :deep(.m3-swipe-action:first-child .m3-swipe-action__button),
+.m3-list-item__swipe--armed.m3-list-item__swipe--end
+  :deep(.m3-swipe-action:last-child .m3-swipe-action__button) {
+  width: calc(100% - 16px);
 }
 
 .m3-list-item--with-action {

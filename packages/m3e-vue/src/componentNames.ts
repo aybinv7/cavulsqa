@@ -43,6 +43,7 @@ export const COMPONENT_NAMES = [
   "M3Slider",
   "M3SnackbarHost",
   "M3SplitButton",
+  "M3SwipeAction",
   "M3Switch",
   "M3Tab",
   "M3Tabs",

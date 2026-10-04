@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, realpathSync } from "node:fs";
+import { existsSync, readFileSync, realpathSync, statSync } from "node:fs";
 import { join, resolve, sep } from "node:path";
 import type { Plugin, ViteDevServer } from "vite-plus";
 
@@ -43,8 +43,9 @@ function exportedFiles(packageDir: string): string[] {
  * first file the build touches - often while `dist` has just been emptied, so the page asks for an
  * entry that is not there yet and boots blank. It also never notices the stylesheet `app.css`
  * imports, so a rebuild paired new JavaScript with old scoped styles. Here every write under a
- * linked `dist` is held back until writing stops and every exported file exists again, then the
- * cached CSS is dropped and the page reloads once.
+ * linked `dist` is held back until writing stops and every exported file exists again with the same
+ * size on two checks in a row - a file that exists can still be half written - then the cached CSS
+ * is dropped and the page reloads once.
  */
 export function linkedRebuilds(root: string, names: readonly string[]): Plugin {
   const packages = names.map((name) => realpathSync(join(root, "node_modules", name)));
@@ -54,10 +55,17 @@ export function linkedRebuilds(root: string, names: readonly string[]): Plugin {
 
   let server: ViteDevServer | undefined;
   let timer: ReturnType<typeof setTimeout> | undefined;
+  let sizes = "";
+
+  const snapshot = () =>
+    required.map((file) => (existsSync(file) ? statSync(file).size : -1)).join(",");
 
   const reload = () => {
     if (!server) return;
-    if (!required.every((file) => existsSync(file))) {
+    const now = snapshot();
+    const settled = now === sizes && !now.split(",").includes("-1");
+    sizes = now;
+    if (!settled) {
       timer = setTimeout(reload, SETTLE_MS);
       return;
     }
@@ -69,6 +77,7 @@ export function linkedRebuilds(root: string, names: readonly string[]): Plugin {
 
   const schedule = () => {
     clearTimeout(timer);
+    sizes = "";
     timer = setTimeout(reload, SETTLE_MS);
   };
 

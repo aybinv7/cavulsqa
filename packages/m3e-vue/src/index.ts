@@ -44,6 +44,7 @@ export { default as M3SideSheet } from "./components/sheet/M3SideSheet.vue";
 export { default as M3Slider } from "./components/slider/M3Slider.vue";
 export { default as M3SnackbarHost } from "./components/snackbar/M3SnackbarHost.vue";
 export { default as M3SplitButton } from "./components/button/M3SplitButton.vue";
+export { default as M3SwipeAction } from "./components/list/M3SwipeAction.vue";
 export { default as M3Switch } from "./components/selection/M3Switch.vue";
 export { default as M3Tab } from "./components/tabs/M3Tab.vue";
 export { default as M3Tabs } from "./components/tabs/M3Tabs.vue";
