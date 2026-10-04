@@ -1,7 +1,18 @@
 <script setup lang="ts">
-import { computed, provide, useSlots, useTemplateRef } from "vue";
+import M3Glyph from "../icon/M3Glyph.vue";
+import {
+  computed,
+  inject,
+  onBeforeUnmount,
+  provide,
+  useId,
+  useSlots,
+  useTemplateRef,
+  watch,
+} from "vue";
 import { vRipple } from "../../directives/ripple.js";
 import { useListSwipe } from "../../composables/useListSwipe.js";
+import { LIST_ACCORDION } from "./accordionContext.js";
 import { LIST_SWIPE } from "./swipeContext.js";
 import type { SwipeSide } from "../../utils/swipe.js";
 
@@ -18,6 +29,10 @@ import type { SwipeSide } from "../../utils/swipe.js";
  * Framework7's swipeout in Material form. `v-model:swiped` is the open side; `swipe-full` lets a
  * long swipe fire the outermost action. Vertical scrolling stays native: the row only claims a drag
  * that starts sideways.
+ *
+ * `#details` makes it expandable - Framework7's accordion item: the row toggles a region below it
+ * (`v-model:expanded`), a chevron turns, and the region grows on the default spatial spring. Inside
+ * `M3List accordion`, opening one closes the others.
  */
 const props = withDefaults(
   defineProps<{
@@ -48,6 +63,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{ click: [event: MouseEvent] }>();
 const swiped = defineModel<SwipeSide | null>("swiped", { default: null });
+const expanded = defineModel<boolean>("expanded", { default: false });
 const slots = useSlots();
 const item = useTemplateRef<HTMLElement>("item");
 const row = useTemplateRef<HTMLElement>("row");
@@ -72,7 +88,23 @@ useListSwipe({
   fire: (action) => swipeActions.get(action)?.(),
 });
 
-const interactive = computed(() => props.clickable || Boolean(props.href));
+const expandable = computed(() => Boolean(slots.details));
+const detailsId = useId();
+const headlineId = useId();
+const accordion = inject(LIST_ACCORDION, null);
+const collapse = () => (expanded.value = false);
+
+watch(
+  expanded,
+  (open) => {
+    if (open) accordion?.opened(collapse);
+    else accordion?.closed(collapse);
+  },
+  { immediate: true },
+);
+onBeforeUnmount(() => accordion?.closed(collapse));
+
+const interactive = computed(() => props.clickable || Boolean(props.href) || expandable.value);
 const tag = computed(() => (props.href ? "a" : interactive.value ? "button" : "div"));
 const lines = computed(() => {
   const extra =
@@ -83,6 +115,7 @@ const lines = computed(() => {
 
 function onClick(event: MouseEvent) {
   if (props.disabled) return;
+  if (expandable.value) expanded.value = !expanded.value;
   emit("click", event);
 }
 </script>
@@ -100,6 +133,8 @@ function onClick(event: MouseEvent) {
         'm3-list-item--disabled': props.disabled,
         'm3-list-item--with-action': $slots.action,
         'm3-list-item--swipe': swipeable,
+        'm3-list-item--expandable': expandable,
+        'm3-list-item--expanded': expandable && expanded,
       },
     ]"
   >
@@ -129,13 +164,15 @@ function onClick(event: MouseEvent) {
         :type="tag === 'button' ? 'button' : undefined"
         :disabled="tag === 'button' ? props.disabled : undefined"
         :aria-current="props.selected && props.href ? 'page' : undefined"
-        :aria-pressed="props.selected && tag === 'button' ? true : undefined"
+        :aria-pressed="props.selected && tag === 'button' && !expandable ? true : undefined"
+        :aria-expanded="expandable ? expanded : undefined"
+        :aria-controls="expandable ? detailsId : undefined"
         @click="onClick"
       >
         <span v-if="$slots.leading" class="m3-list-item__leading"><slot name="leading" /></span>
         <span class="m3-list-item__text">
           <span v-if="props.overline" class="m3-list-item__overline">{{ props.overline }}</span>
-          <span class="m3-list-item__headline"
+          <span :id="headlineId" class="m3-list-item__headline"
             ><slot>{{ props.headline }}</slot></span
           >
           <span v-if="props.supporting || $slots.supporting" class="m3-list-item__supporting">
@@ -146,8 +183,23 @@ function onClick(event: MouseEvent) {
           props.trailingText
         }}</span>
         <span v-if="$slots.trailing" class="m3-list-item__trailing"><slot name="trailing" /></span>
+        <span v-if="expandable" class="m3-list-item__expand" aria-hidden="true"
+          ><M3Glyph name="expandMore"
+        /></span>
       </component>
       <span v-if="$slots.action" class="m3-list-item__action"><slot name="action" /></span>
+    </div>
+    <div
+      v-if="expandable"
+      :id="detailsId"
+      class="m3-list-item__details"
+      role="region"
+      :aria-labelledby="headlineId"
+      :inert="!expanded"
+    >
+      <div class="m3-list-item__details-clip">
+        <div class="m3-list-item__details-content"><slot name="details" /></div>
+      </div>
     </div>
   </component>
 </template>
@@ -366,6 +418,76 @@ a.m3-list-item__surface {
   color: color-mix(in srgb, var(--md-sys-color-on-surface) 38%, transparent);
   cursor: default;
   pointer-events: none;
+}
+
+.m3-list-item--expandable {
+  border-start-start-radius: var(--m3-list-item-start);
+  border-start-end-radius: var(--m3-list-item-start);
+  border-end-start-radius: var(--m3-list-item-end);
+  border-end-end-radius: var(--m3-list-item-end);
+  background: var(--m3-list-item-container);
+  transition:
+    border-radius var(--md-sys-motion-spring-default-spatial-duration)
+      var(--md-sys-motion-spring-default-spatial),
+    margin var(--md-sys-motion-spring-default-spatial-duration)
+      var(--md-sys-motion-spring-default-spatial);
+}
+
+.m3-list-item--expandable .m3-list-item__surface {
+  background: transparent;
+}
+
+.m3-list-item--expanded .m3-list-item__surface {
+  border-end-start-radius: 4px;
+  border-end-end-radius: 4px;
+}
+
+.m3-list-item__expand {
+  display: flex;
+  flex: none;
+  color: var(--md-sys-color-on-surface-variant);
+  transition: rotate var(--md-sys-motion-spring-fast-spatial-duration)
+    var(--md-sys-motion-spring-fast-spatial);
+}
+
+.m3-list-item__expand :deep(svg) {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
+.m3-list-item--expanded .m3-list-item__expand {
+  rotate: 180deg;
+}
+
+.m3-list-item__details {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--md-sys-motion-spring-default-spatial-duration)
+    var(--md-sys-motion-spring-default-spatial);
+}
+
+.m3-list-item--expanded .m3-list-item__details {
+  grid-template-rows: 1fr;
+}
+
+.m3-list-item__details-clip {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.m3-list-item__details-content {
+  padding: 0 16px 16px;
+  color: var(--md-sys-color-on-surface-variant);
+  font: var(--md-sys-typescale-body-medium-weight) var(--md-sys-typescale-body-medium-size) /
+    var(--md-sys-typescale-body-medium-line-height) var(--md-sys-typescale-body-medium-font);
+  opacity: 0;
+  transition: opacity var(--md-sys-motion-spring-default-effects-duration)
+    var(--md-sys-motion-spring-default-effects);
+}
+
+.m3-list-item--expanded .m3-list-item__details-content {
+  opacity: 1;
 }
 
 .m3-list-item--disabled .m3-list-item__leading,

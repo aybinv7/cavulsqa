@@ -1,18 +1,43 @@
 <script setup lang="ts">
+import { provide } from "vue";
+import { LIST_ACCORDION } from "./accordionContext.js";
+
 /**
  * An Expressive list. `segmented` gives every item its own surface, 2dp apart, with small inner
  * corners and large outer ones; a pressed or selected item rounds off completely. `standard` is a
  * plain run of items on the parent's surface.
  *
+ * `accordion` keeps one expandable item open at a time, as Framework7's accordion list does. An
+ * expanded item in a segmented list steps out of the run as its own rounded card, and its
+ * neighbours round off the corners that face it.
+ *
  * @see https://m3.material.io/components/lists/specs
  */
 const props = withDefaults(
-  defineProps<{ variant?: "standard" | "segmented"; inset?: boolean; label?: string }>(),
+  defineProps<{
+    variant?: "standard" | "segmented";
+    inset?: boolean;
+    label?: string;
+    accordion?: boolean;
+  }>(),
   {
     variant: "segmented",
     inset: false,
+    accordion: false,
   },
 );
+
+let open: (() => void) | null = null;
+provide(LIST_ACCORDION, {
+  opened(collapse) {
+    if (!props.accordion) return;
+    if (open && open !== collapse) open();
+    open = collapse;
+  },
+  closed(collapse) {
+    if (open === collapse) open = null;
+  },
+});
 </script>
 
 <template>
@@ -57,5 +82,27 @@ const props = withDefaults(
 
 .m3-list--segmented > :deep(.m3-list-item:last-child) {
   --m3-list-item-end: 16px;
+}
+
+.m3-list--segmented > :deep(.m3-list-item:has(+ .m3-list-item.m3-list-item--expanded)) {
+  --m3-list-item-end: 16px;
+}
+
+.m3-list--segmented > :deep(.m3-list-item.m3-list-item--expanded + .m3-list-item) {
+  --m3-list-item-start: 16px;
+}
+
+.m3-list--segmented > :deep(.m3-list-item.m3-list-item--expanded) {
+  --m3-list-item-start: 16px;
+  --m3-list-item-end: 16px;
+  margin-block: 6px;
+}
+
+.m3-list--segmented > :deep(.m3-list-item.m3-list-item--expanded:first-child) {
+  margin-top: 0;
+}
+
+.m3-list--segmented > :deep(.m3-list-item.m3-list-item--expanded:last-child) {
+  margin-bottom: 0;
 }
 </style>

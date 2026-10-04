@@ -18,7 +18,8 @@ components (date and time pickers as dialog or sheet, Framework7-style wheel pic
 that recycles its rows, swipe actions on list items, a full-screen search view, a range slider,
 cascading menus, a standard bottom sheet with peek, half and expanded detents, Framework7-style skeleton
 loading, and Compose's carousel - multi-browse, hero and uncontained - ported keyline for keyline,
-and Framework7's stepper with its dynamic auto-repeat), an overlay stack Android back can close, and promise-based snackbar, dialog and action
+Framework7's stepper with its dynamic auto-repeat, and expandable list items with an accordion
+list), an overlay stack Android back can close, and promise-based snackbar, dialog and action
 sheet services. Both join the libraries' shared version.
 
 **New package: `@cavulsqa/recorder`** - an in-app field recorder for Capacitor WebViews: rrweb,
