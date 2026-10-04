@@ -164,6 +164,13 @@ status bar icons turn light while it shows.
 
 ## Lists at scale
 
+**`M3InfiniteScroll`** - after a list: `:load` returns a promise and resolves `false` when there is
+no more; failures wait for the user's retry; `endText` closes the list; expose `reset()` after a new
+filter. Feed it from a repository with `LIMIT/OFFSET` (or a keyset) - never load everything to
+slice it in memory. **`M3Timeline` + `M3TimelineItem`** - an order's journey, a patient's visits:
+`title`, `time`, `supporting`, `state` done | current | upcoming, `#icon` for the current step,
+`stateLabel` so the state is read out.
+
 **`M3VirtualList`** - thousands of rows against the page's own scroller (the app bar still
 collapses): `items`, `itemSize` (number or function: 56 / 72 / 88 + 2 for the segment gap),
 `itemKey`, `inset`. Rows are recycled - row components must render from props alone; `recycle=false`

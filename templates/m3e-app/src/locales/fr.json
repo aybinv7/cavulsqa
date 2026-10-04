@@ -610,7 +610,43 @@
         "pharmacy": "Pharmacie El Hayat",
         "school": "École Ibn Khaldoun",
         "bakery": "Boulangerie Sidi El Houari"
-      }
+      },
+      "timeline": "Chronologie",
+      "tracking": "Suivi de SO-1024",
+      "states": {
+        "done": "fait",
+        "current": "en cours",
+        "upcoming": "à venir"
+      },
+      "steps": {
+        "placed": {
+          "title": "Commande passée",
+          "text": "Oran Market, 12 lignes"
+        },
+        "confirmed": {
+          "title": "Confirmée",
+          "text": "Stock réservé à l'entrepôt central"
+        },
+        "picked": {
+          "title": "Préparée et emballée",
+          "text": "3 caisses, 1 palette"
+        },
+        "transit": {
+          "title": "En livraison",
+          "text": "Chauffeur Karim, à environ 40 minutes"
+        },
+        "delivered": {
+          "title": "Livrée",
+          "text": "Signature à la livraison"
+        }
+      },
+      "infinite": "Défilement infini",
+      "infiniteNote": "Le défilement infini de Framework7 : la page suivante se charge à l'approche de la fin. La troisième échoue une fois exprès - réessayez-la.",
+      "page": "Page {n}",
+      "loadingMore": "Chargement d'autres commandes",
+      "loadFailed": "Impossible de charger plus de commandes",
+      "retry": "Réessayer",
+      "allLoaded": "Ce sont toutes les commandes"
     },
     "pickers": {
       "modal": "Sélecteur de date modal",

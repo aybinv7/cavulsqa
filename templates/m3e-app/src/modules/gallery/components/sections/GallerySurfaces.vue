@@ -85,6 +85,47 @@
     <M3Divider inset="start" />
     <M3ListItem :headline="t('gallery.surfaces.storage')" trailing-text="12.4 GB" />
   </M3List>
+
+  <SectionHeader :title="t('gallery.surfaces.timeline')" />
+  <div class="px-6 pb-2">
+    <M3Timeline :label="t('gallery.surfaces.tracking')">
+      <M3TimelineItem
+        v-for="step in STEPS"
+        :key="step.id"
+        :title="t(`gallery.surfaces.steps.${step.id}.title`)"
+        :supporting="t(`gallery.surfaces.steps.${step.id}.text`)"
+        :time="step.time"
+        :state="step.state"
+        :state-label="t(`gallery.surfaces.states.${step.state}`)"
+      >
+        <template v-if="step.state === 'current'" #icon
+          ><i-ms-local-shipping-outline-rounded
+        /></template>
+      </M3TimelineItem>
+    </M3Timeline>
+  </div>
+
+  <SectionHeader :title="t('gallery.surfaces.infinite')" />
+  <p class="type-body-small m-0 px-8 pb-3 text-on-surface-variant">
+    {{ t("gallery.surfaces.infiniteNote") }}
+  </p>
+  <M3List variant="segmented" inset>
+    <M3ListItem
+      v-for="order in endless"
+      :key="order"
+      :headline="t('gallery.tabs.order', { n: order })"
+      :supporting="t('gallery.surfaces.page', { n: Math.ceil((order - 5000) / 15) })"
+    >
+      <template #leading><i-ms-receipt-long-outline-rounded /></template>
+    </M3ListItem>
+  </M3List>
+  <M3InfiniteScroll
+    :load="loadMore"
+    :loading-label="t('gallery.surfaces.loadingMore')"
+    :error-text="t('gallery.surfaces.loadFailed')"
+    :retry-label="t('gallery.surfaces.retry')"
+    :end-text="t('gallery.surfaces.allLoaded')"
+  />
 </template>
 
 <script setup lang="ts">
@@ -96,6 +137,29 @@ const snackbar = useSnackbar();
 const CARDS = ["elevated", "filled", "outlined"] as const;
 const ITEMS = ["inbox", "drafts", "archive"] as const;
 const QUESTIONS = ["offline", "sync", "storage", "export"] as const;
+const STEPS = [
+  { id: "placed", time: "08:12", state: "done" },
+  { id: "confirmed", time: "08:40", state: "done" },
+  { id: "picked", time: "10:05", state: "done" },
+  { id: "transit", time: "11:20", state: "current" },
+  { id: "delivered", time: "", state: "upcoming" },
+] as const;
+const PAGE = 15;
+const PAGES = 5;
+const endless = ref<number[]>([]);
+let failedOnce = false;
+
+async function loadMore(): Promise<boolean> {
+  await new Promise((resolve) => setTimeout(resolve, 900));
+  const page = endless.value.length / PAGE;
+  if (page === 2 && !failedOnce) {
+    failedOnce = true;
+    throw new Error("simulated network failure");
+  }
+  const start = 5001 + endless.value.length;
+  endless.value = [...endless.value, ...Array.from({ length: PAGE }, (_, i) => start + i)];
+  return page + 1 < PAGES;
+}
 const route = ref(["warehouse", "market", "pharmacy", "school", "bakery"]);
 
 function movedText(label: string, position: number, count: number) {

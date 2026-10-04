@@ -610,7 +610,43 @@
         "pharmacy": "El Hayat pharmacy",
         "school": "Ibn Khaldoun school",
         "bakery": "Sidi El Houari bakery"
-      }
+      },
+      "timeline": "Timeline",
+      "tracking": "Tracking SO-1024",
+      "states": {
+        "done": "done",
+        "current": "in progress",
+        "upcoming": "to come"
+      },
+      "steps": {
+        "placed": {
+          "title": "Order placed",
+          "text": "Oran Market, 12 lines"
+        },
+        "confirmed": {
+          "title": "Confirmed",
+          "text": "Stock reserved at the central warehouse"
+        },
+        "picked": {
+          "title": "Picked and packed",
+          "text": "3 crates, 1 pallet"
+        },
+        "transit": {
+          "title": "Out for delivery",
+          "text": "Driver Karim, about 40 minutes away"
+        },
+        "delivered": {
+          "title": "Delivered",
+          "text": "Signature on delivery"
+        }
+      },
+      "infinite": "Infinite scroll",
+      "infiniteNote": "Framework7's infinite scroll: the next page loads as the end comes near. The third page fails once on purpose - retry it.",
+      "page": "Page {n}",
+      "loadingMore": "Loading more orders",
+      "loadFailed": "Could not load more orders",
+      "retry": "Retry",
+      "allLoaded": "That is every order"
     },
     "pickers": {
       "modal": "Modal date picker",
