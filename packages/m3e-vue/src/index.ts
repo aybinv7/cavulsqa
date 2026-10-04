@@ -13,8 +13,10 @@ export { default as M3Card } from "./components/card/M3Card.vue";
 export { default as M3Carousel } from "./components/carousel/M3Carousel.vue";
 export { default as M3Checkbox } from "./components/selection/M3Checkbox.vue";
 export { default as M3Chip } from "./components/chip/M3Chip.vue";
+export { default as M3ChipField } from "./components/textfield/M3ChipField.vue";
 export { default as M3CircularProgress } from "./components/progress/M3CircularProgress.vue";
 export { default as M3ClockDial } from "./components/datetime/M3ClockDial.vue";
+export { default as M3CodeField } from "./components/textfield/M3CodeField.vue";
 export { default as M3ColorPicker } from "./components/color/M3ColorPicker.vue";
 export { default as M3DataTable } from "./components/table/M3DataTable.vue";
 export { default as M3DatePicker } from "./components/datetime/M3DatePicker.vue";
@@ -219,4 +221,6 @@ export {
 } from "./utils/messages.js";
 export type { MessageAction } from "./components/messages/types.js";
 export type { AttachOption } from "./components/sheet/attach.js";
+export { sanitizeCode, type CodeAlphabet } from "./utils/codeField.js";
+export { hasEntry, splitEntries } from "./utils/chipField.js";
 export { liftPlacement, type LiftPlacement } from "./utils/messageLift.js";

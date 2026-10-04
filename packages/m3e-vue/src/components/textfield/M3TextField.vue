@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { computed, shallowRef, useId } from "vue";
+import { computed, nextTick, shallowRef, useId } from "vue";
 
 /**
  * The M3 text field, filled or outlined, with a label that floats up on focus or content,
  * supporting text, an error state with its message, a character counter, and `leading` /
  * `trailing` slots for icons. Native input attributes (`type`, `inputmode`, `autocomplete`...)
  * pass through to the input.
+ *
+ * It is a controlled field: when the bound model refuses or reshapes what was typed - a formatter
+ * grouping a phone number, a filter dropping letters - the input shows the model, not the keystroke.
  *
  * @see https://m3.material.io/components/text-fields/specs
  */
@@ -35,6 +38,14 @@ const supportId = `${id}-support`;
 
 const floated = computed(() => focused.value || model.value.length > 0 || Boolean(props.prefix));
 const message = computed(() => props.error || props.supporting);
+
+function settle(event: Event) {
+  if ((event as InputEvent).isComposing) return;
+  const element = event.target as HTMLInputElement | HTMLTextAreaElement;
+  void nextTick(() => {
+    if (element.value !== model.value) element.value = model.value;
+  });
+}
 </script>
 
 <template>
@@ -56,7 +67,9 @@ const message = computed(() => props.error || props.supporting);
       <span class="m3-text-field__body">
         <span class="m3-text-field__label">{{ props.label }}</span>
         <span class="m3-text-field__row">
-          <span v-if="props.prefix" class="m3-text-field__affix">{{ props.prefix }}</span>
+          <span v-if="props.prefix" class="m3-text-field__affix m3-text-field__affix--prefix">{{
+            props.prefix
+          }}</span>
           <textarea
             v-if="props.multiline"
             :id="id"
@@ -69,6 +82,7 @@ const message = computed(() => props.error || props.supporting);
             :readonly="props.readonly"
             :aria-invalid="Boolean(props.error) || undefined"
             :aria-describedby="message ? supportId : undefined"
+            @input="settle"
             @focus="focused = true"
             @blur="focused = false"
           />
@@ -83,10 +97,13 @@ const message = computed(() => props.error || props.supporting);
             :readonly="props.readonly"
             :aria-invalid="Boolean(props.error) || undefined"
             :aria-describedby="message ? supportId : undefined"
+            @input="settle"
             @focus="focused = true"
             @blur="focused = false"
           />
-          <span v-if="props.suffix" class="m3-text-field__affix">{{ props.suffix }}</span>
+          <span v-if="props.suffix" class="m3-text-field__affix m3-text-field__affix--suffix">{{
+            props.suffix
+          }}</span>
         </span>
       </span>
       <span v-if="$slots.trailing" class="m3-text-field__icon"><slot name="trailing" /></span>
@@ -233,6 +250,14 @@ const message = computed(() => props.error || props.supporting);
   color: var(--md-sys-color-on-surface-variant);
   font: var(--md-sys-typescale-body-large-weight) var(--md-sys-typescale-body-large-size) /
     var(--md-sys-typescale-body-large-line-height) var(--md-sys-typescale-body-large-font);
+}
+
+.m3-text-field__affix--prefix {
+  margin-inline-end: 4px;
+}
+
+.m3-text-field__affix--suffix {
+  margin-inline-start: 4px;
 }
 
 .m3-text-field__icon {
