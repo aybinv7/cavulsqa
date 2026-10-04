@@ -1,0 +1,53 @@
+{
+  "name": "@cavulsqa/recorder",
+  "version": "0.1.0",
+  "description": "In-app field recorder for Capacitor WebViews: captures rrweb, console, network, perf and database tracks into a Capubridge-openable .capu archive and hands the bytes to an injected sink.",
+  "keywords": [
+    "capacitor",
+    "capubridge",
+    "debugging",
+    "recorder",
+    "rrweb",
+    "session-replay"
+  ],
+  "homepage": "https://github.com/aybinv7/cavulsqa/tree/main/packages/recorder#readme",
+  "bugs": {
+    "url": "https://github.com/aybinv7/cavulsqa/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aybinv7/cavulsqa.git",
+    "directory": "packages/recorder"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "dev": "vp pack --watch",
+    "test": "vp test",
+    "check": "vp check",
+    "prepublishOnly": "vp run build"
+  },
+  "dependencies": {
+    "fflate": "catalog:",
+    "rrweb": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "bumpp": "^11.1.0",
+    "happy-dom": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plus": "catalog:"
+  }
+}
