@@ -6,6 +6,12 @@ const hiddenRequests = shallowRef(0);
 
 export interface NavigationVisibility {
   isVisible: ComputedRef<boolean>;
+  /**
+   * Whether the bar keeps its row in the layout. Hiding on scroll only slides it away: taking the
+   * row back would change the content's height under the finger, and near the end of a page that
+   * moves the scroll position, which shows the bar again, which moves it back.
+   */
+  isReserved: ComputedRef<boolean>;
   setKeyboardOpen: (open: boolean) => void;
   /** Hide-on-scroll: the page on screen is scrolling its content down. */
   setScrollHidden: (hidden: boolean) => void;
@@ -22,6 +28,7 @@ export function useNavigationVisibility(): NavigationVisibility {
     isVisible: computed(
       () => !keyboardOpen.value && !scrollHidden.value && hiddenRequests.value === 0,
     ),
+    isReserved: computed(() => !keyboardOpen.value && hiddenRequests.value === 0),
     setKeyboardOpen: (open) => {
       keyboardOpen.value = open;
     },

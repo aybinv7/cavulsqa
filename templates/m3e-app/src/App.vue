@@ -77,7 +77,7 @@ const { t } = useI18n();
 const parameters = framework7Parameters();
 const windowClass = useWindowClass();
 const { active, show } = useActiveTab();
-const { isVisible, setScrollHidden } = useNavigationVisibility();
+const { isVisible, isReserved, setScrollHidden } = useNavigationVisibility();
 const railExpanded = useLocalStorage("app-rail-expanded", false);
 
 function notificationsMore(count: number) {
@@ -86,14 +86,16 @@ function notificationsMore(count: number) {
 
 const rail = computed(() => windowClass.value !== "compact");
 const navVisible = computed(() => !rail.value && isVisible.value);
+const navReserved = computed(() => !rail.value && isReserved.value);
 
 /**
  * How much of the bottom edge the bar occupies, for everything that floats above it: page padding,
  * FABs, the floating toolbar, snackbars. One variable on the root, so nothing measures the bar.
+ * Page padding keeps the row while the bar is only scrolled away; what floats follows the bar.
  */
 watchEffect(() => {
   const root = document.documentElement.style;
-  root.setProperty("--app-nav-offset", navVisible.value ? "64px" : "0px");
+  root.setProperty("--app-nav-offset", navReserved.value ? "64px" : "0px");
   root.setProperty("--m3-snackbar-offset", navVisible.value ? "64px" : "0px");
   root.setProperty("--m3-floating-toolbar-offset", navVisible.value ? "64px" : "0px");
 });
