@@ -9,10 +9,10 @@ cadence and has its own section.
 
 ## Libraries
 
-### Unreleased
+### 1.4.0
 
-`m3e` and `m3e-vue` changed after 1.3.0 reached npm; bump the libraries (1.4.0 - `m3e` gains an
-export) before the next release.
+`mobile-db`, `reactive-db`, `reactive-vue` and `repository` were not published at 1.3.0, so 1.4.0
+is their first release since 1.2.1 and also carries the 1.3.0 changes below.
 
 - **Arabic and other joined scripts get zero tracking.** Letter-spacing pulls apart letters that
   must join, and the M3 type scale tracks labels and body text. `systemStylesheet` now zeroes every
@@ -336,7 +336,7 @@ menu; `f7-app` stays the default.
   team votes and answers. A location opens in the maps app, a contact opens the order search for
   that customer. Location needs `ACCESS_COARSE_LOCATION` and `ACCESS_FINE_LOCATION` in the generated
   Android manifest - see `.claude/rules/native.md`.
-- Generated apps depend on the 1.3.0 libraries.
+- Generated apps depend on the 1.4.0 libraries.
 
 ### 2.9.3
 

@@ -1,6 +1,6 @@
 {
   "name": "@cavulsqa/recorder",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "In-app field recorder for Capacitor WebViews: captures rrweb, console, network, perf and database tracks into a Capubridge-openable .capu archive and hands the bytes to an injected sink.",
   "keywords": [
     "capacitor",

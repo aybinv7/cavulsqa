@@ -1,6 +1,6 @@
 {
   "name": "@cavulsqa/repository",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Local-first data access for Kysely: a per-table repository over a stable row identity, with soft deletes and reactive writes.",
   "keywords": [
     "kysely",
