@@ -13,6 +13,7 @@ import TabsIcon from "~icons/material-symbols/tab-outline-rounded";
 import TableIcon from "~icons/material-symbols/table-outline-rounded";
 import ChartIcon from "~icons/material-symbols/monitoring-rounded";
 import ContactsIcon from "~icons/material-symbols/contacts-outline-rounded";
+import ChatIcon from "~icons/material-symbols/forum-outline-rounded";
 import CalendarIcon from "~icons/material-symbols/calendar-today-outline-rounded";
 import SpeedIcon from "~icons/material-symbols/speed-rounded";
 import CarouselIcon from "~icons/material-symbols/view-carousel-outline-rounded";
@@ -171,6 +172,18 @@ export const CONTACTS_SECTION: GallerySection = {
   subtitleKey: "gallery.sections.contacts.subtitle",
   component: { render: () => null },
   path: "/gallery/contacts/",
+};
+
+/** A conversation with its composer pinned to the page's bottom edge. */
+export const CHAT_SECTION: GallerySection = {
+  id: "chat",
+  icon: ChatIcon,
+  shape: "softBurst",
+  tone: "primary",
+  titleKey: "gallery.sections.chat.title",
+  subtitleKey: "gallery.sections.chat.subtitle",
+  component: { render: () => null },
+  path: "/gallery/chat/",
 };
 
 export function findSection(id: string): GallerySection | undefined {

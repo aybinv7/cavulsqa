@@ -259,6 +259,10 @@
       "charts": {
         "title": "Charts",
         "subtitle": "Line, area, bar and donut"
+      },
+      "chat": {
+        "title": "Messages",
+        "subtitle": "Bubbles, history and a composer"
       }
     },
     "buttons": {
@@ -816,6 +820,55 @@
         "wholesale": "Wholesale",
         "online": "Online",
         "export": "Export"
+      }
+    },
+    "chat": {
+      "title": "Route team",
+      "subtitle": "Amina, Karim and you",
+      "you": "You",
+      "compose": "Message",
+      "send": "Send",
+      "attach": "Send a photo",
+      "thumbsUp": "Add a thumbs up",
+      "photo": "Photo",
+      "photos": "Shared photos",
+      "retry": "Tap to retry",
+      "latest": "Jump to the latest message",
+      "loadingOlder": "Loading earlier messages",
+      "loadFailed": "Could not load earlier messages",
+      "start": "This is the start of the conversation",
+      "typing": "{name} is typing",
+      "unread": "{count} new message | {count} new messages",
+      "copy": "Copy text",
+      "delete": "Delete for me",
+      "copied": "Copied",
+      "copyFailed": "Could not copy",
+      "status": {
+        "sending": "Sending",
+        "sent": "Sent",
+        "delivered": "Delivered",
+        "read": "Read",
+        "failed": "Not sent"
+      },
+      "lines": {
+        "s1": "Reminder: the new prices apply from Sunday.",
+        "s2": "Noted, I'll tell the shops on my route.",
+        "s3": "How did Bab Ezzouar go?",
+        "s4": "18 visits, 14 orders.",
+        "s5": "Two shops were closed, I'll go back Thursday.",
+        "s6": "Sunrise on the coast road, first visit at 7.",
+        "s7": "Beautiful. Can you push the 1L range on that route next week?",
+        "s8": "Yes, I'll add it to Tuesday's orders.",
+        "s9": "Sending the updated price list now",
+        "o1": "Stock count is due Friday.",
+        "o2": "On it.",
+        "o3": "I can cover the north route tomorrow.",
+        "o4": "Thanks both, good week so far.",
+        "o5": "See you at the depot at 8.",
+        "r1": "👍",
+        "r2": "Got it, thanks.",
+        "r3": "Good work today 💪",
+        "r4": "I'll pass by the depot later."
       }
     }
   },

@@ -3,6 +3,7 @@ import { Keyboard } from "@capacitor/keyboard";
 import { useNavigationVisibility } from "@/shared/composables/navigation/useNavigationVisibility";
 
 const EDITABLE = "input, textarea, [contenteditable='true']";
+const KEEPS_KEYBOARD = `${EDITABLE}, [data-keeps-keyboard]`;
 
 function scrollFocusedIntoView(): void {
   const focused = document.activeElement;
@@ -16,7 +17,8 @@ function scrollFocusedIntoView(): void {
  * every phase: the layout is still settling at `keyboardWillShow` and only `keyboardDidShow` sees
  * the final height. The navigation bar leaves while the keyboard is up - it would otherwise sit on
  * the keyboard and steal a row from the field being typed into. A tap outside any field dismisses
- * the keyboard instead of leaving it over half the screen.
+ * the keyboard instead of leaving it over half the screen - except inside `[data-keeps-keyboard]`,
+ * such as a message composer, whose send button must not close it.
  */
 export function useKeyboard(): void {
   if (!Capacitor.isNativePlatform()) return;
@@ -33,7 +35,7 @@ export function useKeyboard(): void {
     "touchstart",
     (event) => {
       const target = event.target;
-      if (!(target instanceof Element) || target.closest(EDITABLE)) return;
+      if (!(target instanceof Element) || target.closest(KEEPS_KEYBOARD)) return;
       if (
         document.activeElement instanceof HTMLElement &&
         document.activeElement.matches(EDITABLE)

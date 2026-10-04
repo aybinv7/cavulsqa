@@ -259,6 +259,10 @@
       "charts": {
         "title": "Graphiques",
         "subtitle": "Courbe, aire, barres et anneau"
+      },
+      "chat": {
+        "title": "Messages",
+        "subtitle": "Bulles, historique et zone de saisie"
       }
     },
     "buttons": {
@@ -816,6 +820,55 @@
         "wholesale": "Gros",
         "online": "En ligne",
         "export": "Export"
+      }
+    },
+    "chat": {
+      "title": "Équipe tournée",
+      "subtitle": "Amina, Karim et vous",
+      "you": "Vous",
+      "compose": "Message",
+      "send": "Envoyer",
+      "attach": "Envoyer une photo",
+      "thumbsUp": "Ajouter un pouce levé",
+      "photo": "Photo",
+      "photos": "Photos partagées",
+      "retry": "Appuyez pour réessayer",
+      "latest": "Aller au dernier message",
+      "loadingOlder": "Chargement des messages précédents",
+      "loadFailed": "Impossible de charger les messages précédents",
+      "start": "C'est le début de la conversation",
+      "typing": "{name} écrit…",
+      "unread": "{count} nouveau message | {count} nouveaux messages",
+      "copy": "Copier le texte",
+      "delete": "Supprimer pour moi",
+      "copied": "Copié",
+      "copyFailed": "Impossible de copier",
+      "status": {
+        "sending": "Envoi",
+        "sent": "Envoyé",
+        "delivered": "Distribué",
+        "read": "Lu",
+        "failed": "Non envoyé"
+      },
+      "lines": {
+        "s1": "Rappel : les nouveaux prix s'appliquent dès dimanche.",
+        "s2": "Noté, je préviens les magasins de ma tournée.",
+        "s3": "Comment s'est passé Bab Ezzouar ?",
+        "s4": "18 visites, 14 commandes.",
+        "s5": "Deux magasins étaient fermés, j'y retourne jeudi.",
+        "s6": "Lever de soleil sur la route côtière, première visite à 7 h.",
+        "s7": "Superbe. Tu peux pousser la gamme 1 L sur cette tournée la semaine prochaine ?",
+        "s8": "Oui, je l'ajoute aux commandes de mardi.",
+        "s9": "J'envoie la liste de prix à jour",
+        "o1": "L'inventaire est prévu vendredi.",
+        "o2": "Je m'en occupe.",
+        "o3": "Je peux couvrir la tournée nord demain.",
+        "o4": "Merci à vous deux, bonne semaine jusqu'ici.",
+        "o5": "Rendez-vous au dépôt à 8 h.",
+        "r1": "👍",
+        "r2": "Bien reçu, merci.",
+        "r3": "Bon travail aujourd'hui 💪",
+        "r4": "Je passe au dépôt plus tard."
       }
     }
   },

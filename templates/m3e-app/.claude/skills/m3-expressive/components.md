@@ -245,6 +245,20 @@ library: `labels` + `series` (`{ label, values, color? }`, `null` breaks a line)
 screen readers get a hidden table. Lines for change over time, bars to compare categories, a
 donut for parts of one whole (at most ~6 segments). Feed them aggregates from SQL, never raw rows.
 
+## Messages
+
+**`M3Messages`** - a conversation: `messages` (`{ id, sent, at, text?, author?, avatar?, status?,
+image? }`, oldest first), `label`, `locale`, `authors` for a group (names and avatars), `typing`
+(`true` or `{ author }`), label props for i18n. It scrolls with the page: opens at the newest,
+follows new ones while the reader is there, keeps their place otherwise and counts what arrived.
+Older history goes in `#before` as `<M3InfiniteScroll edge="start">` - page it, never pass
+thousands. `@hold` (long-press) for a message menu via `useActionSheet`, `@press` for an image,
+`@retry` for a failed send. Give images `width`/`height` so nothing jumps as they load.
+**`M3MessageBar`** - the composer, in `AppPage`'s `#fixed`: `v-model`, `label`, `@send` (trimmed
+text; it clears itself), `#leading` (attach), `#trailing` (emoji), `#idle` (stands in for send
+while empty), `enterSends` for hardware keyboards. It publishes its height for `M3Messages`; zero
+the page's own bottom padding (`.page-content { padding-bottom: 0 }`) on a chat page.
+
 ## Shape and decoration
 
 **`M3Shape`** - masks its content to one of the 35 shapes (square box). **`M3ShapeMorph`** - an SVG

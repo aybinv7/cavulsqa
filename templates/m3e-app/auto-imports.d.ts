@@ -9,6 +9,7 @@
 export {}
 declare global {
   const AppContextKey: typeof import('./src/shared/composables/theme/useAppTheme').AppContextKey
+  const CHAT_SECTION: typeof import('./src/modules/gallery/composables/useGallerySections').CHAT_SECTION
   const CONTACTS_SECTION: typeof import('./src/modules/gallery/composables/useGallerySections').CONTACTS_SECTION
   const CONTRAST_LEVELS: typeof import('./src/shared/utils/theme/themeSettings').CONTRAST_LEVELS
   const DEFAULT_THEME: typeof import('./src/shared/utils/theme/themeSettings').DEFAULT_THEME
@@ -183,6 +184,7 @@ declare global {
   const useBroadcastChannel: typeof import('@vueuse/core').useBroadcastChannel
   const useBrowserLocation: typeof import('@vueuse/core').useBrowserLocation
   const useCached: typeof import('@vueuse/core').useCached
+  const useChatDemo: typeof import('./src/modules/gallery/composables/useChatDemo').useChatDemo
   const useClipboard: typeof import('@vueuse/core').useClipboard
   const useClipboardItems: typeof import('@vueuse/core').useClipboardItems
   const useCloned: typeof import('@vueuse/core').useCloned
@@ -412,6 +414,7 @@ import { UnwrapRef } from 'vue'
 declare module 'vue' {
   interface GlobalComponents {}
   interface ComponentCustomProperties {
+    readonly CHAT_SECTION: UnwrapRef<typeof import('./src/modules/gallery/composables/useGallerySections')['CHAT_SECTION']>
     readonly CONTACTS_SECTION: UnwrapRef<typeof import('./src/modules/gallery/composables/useGallerySections')['CONTACTS_SECTION']>
     readonly CONTRAST_LEVELS: UnwrapRef<typeof import('./src/shared/utils/theme/themeSettings')['CONTRAST_LEVELS']>
     readonly DEFAULT_THEME: UnwrapRef<typeof import('./src/shared/utils/theme/themeSettings')['DEFAULT_THEME']>
@@ -581,6 +584,7 @@ declare module 'vue' {
     readonly useBroadcastChannel: UnwrapRef<typeof import('@vueuse/core')['useBroadcastChannel']>
     readonly useBrowserLocation: UnwrapRef<typeof import('@vueuse/core')['useBrowserLocation']>
     readonly useCached: UnwrapRef<typeof import('@vueuse/core')['useCached']>
+    readonly useChatDemo: UnwrapRef<typeof import('./src/modules/gallery/composables/useChatDemo')['useChatDemo']>
     readonly useClipboard: UnwrapRef<typeof import('@vueuse/core')['useClipboard']>
     readonly useClipboardItems: UnwrapRef<typeof import('@vueuse/core')['useClipboardItems']>
     readonly useCloned: UnwrapRef<typeof import('@vueuse/core')['useCloned']>
