@@ -24,6 +24,7 @@ export const GLYPHS = {
     "M4 19q-.825 0-1.412-.587T2 17V7q0-.825.588-1.412T4 5h16q.825 0 1.413.588T22 7v10q0 .825-.587 1.413T20 19zm0-2h16V7H4zm4-1h8v-2H8zm-3-3h2v-2H5zm3 0h2v-2H8zm3 0h2v-2h-2zm3 0h2v-2h-2zm3 0h2v-2h-2zM5 10h2V8H5zm3 0h2V8H8zm3 0h2V8h-2zm3 0h2V8h-2zm3 0h2V8h-2zM4 17V7z",
   remove: "M5 13v-2h14v2z",
   add: "M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z",
+  dragHandle: "M4 15v-2h16v2zm0-4V9h16v2z",
 } as const;
 
 export type GlyphName = keyof typeof GLYPHS;

@@ -13,6 +13,7 @@ import {
 import { vRipple } from "../../directives/ripple.js";
 import { useListSwipe } from "../../composables/useListSwipe.js";
 import { LIST_ACCORDION } from "./accordionContext.js";
+import { LIST_SORTABLE } from "./sortContext.js";
 import { LIST_SWIPE } from "./swipeContext.js";
 import type { SwipeSide } from "../../utils/swipe.js";
 
@@ -92,6 +93,8 @@ const expandable = computed(() => Boolean(slots.details));
 const detailsId = useId();
 const headlineId = useId();
 const accordion = inject(LIST_ACCORDION, null);
+const sorting = inject(LIST_SORTABLE, null);
+const sortable = computed(() => Boolean(sorting?.enabled()));
 const collapse = () => (expanded.value = false);
 
 watch(
@@ -135,6 +138,7 @@ function onClick(event: MouseEvent) {
         'm3-list-item--swipe': swipeable,
         'm3-list-item--expandable': expandable,
         'm3-list-item--expanded': expandable && expanded,
+        'm3-list-item--sortable': sortable,
       },
     ]"
   >
@@ -188,6 +192,15 @@ function onClick(event: MouseEvent) {
         /></span>
       </component>
       <span v-if="$slots.action" class="m3-list-item__action"><slot name="action" /></span>
+      <button
+        v-if="sortable"
+        type="button"
+        class="m3-list-item__handle m3-focus-ring"
+        data-sort-handle
+        :aria-label="sorting?.label()"
+      >
+        <M3Glyph name="dragHandle" />
+      </button>
     </div>
     <div
       v-if="expandable"
@@ -418,6 +431,61 @@ a.m3-list-item__surface {
   color: color-mix(in srgb, var(--md-sys-color-on-surface) 38%, transparent);
   cursor: default;
   pointer-events: none;
+}
+
+.m3-list-item--sortable .m3-list-item__surface {
+  padding-inline-end: 64px;
+}
+
+.m3-list-item__handle {
+  position: absolute;
+  top: 50%;
+  inset-inline-end: 8px;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  border-radius: 24px;
+  background: none;
+  color: var(--md-sys-color-on-surface-variant);
+  translate: 0 -50%;
+  touch-action: none;
+  cursor: grab;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.m3-list-item__handle :deep(svg) {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
+.m3-list-item--dragging {
+  z-index: 3;
+}
+
+.m3-list-item--dragging .m3-list-item__surface {
+  border-radius: 16px;
+  background: var(--md-sys-color-tertiary-container);
+  color: var(--md-sys-color-on-tertiary-container);
+  box-shadow: var(--md-sys-elevation-level4);
+}
+
+.m3-list-item--dragging .m3-list-item__leading,
+.m3-list-item--dragging .m3-list-item__supporting,
+.m3-list-item--dragging .m3-list-item__handle {
+  color: inherit;
+}
+
+.m3-list-item--dragging .m3-list-item__handle {
+  cursor: grabbing;
+}
+
+.m3-list-item--dropping {
+  transition: transform var(--md-sys-motion-spring-fast-spatial-duration)
+    var(--md-sys-motion-spring-fast-spatial);
 }
 
 .m3-list-item--expandable {

@@ -1,17 +1,7 @@
 import { onMounted, onScopeDispose, shallowRef, type Ref } from "vue";
+import { scrollableAncestor } from "../utils/scroll.js";
 
 export type ScrollTarget = HTMLElement | string | null | undefined;
-
-function scrollableAncestor(element: HTMLElement): HTMLElement | null {
-  let node = element.parentElement;
-  while (node) {
-    const { overflowY } = getComputedStyle(node);
-    if (overflowY === "auto" || overflowY === "scroll" || node.classList.contains("page-content"))
-      return node;
-    node = node.parentElement;
-  }
-  return null;
-}
 
 /**
  * Finds the element that scrolls a component's content - an explicit element or selector, else the

@@ -150,3 +150,4 @@ export {
 export type { WheelColumn, WheelOption, WheelValue } from "./components/picker/types.js";
 export type { DatePickerMode, TimePickerMode } from "./components/datetime/types.js";
 export type { SheetDetent } from "./utils/detents.js";
+export { moveItem } from "./utils/sortable.js";
