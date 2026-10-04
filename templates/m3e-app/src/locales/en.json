@@ -255,6 +255,10 @@
       "tables": {
         "title": "Data table",
         "subtitle": "Sort, select, sticky header and column"
+      },
+      "charts": {
+        "title": "Charts",
+        "subtitle": "Line, area, bar and donut"
       }
     },
     "buttons": {
@@ -793,6 +797,26 @@
       "date": "Date",
       "status": "Status",
       "totalColumn": "Total"
+    },
+    "charts": {
+      "line": "Monthly sales",
+      "lineNote": "A line chart filled as an area: this year against last. Touch and slide along it to read both values; the gap is the months to come.",
+      "bar": "Sales by rep",
+      "barNote": "Grouped bars, or stacked. Touch a rep to read the numbers.",
+      "stacked": "Stacked",
+      "donut": "Sales by channel",
+      "donutNote": "Touch a segment or its legend entry to bring it to the centre.",
+      "total": "Total",
+      "thisYear": "2026",
+      "lastYear": "2025",
+      "august": "August",
+      "september": "September",
+      "channels": {
+        "shops": "Shops",
+        "wholesale": "Wholesale",
+        "online": "Online",
+        "export": "Export"
+      }
     }
   },
   "settings": {

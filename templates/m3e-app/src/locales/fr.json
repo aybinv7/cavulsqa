@@ -255,6 +255,10 @@
       "tables": {
         "title": "Tableau de données",
         "subtitle": "Tri, sélection, en-tête et colonne fixes"
+      },
+      "charts": {
+        "title": "Graphiques",
+        "subtitle": "Courbe, aire, barres et anneau"
       }
     },
     "buttons": {
@@ -793,6 +797,26 @@
       "date": "Date",
       "status": "Statut",
       "totalColumn": "Total"
+    },
+    "charts": {
+      "line": "Ventes mensuelles",
+      "lineNote": "Une courbe remplie en aire : cette année contre l'an dernier. Touchez et glissez le long pour lire les deux valeurs ; le vide, ce sont les mois à venir.",
+      "bar": "Ventes par commercial",
+      "barNote": "Barres groupées, ou empilées. Touchez un commercial pour lire les chiffres.",
+      "stacked": "Empilées",
+      "donut": "Ventes par canal",
+      "donutNote": "Touchez un segment ou sa légende pour l'amener au centre.",
+      "total": "Total",
+      "thisYear": "2026",
+      "lastYear": "2025",
+      "august": "Août",
+      "september": "Septembre",
+      "channels": {
+        "shops": "Magasins",
+        "wholesale": "Gros",
+        "online": "En ligne",
+        "export": "Export"
+      }
     }
   },
   "settings": {

@@ -236,6 +236,15 @@ view (`v-model`, `v-model:expanded`, `placeholder`; results in the default slot 
 recent searches when the query is empty); use it for searching a whole data set.
 → switch, checkbox, radio-button, sliders, chips, text-fields, search /specs
 
+## Charts
+
+`M3LineChart` (`area` for filled), `M3BarChart` (`stacked`) and `M3DonutChart` - plain SVG, no
+library: `labels` + `series` (`{ label, values, color? }`, `null` breaks a line) or `segments`
+(`{ label, value }`), `label` (the accessible name), `format` for numbers (use
+`Intl.NumberFormat` compact). Colours come from the theme's roles; touching reads values;
+screen readers get a hidden table. Lines for change over time, bars to compare categories, a
+donut for parts of one whole (at most ~6 segments). Feed them aggregates from SQL, never raw rows.
+
 ## Shape and decoration
 
 **`M3Shape`** - masks its content to one of the 35 shapes (square box). **`M3ShapeMorph`** - an SVG
