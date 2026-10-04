@@ -11,6 +11,32 @@ export interface DataColumn<T> {
   sortable?: boolean;
   /** Any CSS width, such as `8rem` or `120px`. */
   width?: string;
+  /** Offered as a grouping in the column menu; text columns are, numeric ones are not, by default. */
+  groupable?: boolean;
+  /** Offered for hiding in the column menu; true by default. */
+  hideable?: boolean;
+  /** What a group's header shows in this column: the sum, the average or the count of its rows. */
+  summary?: "sum" | "average" | "count";
+  /** Text for a summary value; the locale's number format by default. */
+  formatSummary?: (value: number) => string;
+}
+
+export interface ColumnMenuLabels {
+  sortAscending: string;
+  sortDescending: string;
+  clearSort: string;
+  groupBy: string;
+  ungroup: string;
+  pin: string;
+  unpin: string;
+  hide: string;
+  columns: string;
+}
+
+export interface DataGroup<T> {
+  key: string;
+  label: string;
+  rows: T[];
 }
 
 export interface DataSort {
@@ -75,4 +101,53 @@ export function nextSort(current: DataSort | null, key: string): DataSort | null
   if (!current || current.key !== key) return { key, direction: "ascending" };
   if (current.direction === "ascending") return { key, direction: "descending" };
   return null;
+}
+
+/** The columns to draw: hidden ones out, pinned ones first in the order they were pinned. */
+export function orderColumns<T>(
+  columns: readonly DataColumn<T>[],
+  hidden: readonly string[],
+  pinned: readonly string[],
+): DataColumn<T>[] {
+  const visible = columns.filter((column) => !hidden.includes(column.key));
+  const first = pinned
+    .map((key) => visible.find((column) => column.key === key))
+    .filter((column): column is DataColumn<T> => column !== undefined);
+  return [...first, ...visible.filter((column) => !pinned.includes(column.key))];
+}
+
+/**
+ * Rows split by one column's text, groups in the order their first row appears - so a table
+ * sorted on that column keeps its groups in that order, and rows keep their order inside a group.
+ */
+export function groupRows<T>(
+  rows: readonly T[],
+  column: DataColumn<T>,
+  locale?: string,
+  emptyLabel = "-",
+): DataGroup<T>[] {
+  const groups = new Map<string, DataGroup<T>>();
+  for (const row of rows) {
+    const text = cellText(row, column, locale);
+    const key = text === "" ? "" : `=${text}`;
+    let group = groups.get(key);
+    if (!group) {
+      group = { key, label: text === "" ? emptyLabel : text, rows: [] };
+      groups.set(key, group);
+    }
+    group.rows.push(row);
+  }
+  return [...groups.values()];
+}
+
+/** A column's summary over some rows, or null when it has none or there is nothing to sum. */
+export function summarize<T>(rows: readonly T[], column: DataColumn<T>): number | null {
+  if (!column.summary) return null;
+  if (column.summary === "count") return rows.length;
+  const numbers = rows
+    .map((row) => cellValue(row, column))
+    .filter((value): value is number => typeof value === "number" && Number.isFinite(value));
+  if (numbers.length === 0) return null;
+  const sum = numbers.reduce((total, value) => total + value, 0);
+  return column.summary === "sum" ? sum : sum / numbers.length;
 }

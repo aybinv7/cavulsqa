@@ -194,6 +194,6 @@ export type { PhotoItem } from "./components/photo/types.js";
 export { createTabPager, type TabPager } from "./components/tabs/pager.js";
 export { groupKey } from "./utils/listIndex.js";
 export type { TreeNode } from "./utils/tree.js";
-export type { DataColumn, DataSort } from "./utils/dataTable.js";
+export type { ColumnMenuLabels, DataColumn, DataGroup, DataSort } from "./utils/dataTable.js";
 export type { ChartSeries } from "./components/chart/palette.js";
 export type { ChatMessage, MessageImage, MessageStatus } from "./utils/messages.js";

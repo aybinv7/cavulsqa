@@ -1,8 +1,16 @@
 import { mount } from "@vue/test-utils";
-import { describe, expect, test } from "vite-plus/test";
+import { afterEach, describe, expect, test } from "vite-plus/test";
 import { defineComponent, h, nextTick, ref } from "vue";
 import { M3DataTable, createM3e } from "../src/index.js";
-import { nextSort, sortRows, type DataColumn, type DataSort } from "../src/utils/dataTable.js";
+import {
+  groupRows,
+  nextSort,
+  orderColumns,
+  sortRows,
+  summarize,
+  type DataColumn,
+  type DataSort,
+} from "../src/utils/dataTable.js";
 
 interface Order {
   ref: string;
@@ -71,6 +79,7 @@ describe("M3DataTable", () => {
             rowKey: (row: unknown) => (row as Order).ref,
             label: "Orders",
             selectable: true,
+            columnMenu: false,
             sort: sort.value,
             "onUpdate:sort": (value: DataSort | null) => (sort.value = value),
             selected: selected.value,
@@ -95,5 +104,140 @@ describe("M3DataTable", () => {
     await wrapper.get("thead [role=checkbox]").trigger("click");
     await nextTick();
     expect(selected.value.map(String).toSorted()).toEqual(["SO-10", "SO-11", "SO-2", "SO-9"]);
+  });
+});
+
+interface Line {
+  ref: string;
+  city: string;
+  cases: number;
+}
+
+const LINES: Line[] = [
+  { ref: "A", city: "Oran", cases: 4 },
+  { ref: "B", city: "Blida", cases: 10 },
+  { ref: "C", city: "Oran", cases: 6 },
+  { ref: "D", city: "", cases: 1 },
+];
+
+const LINE_COLUMNS: DataColumn<Line>[] = [
+  { key: "ref", label: "Order", sortable: true },
+  { key: "city", label: "City", sortable: true },
+  { key: "cases", label: "Cases", numeric: true, sortable: true, summary: "sum" },
+];
+
+describe("column layout helpers", () => {
+  test("hidden columns drop out and pinned ones come first in pin order", () => {
+    const keys = orderColumns(LINE_COLUMNS, ["city"], ["cases"]).map((column) => column.key);
+    expect(keys).toEqual(["cases", "ref"]);
+  });
+
+  test("groups keep first-appearance order; empty values get their own group; summaries add up", () => {
+    const groups = groupRows(LINES, LINE_COLUMNS[1]!, "en", "No city");
+    expect(groups.map((group) => [group.label, group.rows.map((row) => row.ref)])).toEqual([
+      ["Oran", ["A", "C"]],
+      ["Blida", ["B"]],
+      ["No city", ["D"]],
+    ]);
+    expect(summarize(groups[0]!.rows, LINE_COLUMNS[2]!)).toBe(10);
+    expect(summarize(groups[0]!.rows, { key: "cases", label: "", summary: "average" })).toBe(5);
+    expect(summarize(groups[0]!.rows, LINE_COLUMNS[0]!)).toBeNull();
+  });
+});
+
+describe("M3DataTable column menu", () => {
+  afterEach(() => {
+    document.body.innerHTML = "";
+  });
+
+  function table() {
+    const state = {
+      sort: ref<DataSort | null>(null),
+      group: ref<string | null>(null),
+      pinned: ref<string[]>([]),
+      hidden: ref<string[]>([]),
+    };
+    const wrapper = mount(
+      defineComponent({
+        setup: () => () =>
+          h(M3DataTable, {
+            rows: LINES,
+            columns: LINE_COLUMNS as unknown as DataColumn<unknown>[],
+            rowKey: (row: unknown) => (row as Line).ref,
+            label: "Lines",
+            emptyGroupLabel: "No city",
+            sort: state.sort.value,
+            "onUpdate:sort": (value: DataSort | null) => (state.sort.value = value),
+            group: state.group.value,
+            "onUpdate:group": (value: string | null) => (state.group.value = value),
+            pinned: state.pinned.value,
+            "onUpdate:pinned": (value: string[]) => (state.pinned.value = value),
+            hidden: state.hidden.value,
+            "onUpdate:hidden": (value: string[]) => (state.hidden.value = value),
+          }),
+      }),
+      { attachTo: document.body, global: { plugins: [createM3e({ reducedMotion: true })] } },
+    );
+    const openMenu = async (index: number) => {
+      await wrapper.findAll("thead th")[index]!.get("button").trigger("click");
+      await nextTick();
+      await nextTick();
+    };
+    const choose = async (label: string) => {
+      const item = [...document.querySelectorAll<HTMLElement>("[role^=menuitem]")].find((entry) =>
+        entry.textContent?.includes(label),
+      );
+      item!.click();
+      await nextTick();
+      await nextTick();
+    };
+    return { wrapper, state, openMenu, choose };
+  }
+
+  test("a header opens its menu, and sorting from it sets the model", async () => {
+    const { state, openMenu, choose } = table();
+    await openMenu(2);
+    expect(document.querySelector("[role=menu]")).not.toBeNull();
+    await choose("Sort descending");
+    expect(state.sort.value).toEqual({ key: "cases", direction: "descending" });
+  });
+
+  test("grouping draws a header per group with its count and summary, and collapses it", async () => {
+    const { wrapper, state, openMenu, choose } = table();
+    await openMenu(1);
+    await choose("Group by this column");
+    expect(state.group.value).toBe("city");
+    const groups = () => wrapper.findAll(".m3-data-table__group");
+    expect(
+      groups().map((row) =>
+        row
+          .get("th")
+          .findAll("button > span")
+          .map((span) => span.text()),
+      ),
+    ).toEqual([
+      ["Oran", "2 rows"],
+      ["Blida", "1 row"],
+      ["No city", "1 row"],
+    ]);
+    expect(groups()[0]!.findAll("td").at(-1)!.text()).toBe("10");
+    expect(wrapper.findAll("tbody tr")).toHaveLength(7);
+    await groups()[0]!.trigger("click");
+    expect(wrapper.findAll("tbody tr")).toHaveLength(5);
+    expect(groups()[0]!.get("button").attributes("aria-expanded")).toBe("false");
+  });
+
+  test("pinning moves a column first and makes it stick; hiding takes it out", async () => {
+    const { wrapper, state, openMenu, choose } = table();
+    await openMenu(2);
+    await choose("Pin to start");
+    expect(state.pinned.value).toEqual(["cases"]);
+    const headers = () => wrapper.findAll("thead th").map((cell) => cell.text());
+    expect(headers()[0]).toContain("Cases");
+    expect(wrapper.findAll("thead th")[0]!.classes()).toContain("m3-data-table__pinned");
+    await openMenu(2);
+    await choose("Hide column");
+    expect(state.hidden.value).toEqual(["city"]);
+    expect(headers().some((text) => text.includes("City"))).toBe(false);
   });
 });
