@@ -16,6 +16,7 @@
         </M3IconButton>
       </template>
       <template v-if="$slots.actions" #actions><slot name="actions" /></template>
+      <template v-if="$slots.bottom" #bottom><slot name="bottom" /></template>
     </M3TopAppBar>
 
     <slot />
@@ -36,7 +37,8 @@ import type { ComponentPublicInstance } from "vue";
  * content. A tab root gets the large flexible bar; a pushed page (`back`) gets the small bar with a
  * back button and hides the navigation bar for as long as it is mounted.
  *
- * Slots: `actions` (trailing icon buttons in the bar), default (the content), `fab` (positioned
+ * Slots: `actions` (trailing icon buttons in the bar), `bottom` (tabs or a filter pinned under the
+ * bar - Framework7's subnavbar), default (the content), `fab` (positioned
  * above the navigation bar and the gesture area), `fixed` (anything else outside the scroller).
  */
 const props = defineProps<{

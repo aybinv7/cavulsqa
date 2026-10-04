@@ -40,7 +40,11 @@ down). One FAB per screen, for its single most important constructive action, in
 
 **`M3Tabs` + `M3Tab`** - `variant` primary (content-width indicator, optional `#icon`) for peer views
 of one subject; secondary for subdivisions inside a primary tab. `scrollable` beyond ~4 tabs.
-Arrow keys move. → tabs/specs
+Arrow keys move. Swipeable pages: put the tabs in `AppPage`'s `#bottom` slot (pinned under the
+bar), the pages in `M3TabPanels` + `M3TabPanel value`, bind one `v-model` to both and pass both
+the same `createTabPager()` so the indicator follows the swipe. Give `M3TabPanels` a height; each
+page scrolls on its own. A carousel or swipe row inside a page keeps its own sideways drag.
+→ tabs/specs
 
 **`M3TopAppBar`** - rendered by `AppPage`. `small` for pushed pages, `medium`/`large` flexible for
 roots and long titles. Tapping the bar outside its buttons scrolls the page to the top (Android's

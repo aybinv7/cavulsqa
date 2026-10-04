@@ -9,6 +9,7 @@ import MenuIcon from "~icons/material-symbols/menu-rounded";
 import ShapesIcon from "~icons/material-symbols/shapes-outline-rounded";
 import WidgetsIcon from "~icons/material-symbols/widgets-outline-rounded";
 import TuneIcon from "~icons/material-symbols/tune-rounded";
+import TabsIcon from "~icons/material-symbols/tab-outline-rounded";
 import CalendarIcon from "~icons/material-symbols/calendar-today-outline-rounded";
 import SpeedIcon from "~icons/material-symbols/speed-rounded";
 import CarouselIcon from "~icons/material-symbols/view-carousel-outline-rounded";
@@ -23,6 +24,8 @@ export interface GallerySection {
   subtitleKey: string;
   /** Loaded only when the section opens, so the gallery index stays light. */
   component: Component;
+  /** A section with its own route, for a demo that needs the page's app bar. */
+  path?: string;
 }
 
 const section = (
@@ -128,6 +131,18 @@ export const sections: readonly GallerySection[] = [
     () => import("../components/sections/GallerySurfaces.vue"),
   ),
 ];
+
+/** Tabs pinned under the app bar need the whole page, so they have their own route. */
+export const TABS_SECTION: GallerySection = {
+  id: "tabs",
+  icon: TabsIcon,
+  shape: "pill",
+  tone: "primary",
+  titleKey: "gallery.sections.tabs.title",
+  subtitleKey: "gallery.sections.tabs.subtitle",
+  component: { render: () => null },
+  path: "/gallery/tabs/",
+};
 
 export function findSection(id: string): GallerySection | undefined {
   return sections.find((entry) => entry.id === id);

@@ -243,6 +243,10 @@
       "scale": {
         "title": "Listes à grande échelle",
         "subtitle": "5 000 lignes, tirer pour actualiser"
+      },
+      "tabs": {
+        "title": "Onglets glissants",
+        "subtitle": "Des pages sous la barre, à faire glisser"
       }
     },
     "buttons": {
@@ -660,6 +664,28 @@
       "customer": "Client",
       "orders": "{count} commande | {count} commandes",
       "updated": "Clients mis à jour"
+    },
+    "tabs": {
+      "title": "Onglets glissants",
+      "orders": "Commandes",
+      "invoices": "Factures",
+      "payments": "Paiements",
+      "returns": "Retours",
+      "ordersNote": "Glissez d'un onglet à l'autre n'importe où sur la page ; glissez une ligne vers la gauche pour l'archiver - la ligne l'emporte sur les onglets.",
+      "order": "SO-{n}",
+      "orderLines": "Aucune ligne | {count} ligne | {count} lignes",
+      "archive": "Archiver",
+      "invoice": "FAC-{n}",
+      "amount": "{value} DA",
+      "paymentsNote": "Un carrousel dans un onglet garde son propre glissement latéral.",
+      "methods": {
+        "cash": "Espèces",
+        "cheque": "Chèque",
+        "transfer": "Virement",
+        "credit": "Crédit"
+      },
+      "noReturns": "Aucun retour",
+      "noReturnsText": "Les marchandises retournées apparaissent ici."
     }
   },
   "settings": {

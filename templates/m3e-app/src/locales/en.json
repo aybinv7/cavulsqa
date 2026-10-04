@@ -243,6 +243,10 @@
       "scale": {
         "title": "Lists at scale",
         "subtitle": "5,000 rows, pull to refresh"
+      },
+      "tabs": {
+        "title": "Swipeable tabs",
+        "subtitle": "Pages under the app bar, swiped between"
       }
     },
     "buttons": {
@@ -660,6 +664,28 @@
       "customer": "Customer",
       "orders": "{count} order | {count} orders",
       "updated": "Customers updated"
+    },
+    "tabs": {
+      "title": "Swipeable tabs",
+      "orders": "Orders",
+      "invoices": "Invoices",
+      "payments": "Payments",
+      "returns": "Returns",
+      "ordersNote": "Swipe between tabs anywhere on the page; swipe a row left to archive it - the row wins over the pager.",
+      "order": "SO-{n}",
+      "orderLines": "No lines | {count} line | {count} lines",
+      "archive": "Archive",
+      "invoice": "INV-{n}",
+      "amount": "{value} DA",
+      "paymentsNote": "A carousel inside a tab keeps its own sideways drag.",
+      "methods": {
+        "cash": "Cash",
+        "cheque": "Cheque",
+        "transfer": "Transfer",
+        "credit": "Credit"
+      },
+      "noReturns": "No returns",
+      "noReturnsText": "Returned goods show up here."
     }
   },
   "settings": {

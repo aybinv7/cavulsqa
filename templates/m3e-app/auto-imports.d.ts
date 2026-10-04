@@ -17,6 +17,7 @@ declare global {
   const LOCALES: typeof import('./src/plugins/i18n.plugin').LOCALES
   const ORDER_STATUSES: typeof import('./src/modules/demo/composables/useOrderStatus').ORDER_STATUSES
   const STATUS_LOOK: typeof import('./src/modules/demo/composables/useOrderStatus').STATUS_LOOK
+  const TABS_SECTION: typeof import('./src/modules/gallery/composables/useGallerySections').TABS_SECTION
   const TONE_CLASSES: typeof import('./src/shared/utils/tone').TONE_CLASSES
   const WILAYAS: typeof import('./src/modules/gallery/composables/wilayas').WILAYAS
   const WILAYA_OPTIONS: typeof import('./src/modules/gallery/composables/wilayas').WILAYA_OPTIONS
@@ -417,6 +418,7 @@ declare module 'vue' {
     readonly LOCALES: UnwrapRef<typeof import('./src/plugins/i18n.plugin')['LOCALES']>
     readonly ORDER_STATUSES: UnwrapRef<typeof import('./src/modules/demo/composables/useOrderStatus')['ORDER_STATUSES']>
     readonly STATUS_LOOK: UnwrapRef<typeof import('./src/modules/demo/composables/useOrderStatus')['STATUS_LOOK']>
+    readonly TABS_SECTION: UnwrapRef<typeof import('./src/modules/gallery/composables/useGallerySections')['TABS_SECTION']>
     readonly TONE_CLASSES: UnwrapRef<typeof import('./src/shared/utils/tone')['TONE_CLASSES']>
     readonly WILAYAS: UnwrapRef<typeof import('./src/modules/gallery/composables/wilayas')['WILAYAS']>
     readonly WILAYA_OPTIONS: UnwrapRef<typeof import('./src/modules/gallery/composables/wilayas')['WILAYA_OPTIONS']>
