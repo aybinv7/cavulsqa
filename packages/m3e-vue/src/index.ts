@@ -74,6 +74,7 @@ export { default as M3TimePickerPanel } from "./components/datetime/M3TimePicker
 export { default as M3TimeWheel } from "./components/picker/M3TimeWheel.vue";
 export { default as M3Tooltip } from "./components/tooltip/M3Tooltip.vue";
 export { default as M3TopAppBar } from "./components/appbar/M3TopAppBar.vue";
+export { default as M3Tree } from "./components/tree/M3Tree.vue";
 export { default as M3VirtualList } from "./components/list/M3VirtualList.vue";
 export { default as M3WheelColumn } from "./components/picker/M3WheelColumn.vue";
 export { default as M3WheelPicker } from "./components/picker/M3WheelPicker.vue";
@@ -164,3 +165,4 @@ export { moveItem } from "./utils/sortable.js";
 export type { PhotoItem } from "./components/photo/types.js";
 export { createTabPager, type TabPager } from "./components/tabs/pager.js";
 export { groupKey } from "./utils/listIndex.js";
+export type { TreeNode } from "./utils/tree.js";

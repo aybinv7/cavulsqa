@@ -73,6 +73,7 @@ export const COMPONENT_NAMES = [
   "M3TimeWheel",
   "M3Tooltip",
   "M3TopAppBar",
+  "M3Tree",
   "M3VirtualList",
   "M3WheelColumn",
   "M3WheelPicker",
