@@ -52,6 +52,7 @@ export default defineConfig({
      */
     AutoImport({
       include: [/\.[tj]sx?$/, /\.vue$/, /\.vue\?vue/],
+      exclude: [/[\\/]node_modules[\\/]/, /[\\/]\.git[\\/]/, /[\\/]dist[\\/]/],
       imports: ["vue", "vue-i18n", "@vueuse/core", getFramework7AutoImports()],
       dirs: [
         "src/shared/composables/**",

@@ -68,6 +68,7 @@ export default defineConfig(({ mode }) => ({
 
     AutoImport({
       include: [/\.[tj]sx?$/, /\.vue$/, /\.vue\?vue/],
+      exclude: [/[\\/]node_modules[\\/]/, /[\\/]\.git[\\/]/, /[\\/]dist[\\/]/],
       imports: [
         "vue",
         "vue-i18n",
