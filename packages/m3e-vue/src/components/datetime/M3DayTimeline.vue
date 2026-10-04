@@ -293,6 +293,15 @@ defineExpose({ scrollToMinute });
   cursor: pointer;
 }
 
+.m3-day-timeline__event > :slotted(*),
+.m3-day-timeline__time {
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .m3-day-timeline__event--compact {
   flex-direction: row;
   align-items: center;

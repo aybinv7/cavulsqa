@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { computed, nextTick, shallowRef, useId } from "vue";
+import { computed, nextTick, shallowRef, useAttrs, useId } from "vue";
 
 /**
  * The M3 text field, filled or outlined, with a label that floats up on focus or content,
  * supporting text, an error state with its message, a character counter, and `leading` /
  * `trailing` slots for icons. Native input attributes (`type`, `inputmode`, `autocomplete`...)
  * pass through to the input.
+ *
+ * A phone number, an email address, a URL or a number reads left to right in every language, so
+ * for those `type`s and `inputmode`s the value - prefix and suffix with it - stays left to right in
+ * a right-to-left layout while the label and icons mirror. `valueDir` overrides the guess.
  *
  * It is a controlled field: when the bound model refuses or reshapes what was typed - a formatter
  * grouping a phone number, a filter dropping letters - the input shows the model, not the keystroke.
@@ -27,6 +31,8 @@ const props = withDefaults(
     readonly?: boolean;
     prefix?: string;
     suffix?: string;
+    /** The direction of the value itself; left to right by default for numbers, phones, emails, URLs. */
+    valueDir?: "ltr" | "rtl" | "auto";
   }>(),
   { variant: "filled", multiline: false, rows: 3, disabled: false, readonly: false },
 );
@@ -35,6 +41,16 @@ const model = defineModel<string>({ default: "" });
 const focused = shallowRef(false);
 const id = useId();
 const supportId = `${id}-support`;
+
+const LEFT_TO_RIGHT_TYPES = new Set(["tel", "email", "url", "number"]);
+const LEFT_TO_RIGHT_MODES = new Set(["tel", "email", "url", "numeric", "decimal"]);
+const attrs = useAttrs();
+const valueDir = computed(() => {
+  if (props.valueDir) return props.valueDir;
+  const type = String(attrs.type ?? "");
+  const mode = String(attrs.inputmode ?? "");
+  return LEFT_TO_RIGHT_TYPES.has(type) || LEFT_TO_RIGHT_MODES.has(mode) ? "ltr" : undefined;
+});
 
 const floated = computed(() => focused.value || model.value.length > 0 || Boolean(props.prefix));
 const message = computed(() => props.error || props.supporting);
@@ -66,7 +82,7 @@ function settle(event: Event) {
       <span v-if="$slots.leading" class="m3-text-field__icon"><slot name="leading" /></span>
       <span class="m3-text-field__body">
         <span class="m3-text-field__label">{{ props.label }}</span>
-        <span class="m3-text-field__row">
+        <span class="m3-text-field__row" :dir="valueDir">
           <span v-if="props.prefix" class="m3-text-field__affix m3-text-field__affix--prefix">{{
             props.prefix
           }}</span>

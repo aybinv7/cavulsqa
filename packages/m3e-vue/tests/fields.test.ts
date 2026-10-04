@@ -182,3 +182,28 @@ describe("M3TextField as a controlled field", () => {
     wrapper.unmount();
   });
 });
+
+describe("M3TextField value direction", () => {
+  test("numbers, phones, emails and URLs keep left to right in any layout", () => {
+    const phone = mount(M3TextField, {
+      props: { label: "Phone", prefix: "+213" },
+      attrs: { inputmode: "tel" },
+      global: { plugins },
+    });
+    expect(phone.get(".m3-text-field__row").attributes("dir")).toBe("ltr");
+    const email = mount(M3TextField, {
+      props: { label: "Email" },
+      attrs: { type: "email" },
+      global: { plugins },
+    });
+    expect(email.get(".m3-text-field__row").attributes("dir")).toBe("ltr");
+    const name = mount(M3TextField, { props: { label: "Name" }, global: { plugins } });
+    expect(name.get(".m3-text-field__row").attributes("dir")).toBeUndefined();
+    const forced = mount(M3TextField, {
+      props: { label: "Code", valueDir: "rtl" },
+      attrs: { inputmode: "numeric" },
+      global: { plugins },
+    });
+    expect(forced.get(".m3-text-field__row").attributes("dir")).toBe("rtl");
+  });
+});

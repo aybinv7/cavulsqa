@@ -103,6 +103,18 @@ Android share sheet. It must be published before the next creator release.
   2,000-message thread: opening 2.8s to 130ms, a new message 545ms to 99ms, the worst frame while
   scrolling back 1.5s to 99ms. `useConversationScroll` exposes `hold(change)` for the same purpose.
 
+**Right-to-left and dark, swept on a device:**
+
+- A verification code reads left to right in every language: `M3CodeField` keeps its cells in that
+  order under `dir="rtl"`, where they had filled from the right.
+- `M3TextField` keeps the value of a phone number, email, URL or number field left to right in a
+  right-to-left layout, prefix and suffix with it, while the label and icons mirror; a `+213`
+  number read backwards before. `valueDir` overrides the guess.
+- The reaction pill and the message menu are placed from their measured width and kept inside the
+  screen; a pill wider than the room beside a bubble ran off the edge (`alignBeside`).
+- `M3DayTimeline` shortens an event's text with an ellipsis inside its card; in a narrow lane the
+  text ran past the card's start edge, which under right-to-left cut its first letters.
+
 **Packaging, found by installing the tarballs into a fresh project at the top of every peer range:**
 
 - `@cavulsqa/m3e` bundles `@material/material-color-utilities` instead of importing it. Its 0.4.0
@@ -262,6 +274,13 @@ menu; `f7-app` stays the default.
   slides the bar; the row is released for the keyboard and pushed pages.
 - The gallery's data table switches between 30, 1,000 and 5,000 rows, so scale can be checked on
   any device.
+- **Fixed: dark mode never applied** unless the phone itself was dark and Framework7 happened to
+  agree. `F7App` turns an unset `darkMode` into `false`, and Framework7 then clears `dark` from
+  `<html>` at init - after the theme had set it. The template now hands Framework7 the mode the
+  theme already applied.
+- The document's `lang` and `dir` follow the app's locale from the first paint (they were only set
+  on a language change), and Framework7's own right-to-left flag follows them, so a right-to-left
+  locale needs nothing but its translation.
 - Generated apps depend on the 1.3.0 libraries.
 
 ### 2.9.3

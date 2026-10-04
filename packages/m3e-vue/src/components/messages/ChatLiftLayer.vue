@@ -4,7 +4,7 @@ import type { MessageAction } from "./types.js";
 import { useHaptics } from "../../composables/services.js";
 import { useFocusTrap } from "../../composables/useFocusTrap.js";
 import { useOverlay } from "../../composables/useOverlay.js";
-import { liftPlacement } from "../../utils/messageLift.js";
+import { alignBeside, liftPlacement } from "../../utils/messageLift.js";
 import { ownReaction, type ChatMessage } from "../../utils/messages.js";
 
 const EDGE = 12;
@@ -96,9 +96,11 @@ function place() {
   );
   const rtl = getComputedStyle(target).direction === "rtl";
   const toRight = (message.value?.sent ?? false) !== rtl;
-  const side: Record<string, string> = toRight
-    ? { right: `${Math.max(EDGE, window.innerWidth - rect.right)}px` }
-    : { left: `${Math.max(EDGE, rect.left)}px` };
+  const width = window.innerWidth;
+  const beside = (element: HTMLElement | null) => ({
+    left: `${alignBeside(rect, element?.offsetWidth ?? 0, width, toRight, EDGE)}px`,
+    maxWidth: `${width - EDGE * 2}px`,
+  });
   placement.value = {
     ghost: {
       top: `${rect.top}px`,
@@ -110,12 +112,12 @@ function place() {
     },
     pill: {
       top: `${result.pillTop}px`,
-      ...side,
+      ...beside(pill.value),
       transformOrigin: toRight ? "bottom right" : "bottom left",
     },
     menu: {
       top: `${result.menuTop}px`,
-      ...side,
+      ...beside(menu.value),
       transformOrigin: toRight ? "top right" : "top left",
     },
   };

@@ -223,4 +223,4 @@ export type { MessageAction } from "./components/messages/types.js";
 export type { AttachOption } from "./components/sheet/attach.js";
 export { sanitizeCode, type CodeAlphabet } from "./utils/codeField.js";
 export { hasEntry, splitEntries } from "./utils/chipField.js";
-export { liftPlacement, type LiftPlacement } from "./utils/messageLift.js";
+export { alignBeside, liftPlacement, type LiftPlacement } from "./utils/messageLift.js";

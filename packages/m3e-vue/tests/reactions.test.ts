@@ -10,7 +10,7 @@ import {
   reactionTotal,
   type ChatMessage,
 } from "../src/index.js";
-import { liftPlacement } from "../src/utils/messageLift.js";
+import { alignBeside, liftPlacement } from "../src/utils/messageLift.js";
 
 const plugins = [createM3e({ reducedMotion: true })];
 const Icon = markRaw(defineComponent({ render: () => h("svg") }));
@@ -78,6 +78,20 @@ describe("liftPlacement", () => {
       height: 530,
       menuTop: 640,
     });
+  });
+});
+
+describe("alignBeside", () => {
+  const bubble = { left: 60, right: 310 };
+
+  test("lines up with the bubble's side when there is room", () => {
+    expect(alignBeside(bubble, 200, 360, true, 12)).toBe(110);
+    expect(alignBeside(bubble, 200, 360, false, 12)).toBe(60);
+  });
+
+  test("slides inward rather than off either edge", () => {
+    expect(alignBeside(bubble, 320, 360, true, 12)).toBe(12);
+    expect(alignBeside({ left: 120, right: 340 }, 300, 360, false, 12)).toBe(48);
   });
 });
 

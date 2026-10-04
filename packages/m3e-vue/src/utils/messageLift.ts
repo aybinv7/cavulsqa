@@ -34,3 +34,20 @@ export function liftPlacement(
     menuTop: top + height + sizes.gap,
   };
 }
+
+/**
+ * The left edge for something `size` wide that lines up with one side of the bubble - its right
+ * edge when `toRight`, else its left - and stays `margin` inside the screen. A reaction pill wider
+ * than the room beside a bubble slides inward instead of running off the edge.
+ */
+export function alignBeside(
+  bubble: { left: number; right: number },
+  size: number,
+  viewport: number,
+  toRight: boolean,
+  margin: number,
+): number {
+  const wanted = toRight ? bubble.right - size : bubble.left;
+  const highest = viewport - margin - size;
+  return Math.max(margin, Math.min(wanted, highest));
+}

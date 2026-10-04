@@ -10,6 +10,7 @@ import { sanitizeCode, type CodeAlphabet } from "../../utils/codeField.js";
  * What the alphabet does not allow is dropped, a pasted "Code: 482 913" fills all six, and a full
  * code emits `complete`.
  *
+ * Codes read left to right in every language, so the cells do too in a right-to-left layout.
  * A filled cell rounds off and its character springs in; `error` turns the row to the error
  * colours with a shake, and typing again clears it for the caller to re-check. `success` turns it
  * to the primary colours in a wave and makes it read-only - the code was accepted.
@@ -182,6 +183,7 @@ defineExpose({
   position: relative;
   display: flex;
   gap: 8px;
+  direction: ltr;
 }
 
 .m3-code-field__input {
