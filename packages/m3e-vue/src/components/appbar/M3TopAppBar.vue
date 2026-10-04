@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, useTemplateRef } from "vue";
+import { computed, onScopeDispose, useTemplateRef } from "vue";
 import { useReducedMotion } from "../../composables/useReducedMotion.js";
 import { useScrollContainer, type ScrollTarget } from "../../composables/useScrollContainer.js";
+import { followOffset, snapOffset } from "../../utils/scrollHide.js";
 
 /**
  * The top app bar: `small` (64dp), or the flexible `medium` and `large` whose big title scrolls
@@ -12,6 +13,11 @@ import { useScrollContainer, type ScrollTarget } from "../../composables/useScro
  * `#bottom` holds what pins under the bar - Framework7's subnavbar: tabs, a segmented filter. It
  * sits below a flexible bar's big title and sticks under the bar once that title has scrolled
  * away, taking the bar's colour with it.
+ *
+ * `scrollBehavior="enterAlways"` (small bars) is Compose's enter-always behaviour: the bar slides
+ * away with the content as it scrolls down and comes back the moment it scrolls up, following the
+ * finger, then settles fully in or out; the status-bar strip stays covered and `#bottom` travels
+ * with it.
  *
  * Tapping the bar anywhere but its buttons scrolls the content back to the top - the Android
  * stand-in for iOS's status-bar tap, which Android keeps for its own shade. `scrollToTop` turns it
@@ -29,8 +35,9 @@ const props = withDefaults(
     centered?: boolean;
     scrollTarget?: ScrollTarget;
     scrollToTop?: boolean;
+    scrollBehavior?: "pinned" | "enterAlways";
   }>(),
-  { variant: "small", centered: false, scrollToTop: true },
+  { variant: "small", centered: false, scrollToTop: true, scrollBehavior: "pinned" },
 );
 
 const bar = useTemplateRef<HTMLElement>("bar");
@@ -39,14 +46,41 @@ const bottom = useTemplateRef<HTMLElement>("bottom");
 const flexible = computed(() => props.variant !== "small");
 
 const reduced = useReducedMotion();
+const ROW = 64;
+const enterAlways = computed(() => props.scrollBehavior === "enterAlways" && !flexible.value);
+let offset = 0;
+let settle: ReturnType<typeof setTimeout> | undefined;
+
+function place(px: number, animate: boolean) {
+  container.value?.style.setProperty("--m3-app-bar-offset", `${px}px`);
+  for (const element of [bar.value, bottom.value]) {
+    if (!element) continue;
+    element.classList.toggle("m3-app-bar--following", !animate || reduced.value);
+    element.style.setProperty("--m3-app-bar-offset", `${px}px`);
+  }
+}
+
+function follow(scrollTop: number, delta: number) {
+  offset = followOffset(offset, delta, scrollTop, ROW);
+  place(offset, false);
+  clearTimeout(settle);
+  settle = setTimeout(() => {
+    offset = snapOffset(offset, container.value?.scrollTop ?? 0, ROW);
+    place(offset, true);
+  }, 140);
+}
+
+onScopeDispose(() => clearTimeout(settle));
+
 const INTERACTIVE = "button, a, input, select, textarea, [role=button], [role=menuitem]";
 
 const container = useScrollContainer(
   bar,
   () => props.scrollTarget,
-  (scrollTop) => {
+  (scrollTop, delta) => {
     const element = bar.value;
     if (!element) return;
+    if (enterAlways.value) follow(scrollTop, delta);
     element.toggleAttribute("data-scrolled", scrollTop > 0);
     bottom.value?.toggleAttribute("data-scrolled", scrollTop > 0);
     if (!flexible.value) return;
@@ -111,12 +145,39 @@ function onTap(event: MouseEvent) {
   padding-top: env(safe-area-inset-top);
   background: var(--md-sys-color-surface);
   color: var(--md-sys-color-on-surface);
-  transition: background-color var(--md-sys-motion-spring-default-effects-duration)
-    var(--md-sys-motion-spring-default-effects);
 }
 
 .m3-app-bar[data-scrolled] {
   background: var(--md-sys-color-surface-container);
+}
+
+.m3-app-bar,
+.m3-app-bar-bottom {
+  transform: translateY(calc(var(--m3-app-bar-offset, 0px) * -1));
+  transition:
+    background-color var(--md-sys-motion-spring-default-effects-duration)
+      var(--md-sys-motion-spring-default-effects),
+    transform var(--md-sys-motion-spring-fast-spatial-duration)
+      var(--md-sys-motion-spring-fast-spatial);
+}
+
+.m3-app-bar::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top);
+  background: inherit;
+  z-index: 1;
+  transform: translateY(var(--m3-app-bar-offset, 0px));
+  transition: inherit;
+  pointer-events: none;
+}
+
+.m3-app-bar.m3-app-bar--following,
+.m3-app-bar-bottom.m3-app-bar--following,
+.m3-app-bar--following::before {
+  transition: background-color var(--md-sys-motion-spring-default-effects-duration)
+    var(--md-sys-motion-spring-default-effects);
 }
 
 .m3-app-bar-bottom {
@@ -125,8 +186,6 @@ function onTap(event: MouseEvent) {
   top: calc(env(safe-area-inset-top) + 64px);
   z-index: 3;
   background: var(--md-sys-color-surface);
-  transition: background-color var(--md-sys-motion-spring-default-effects-duration)
-    var(--md-sys-motion-spring-default-effects);
 }
 
 .m3-app-bar-bottom[data-scrolled] {

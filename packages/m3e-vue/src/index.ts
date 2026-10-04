@@ -145,6 +145,8 @@ export {
 } from "./composables/useFormDraft.js";
 export { useOverlay, type UseOverlayOptions } from "./composables/useOverlay.js";
 export { useScrollContainer, type ScrollTarget } from "./composables/useScrollContainer.js";
+export { useHideOnScroll, type HideOnScrollOptions } from "./composables/useHideOnScroll.js";
+export { followOffset, snapOffset, nextHideState, type HideState } from "./utils/scrollHide.js";
 export { vRipple } from "./directives/ripple.js";
 export { applyColorScheme, applySystemTokens, setDarkMode } from "./theme/applyTheme.js";
 export { BUTTON_METRICS, type ButtonSize } from "./components/button/sizes.js";

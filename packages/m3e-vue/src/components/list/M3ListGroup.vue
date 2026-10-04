@@ -39,7 +39,10 @@ const titleId = useId();
 
 .m3-list-group__title {
   position: sticky;
-  top: var(--m3-list-group-top, calc(env(safe-area-inset-top) + 64px));
+  top: var(
+    --m3-list-group-top,
+    calc(env(safe-area-inset-top) + 64px - var(--m3-app-bar-offset, 0px))
+  );
   z-index: 2;
   margin: 0;
   padding: 12px 28px 8px;
