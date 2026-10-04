@@ -25,6 +25,10 @@ export) before the next release.
   behind each - the owner first, whose row takes their reaction off (`react` with `null`), then
   the names in each reaction's new `by`, then the rest of a count it does not name
   (`reactionPeople`).
+- `useSwipeStep`: previous and next by swiping the content itself - a day, a record. It follows
+  the finger, leaves past a quarter of its width or on a flick, and the replacement slides in from
+  the other side; at an end it resists and springs back. Vertical scrolling stays native,
+  right-to-left mirrors it, reduced motion changes in place.
 - `M3Tabs` no longer replays a swipe. The indicator followed the finger to the next tab, then the
   selection caught up, the tabs re-rendered, and Vue re-applied the old tab's style binding - the
   indicator snapped back and animated forward again. It now has one writer, which skips a move to
