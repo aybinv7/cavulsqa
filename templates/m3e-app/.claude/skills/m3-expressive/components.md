@@ -38,6 +38,9 @@ peer actions on one screen; variants of one action are a FAB menu.
 
 ## Navigation
 
+**`M3Breadcrumbs`** - `items` (`{ label, href? }`), `@select`, `max` (the middle collapses into a
+menu past it), `label`. The last item is the current page. Fades the edge it overflows past.
+
 **`M3NavigationBar` / `M3NavigationRail` + `M3NavigationItem`** - the shell already renders these from
 `src/app/tabs.ts`; add a destination there. Items take `#icon="{ selected }"` (outlined → filled),
 `badge` (number or `true`). `@reselect` fires on tapping the current destination.
@@ -266,6 +269,17 @@ screen readers get a hidden table. Lines for change over time, bars to compare c
 donut for parts of one whole (at most ~6 segments). Feed them aggregates from SQL, never raw rows.
 
 ## Forms
+
+**`M3TextEditor`** - Framework7's text editor: `v-model` HTML, `label`, `placeholder`, `toolbar`
+(commands and `"|"`), `labels` for i18n. Bold, italic, underline, strikethrough, lists, links
+(through a popover), clear formatting. Its HTML is sanitised in and out (`sanitizeHtml` is exported
+
+- run it again wherever stored HTML is rendered with `v-html`). Use a plain multiline `M3TextField`
+  unless formatting is the point.
+
+**`M3ColorPicker`** - `v-model` `#rrggbb`, hue / chroma / tone sliders in HCT with previewing tracks,
+a hex field, optional `swatches`. Put it in a sheet with a draft and apply on confirm when the
+colour drives something expensive, such as the app theme.
 
 **`useFormDraft(key, state, options)`** - keeps what is typed into a form as a draft (debounced,
 written at once when the app goes to the background) and restores it when the form opens again.

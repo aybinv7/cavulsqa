@@ -98,12 +98,40 @@
       </M3FloatingToolbar>
     </div>
   </GalleryBlock>
+
+  <GalleryBlock
+    :title="t('gallery.navigation.breadcrumbs')"
+    :note="t('gallery.navigation.breadcrumbsNote')"
+    stack
+  >
+    <M3Breadcrumbs
+      :items="trail"
+      :label="t('gallery.navigation.breadcrumbs')"
+      :more-label="t('gallery.navigation.moreLevels')"
+      @select="(_, index) => (depth = index + 1)"
+    />
+    <div class="flex flex-wrap gap-2">
+      <M3Button variant="tonal" size="s" :disabled="depth >= CATALOGUE.length" @click="depth += 1">
+        {{ t("gallery.navigation.deeper") }}
+      </M3Button>
+      <M3Button variant="text" size="s" :disabled="depth <= 1" @click="depth = 1">
+        {{ t("gallery.navigation.top") }}
+      </M3Button>
+    </div>
+  </GalleryBlock>
 </template>
 
 <script setup lang="ts">
 import GalleryBlock from "@/modules/gallery/components/GalleryBlock.vue";
 
 const { t } = useI18n();
+const CATALOGUE = ["catalogue", "beverages", "juices", "brand", "orange", "pack"] as const;
+const depth = ref<number>(CATALOGUE.length);
+const trail = computed(() =>
+  CATALOGUE.slice(0, depth.value).map((level) => ({
+    label: t(`gallery.navigation.levels.${level}`),
+  })),
+);
 const SCROLLING = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug"] as const;
 
 const primary = ref("flights");

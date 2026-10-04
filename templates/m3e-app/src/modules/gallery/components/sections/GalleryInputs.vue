@@ -121,6 +121,26 @@
       :label="t('gallery.inputs.note')"
     />
   </GalleryBlock>
+
+  <GalleryBlock
+    :title="t('gallery.inputs.richText')"
+    :note="t('gallery.inputs.richTextNote')"
+    stack
+  >
+    <M3TextEditor
+      v-model="report"
+      :label="t('gallery.inputs.report')"
+      :placeholder="t('gallery.inputs.reportPlaceholder')"
+      :labels="editorLabels"
+      :link-label="t('gallery.inputs.linkAddress')"
+      :apply-label="t('gallery.inputs.apply')"
+      :remove-link-label="t('gallery.inputs.removeLink')"
+      :invalid-link-text="t('gallery.inputs.invalidLink')"
+    />
+    <p class="type-body-small m-0 text-on-surface-variant">
+      {{ t("gallery.inputs.stored", { n: report.length }) }}
+    </p>
+  </GalleryBlock>
 </template>
 
 <script setup lang="ts">
@@ -128,6 +148,19 @@ import GalleryBlock from "@/modules/gallery/components/GalleryBlock.vue";
 import { WILAYA_OPTIONS } from "@/modules/gallery/composables/wilayas";
 
 const { t } = useI18n();
+const report = ref(
+  "<p>Visited <b>Supérette El Feth</b>: the shelf was restocked.</p><ul><li>Orange 1L - 12 cases</li><li>Apple 1L - 6 cases</li></ul>",
+);
+const editorLabels = computed(() => ({
+  bold: t("gallery.inputs.commands.bold"),
+  italic: t("gallery.inputs.commands.italic"),
+  underline: t("gallery.inputs.commands.underline"),
+  strikeThrough: t("gallery.inputs.commands.strikeThrough"),
+  insertUnorderedList: t("gallery.inputs.commands.bulleted"),
+  insertOrderedList: t("gallery.inputs.commands.numbered"),
+  link: t("gallery.inputs.commands.link"),
+  removeFormat: t("gallery.inputs.commands.clear"),
+}));
 const query = ref("");
 const customerQuery = ref("");
 const CUSTOMERS = [

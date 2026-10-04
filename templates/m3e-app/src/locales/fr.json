@@ -378,7 +378,20 @@
       "saved": "Enregistrés",
       "toolbar": "Barre d'outils flottante",
       "toolbarNote": "Remplace la barre d'application du bas ; standard ou vive, avec un FAB associé.",
-      "vibrant": "Couleurs vives"
+      "vibrant": "Couleurs vives",
+      "breadcrumbs": "Fil d'Ariane",
+      "breadcrumbsNote": "Où vous êtes dans une hiérarchie ; chaque niveau permet de remonter. Au-delà de quatre niveaux, le milieu se replie dans un menu.",
+      "moreLevels": "Afficher les niveaux masqués",
+      "deeper": "Descendre",
+      "top": "Revenir en haut",
+      "levels": {
+        "catalogue": "Catalogue",
+        "beverages": "Boissons",
+        "juices": "Jus",
+        "brand": "Ramy",
+        "orange": "Orange 1 L",
+        "pack": "Pack de 6"
+      }
     },
     "overlays": {
       "sheet": "Feuilles du bas",
@@ -567,7 +580,26 @@
       },
       "wilaya": "Wilaya",
       "wilayaHint": "Essayez « bej » ou « setif »",
-      "results": "Aucun résultat | {count} résultat | {count} résultats"
+      "results": "Aucun résultat | {count} résultat | {count} résultats",
+      "richText": "Texte enrichi",
+      "richTextNote": "Gras, listes et liens pour un compte rendu de visite. Ce qui est enregistré est du HTML nettoyé : scripts et styles collés n'entrent jamais.",
+      "report": "Compte rendu de visite",
+      "reportPlaceholder": "Ce qui s'est passé lors de cette visite",
+      "linkAddress": "Adresse du lien",
+      "apply": "Appliquer",
+      "removeLink": "Retirer le lien",
+      "invalidLink": "Utilisez une adresse web, e-mail ou téléphone",
+      "stored": "{n} caractères de HTML enregistrés",
+      "commands": {
+        "bold": "Gras",
+        "italic": "Italique",
+        "underline": "Souligné",
+        "strikeThrough": "Barré",
+        "bulleted": "Liste à puces",
+        "numbered": "Liste numérotée",
+        "link": "Lien",
+        "clear": "Effacer la mise en forme"
+      }
     },
     "carousels": {
       "multiBrowse": "Multi-navigation",
@@ -1019,7 +1051,14 @@
       "violet": "Violet",
       "pink": "Rose",
       "slate": "Ardoise"
-    }
+    },
+    "hue": "Teinte",
+    "chroma": "Chroma",
+    "tone": "Ton",
+    "hex": "Hex",
+    "pickNote": "Choisie en HCT, l'espace où Material construit ses schémas : la teinte reste fixe quand le ton et le chroma bougent.",
+    "cancel": "Annuler",
+    "apply": "Utiliser cette couleur"
   },
   "errors": {
     "notFoundTitle": "Introuvable",

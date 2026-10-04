@@ -378,7 +378,20 @@
       "saved": "Saved",
       "toolbar": "Floating toolbar",
       "toolbarNote": "Replaces the bottom app bar; standard or vibrant, with a paired FAB.",
-      "vibrant": "Vibrant colours"
+      "vibrant": "Vibrant colours",
+      "breadcrumbs": "Breadcrumbs",
+      "breadcrumbsNote": "Where you are in a hierarchy; each level goes back up. Past four levels the middle folds into a menu.",
+      "moreLevels": "Show hidden levels",
+      "deeper": "Go deeper",
+      "top": "Back to the top",
+      "levels": {
+        "catalogue": "Catalogue",
+        "beverages": "Beverages",
+        "juices": "Juices",
+        "brand": "Ramy",
+        "orange": "Orange 1L",
+        "pack": "Pack of 6"
+      }
     },
     "overlays": {
       "sheet": "Bottom sheets",
@@ -567,7 +580,26 @@
       },
       "wilaya": "Wilaya",
       "wilayaHint": "Try \"bej\" or \"setif\"",
-      "results": "No results | {count} result | {count} results"
+      "results": "No results | {count} result | {count} results",
+      "richText": "Rich text",
+      "richTextNote": "Bold, lists and links for a visit report. What is stored is sanitised HTML: pasted scripts and styles never get in.",
+      "report": "Visit report",
+      "reportPlaceholder": "What happened on this visit",
+      "linkAddress": "Link address",
+      "apply": "Apply",
+      "removeLink": "Remove link",
+      "invalidLink": "Use a web, email or phone address",
+      "stored": "{n} characters of HTML stored",
+      "commands": {
+        "bold": "Bold",
+        "italic": "Italic",
+        "underline": "Underline",
+        "strikeThrough": "Strikethrough",
+        "bulleted": "Bulleted list",
+        "numbered": "Numbered list",
+        "link": "Link",
+        "clear": "Clear formatting"
+      }
     },
     "carousels": {
       "multiBrowse": "Multi-browse",
@@ -1019,7 +1051,14 @@
       "violet": "Violet",
       "pink": "Pink",
       "slate": "Slate"
-    }
+    },
+    "hue": "Hue",
+    "chroma": "Chroma",
+    "tone": "Tone",
+    "hex": "Hex",
+    "pickNote": "Picked in HCT, the space Material builds schemes in: hue stays put while tone and chroma move.",
+    "cancel": "Cancel",
+    "apply": "Use this colour"
   },
   "errors": {
     "notFoundTitle": "Not found",

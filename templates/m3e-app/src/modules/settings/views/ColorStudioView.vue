@@ -29,19 +29,37 @@
           />
         </template>
       </M3TextField>
-      <label class="relative mt-2">
-        <span class="m3-visually-hidden">{{ t("studio.pick") }}</span>
-        <input
-          type="color"
-          class="absolute inset-0 z-10 size-full cursor-pointer opacity-0"
-          :value="settings.seed"
-          @input="onPicked"
-        />
-        <M3IconButton variant="tonal" size="m" :label="t('studio.pick')" tabindex="-1">
-          <i-ms-tune-rounded />
-        </M3IconButton>
-      </label>
+      <M3IconButton
+        variant="tonal"
+        size="m"
+        class="mt-2"
+        :label="t('studio.pick')"
+        @click="openPicker"
+      >
+        <i-ms-tune-rounded />
+      </M3IconButton>
     </div>
+
+    <template #fixed>
+      <M3BottomSheet v-model:open="pickerOpen" :title="t('studio.pick')">
+        <div class="flex flex-col gap-6 px-6 pb-6">
+          <M3ColorPicker
+            v-model="draftSeed"
+            :label="t('studio.pick')"
+            :hue-label="t('studio.hue')"
+            :chroma-label="t('studio.chroma')"
+            :tone-label="t('studio.tone')"
+            :hex-label="t('studio.hex')"
+            :invalid-text="t('studio.customInvalid')"
+          />
+          <p class="type-body-small m-0 text-on-surface-variant">{{ t("studio.pickNote") }}</p>
+          <div class="flex justify-end gap-2">
+            <M3Button variant="text" @click="pickerOpen = false">{{ t("studio.cancel") }}</M3Button>
+            <M3Button @click="applyPicked">{{ t("studio.apply") }}</M3Button>
+          </div>
+        </div>
+      </M3BottomSheet>
+    </template>
 
     <SectionHeader :title="t('studio.variant')" />
     <div class="flex flex-wrap gap-2 px-4" role="radiogroup" :aria-label="t('studio.variant')">
@@ -103,9 +121,9 @@ const hexError = computed(() =>
   hex.value.length >= 4 && !hexValid.value ? t("studio.customInvalid") : undefined,
 );
 
-watch(hexValid, (valid) => {
-  if (valid && normalizedHex.value.toLowerCase() !== settings.value.seed.toLowerCase()) {
-    theme.update({ seed: normalizedHex.value });
+watch(normalizedHex, (value) => {
+  if (hexValid.value && value.toLowerCase() !== settings.value.seed.toLowerCase()) {
+    theme.update({ seed: value });
   }
 });
 
@@ -122,8 +140,17 @@ const contrastOptions = computed<ChoiceOption<ContrastChoice>[]>(() => [
   { value: "high", label: t("studio.contrastHigh") },
 ]);
 
-function onPicked(event: Event) {
-  hex.value = (event.target as HTMLInputElement).value;
+const pickerOpen = ref(false);
+const draftSeed = ref(settings.value.seed);
+
+function openPicker() {
+  draftSeed.value = settings.value.seed;
+  pickerOpen.value = true;
+}
+
+function applyPicked() {
+  hex.value = draftSeed.value;
+  pickerOpen.value = false;
 }
 
 async function reset() {
