@@ -103,3 +103,64 @@ describe("swipeable tab panels", () => {
     expect(seen).toEqual([1.4]);
   });
 });
+
+describe("tab indicator", () => {
+  test("a swipe that lands on a tab is not replayed when the selection catches up", async () => {
+    const rect = (left: number, width: number) =>
+      ({
+        left,
+        width,
+        top: 0,
+        height: 48,
+        right: left + width,
+        bottom: 48,
+        x: left,
+        y: 0,
+      }) as DOMRect;
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
+      function (this: HTMLElement) {
+        const value = this.dataset.value;
+        return value ? rect(TABS.indexOf(value) * 100, 100) : rect(0, 400);
+      },
+    );
+    const selected = ref("orders");
+    const pager = createTabPager();
+    const wrapper = mount(
+      defineComponent({
+        setup: () => () =>
+          h(
+            M3Tabs,
+            {
+              modelValue: selected.value,
+              "onUpdate:modelValue": (value: string | undefined) => (selected.value = value ?? ""),
+              pager,
+              variant: "secondary",
+            },
+            () => TABS.map((value) => h(M3Tab, { key: value, value, label: value })),
+          ),
+      }),
+      { global: { plugins: [createM3e({ reducedMotion: true })] }, attachTo: document.body },
+    );
+    await nextTick();
+    await nextTick();
+    const bar = wrapper.get(".m3-tabs__indicator").element as HTMLElement;
+    const seen: string[] = [];
+    const observer = new MutationObserver(() => seen.push(bar.style.transform));
+    observer.observe(bar, { attributes: true, attributeFilter: ["style"] });
+
+    pager.update(0.5);
+    pager.update(1);
+    selected.value = "invoices";
+    await nextTick();
+    await nextTick();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    observer.disconnect();
+
+    const after = seen.slice(seen.indexOf("translateX(100px)"));
+    expect(after.length).toBeGreaterThan(0);
+    expect(after).not.toContain("translateX(0px)");
+    expect(bar.style.transform).toBe("translateX(100px)");
+    wrapper.unmount();
+    vi.restoreAllMocks();
+  });
+});

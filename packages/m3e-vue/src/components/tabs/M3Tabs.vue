@@ -38,7 +38,26 @@ const root = useTemplateRef<HTMLElement>("root");
 const bar = useTemplateRef<HTMLElement>("bar");
 const { width } = useElementSize(root);
 const haptics = useHaptics();
-const indicator = shallowRef({ left: 0, width: 0, ready: false });
+const ready = shallowRef(false);
+let placed = { left: 0, width: 0 };
+
+/**
+ * The indicator's one writer. A swipe and a tap both move it here, so nothing else - a template
+ * style binding re-applied on the next render - can put it back where it was and make it run the
+ * same move twice.
+ */
+function place(left: number, width: number, animate: boolean) {
+  const element = bar.value;
+  if (!element) return;
+  if (Math.abs(left - placed.left) < 0.5 && Math.abs(width - placed.width) < 0.5) {
+    element.style.transition = "";
+    return;
+  }
+  element.style.transition = animate ? "" : "none";
+  element.style.width = `${width}px`;
+  element.style.transform = `translateX(${left}px)`;
+  placed = { left, width };
+}
 
 provide(TABS, {
   selected,
@@ -68,14 +87,12 @@ function measure() {
   const list = root.value;
   const tab = tabElements().find((element) => element.dataset.value === selected.value);
   if (!list || !tab) {
-    indicator.value = { ...indicator.value, width: 0 };
+    place(placed.left, 0, false);
     return;
   }
   const { left, width: contentWidth } = spanOf(list, tab);
-  if (bar.value) bar.value.style.transition = "";
-  const first = !indicator.value.ready;
-  indicator.value = { left, width: contentWidth, ready: indicator.value.ready };
-  if (first) requestAnimationFrame(() => (indicator.value = { ...indicator.value, ready: true }));
+  place(left, contentWidth, ready.value);
+  if (!ready.value) requestAnimationFrame(() => (ready.value = true));
   if (props.scrollable)
     tab.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
 }
@@ -115,9 +132,7 @@ function follow(position: number) {
   const fraction = clamped - lower;
   const a = spanOf(list, tabs[lower]!);
   const b = spanOf(list, tabs[upper]!);
-  element.style.transition = "none";
-  element.style.width = `${a.width + (b.width - a.width) * fraction}px`;
-  element.style.transform = `translateX(${a.left + (b.left - a.left) * fraction}px)`;
+  place(a.left + (b.left - a.left) * fraction, a.width + (b.width - a.width) * fraction, false);
 }
 
 let unfollow: (() => void) | undefined;
@@ -148,9 +163,8 @@ onMounted(() => void nextTick(measure));
     <span
       ref="bar"
       class="m3-tabs__indicator"
-      :class="{ 'm3-tabs__indicator--ready': indicator.ready }"
+      :class="{ 'm3-tabs__indicator--ready': ready }"
       aria-hidden="true"
-      :style="{ width: `${indicator.width}px`, transform: `translateX(${indicator.left}px)` }"
     />
   </div>
 </template>
@@ -184,6 +198,7 @@ onMounted(() => void nextTick(measure));
   position: absolute;
   bottom: 0;
   left: 0;
+  width: 0;
   height: 3px;
   border-radius: 3px;
   background: var(--md-sys-color-primary);
