@@ -29,7 +29,7 @@ pnpm create @cavulsqa --name caputa --app-id com.example.caputa --yes
 | flag         | default          |                                                         |
 | ------------ | ---------------- | ------------------------------------------------------- |
 | `--name`     | asked            | package and directory name                              |
-| `--template` | the only one     | which bundled template                                  |
+| `--template` | `f7-app`         | `f7-app` or `m3e-app`; asked from a numbered menu       |
 | `--dir`      | `./<name>`       | where to write it                                       |
 | `--app-name` | `Name`           | launcher name, window title, Settings screen            |
 | `--app-id`   | `com.ayb.<name>` | Android application id                                  |
@@ -40,6 +40,13 @@ pnpm create @cavulsqa --name caputa --app-id com.example.caputa --yes
 
 ## What you get
 
+Two templates, one data layer:
+
+| Template  | Look and feel                                                                                                                                                                                                                                       |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `f7-app`  | Framework7's own components, native on iOS and on Material (`theme: auto`)                                                                                                                                                                          |
+| `m3e-app` | Material 3 Expressive: `@cavulsqa/m3e-vue` components on 2025 dynamic colour, Google Sans Flex, spring motion, a colour studio and a component gallery. Framework7 stays underneath as the navigation engine only, so it is Android-first by design |
+
 The `f7-app` template: a tabbed shell, a `domains` / `modules` / `shared` layout, and a working
 sales demo over a six-table schema — dashboard aggregates, search, an order sheet, swipe actions,
 a detail screen — with tests against real SQLite.
@@ -48,6 +55,10 @@ Underneath it, the data layer this repository publishes: `@cavulsqa/mobile-db` f
 under Kysely, `@cavulsqa/reactive-db` for the change bus, and `@cavulsqa/reactive-vue` for
 `useReactiveQuery`. A write announces the tables it touched and every query watching them refetches;
 nothing in a screen asks for a refresh.
+
+`m3e-app` has the same layout and data layer, with every screen built from `M3*` components and an
+`m3-expressive` skill that carries the design system: which component, which colour role, which
+spring, and a link to the spec page for each.
 
 `CLAUDE.md`, `.claude/rules/` and `.claude/skills/` come with it, so an agent opening the generated
 repository knows the architecture, the conventions, and the traps that have already cost someone a

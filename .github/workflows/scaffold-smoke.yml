@@ -41,6 +41,11 @@ jobs:
     # A failed release published nothing, so there is nothing new to smoke-test.
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
+    # Every bundled template is a promise; a flavour nobody smoke-tests is the one that breaks.
+    strategy:
+      fail-fast: false
+      matrix:
+        template: [f7-app, m3e-app]
     steps:
       - uses: actions/checkout@v5
 
@@ -61,7 +66,7 @@ jobs:
         run: node packages/create/scripts/bundleTemplates.mjs
 
       - name: Generate
-        run: node packages/create/bin/create.mjs --name smoke --dir "$RUNNER_TEMP/smoke" --yes
+        run: node packages/create/bin/create.mjs --name smoke --template "${{ matrix.template }}" --dir "$RUNNER_TEMP/smoke" --yes
 
       - name: No workspace protocols survived
         working-directory: ${{ runner.temp }}/smoke
@@ -112,6 +117,6 @@ jobs:
         if: github.event_name != 'workflow_dispatch' || inputs.android
         uses: actions/upload-artifact@v4
         with:
-          name: smoke-debug-apk
+          name: smoke-debug-apk-${{ matrix.template }}
           path: ${{ runner.temp }}/smoke/android/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error

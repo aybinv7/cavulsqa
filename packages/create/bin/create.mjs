@@ -7,11 +7,17 @@
  * silent default, because a generated app named "my-app" in the wrong directory is worse than a
  * failed command.
  */
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { basename, dirname, isAbsolute, join, resolve } from "node:path";
 import { createInterface } from "node:readline/promises";
 import { fileURLToPath } from "node:url";
 import { scaffold } from "../lib/scaffold.mjs";
+import {
+  defaultTemplate,
+  listTemplates,
+  resolveTemplateChoice,
+  templateMenu,
+} from "../lib/templates.mjs";
 
 const PACKAGE = dirname(dirname(fileURLToPath(import.meta.url)));
 const BUNDLED = join(PACKAGE, "templates");
@@ -38,7 +44,7 @@ function usage() {
 
 Options:
   --name NAME          package and directory name
-  --template NAME      which template (default: the only one, or you are asked)
+  --template NAME      which template (default: the manifest's default, or you are asked)
   --dir PATH           where to write it (default: ./<name>)
   --app-name NAME      launcher name and window title (default: Name)
   --app-id ID          android application id (default: com.ayb.<name>)
@@ -49,24 +55,7 @@ Options:
   --help               this
 
 Templates bundled in this package:
-${listTemplates()
-  .map((entry) => `  ${entry.name}  ${entry.description}`)
-  .join("\n")}`);
-}
-
-function listTemplates() {
-  const manifest = JSON.parse(readFileSync(join(PACKAGE, "package.json"), "utf8"));
-  const declared = manifest.createConfig?.templates ?? [];
-  if (!existsSync(BUNDLED)) return declared;
-
-  // The manifest is what `vp create` reads; the directory is what actually shipped. Trust the
-  // directory, and let the manifest supply the descriptions.
-  return readdirSync(BUNDLED, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => ({
-      name: entry.name,
-      description: declared.find((listed) => listed.name === entry.name)?.description ?? "",
-    }));
+${templateMenu(listTemplates(PACKAGE))}`);
 }
 
 /**
@@ -109,15 +98,19 @@ async function main() {
       throw new Error(`"${String(name)}" is not a usable package name`);
     }
 
-    const templates = listTemplates();
+    const templates = listTemplates(PACKAGE);
     if (!templates.length) throw new Error("this build of @cavulsqa/create bundles no templates");
 
     let template = flags.get("template");
     if (typeof template !== "string") {
-      template =
-        templates.length === 1
-          ? templates[0].name
-          : await ask(`Template [${templates.map((t) => t.name).join(", ")}]`, templates[0].name);
+      const fallback = defaultTemplate(templates);
+      if (templates.length === 1 || !rl) {
+        template = fallback.name;
+      } else {
+        console.log(`\nTemplates:\n${templateMenu(templates)}\n`);
+        const answer = await ask("Template", String(templates.indexOf(fallback) + 1));
+        template = resolveTemplateChoice(answer, templates) ?? answer;
+      }
     }
     if (!templates.some((entry) => entry.name === template)) {
       throw new Error(
