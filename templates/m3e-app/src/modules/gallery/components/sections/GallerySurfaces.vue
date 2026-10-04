@@ -24,6 +24,8 @@
     </div>
   </GalleryBlock>
 
+  <SurfacesContainerTransform />
+
   <SectionHeader :title="t('gallery.surfaces.segmented')" />
   <M3List variant="segmented" inset>
     <M3ListItem
@@ -160,6 +162,7 @@
 <script setup lang="ts">
 import { moveItem } from "@cavulsqa/m3e-vue";
 import GalleryBlock from "@/modules/gallery/components/GalleryBlock.vue";
+import SurfacesContainerTransform from "@/modules/gallery/components/surfaces/SurfacesContainerTransform.vue";
 import { useTreeDemo } from "@/modules/gallery/composables/useTreeDemo";
 
 const { t } = useI18n();

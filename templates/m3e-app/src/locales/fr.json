@@ -697,6 +697,8 @@
     "surfaces": {
       "cards": "Cartes",
       "cardsNote": "Surélevée, remplie et à contour ; une carte entière peut être une cible.",
+      "containerTransform": "Transformation de conteneur",
+      "containerTransformNote": "Une carte qui mène à sa page : touchez-la et elle s'y déploie, couleur et coins compris ; le retour referme la page dans la même carte.",
       "cardText": "Touchez pour ouvrir",
       "tapped": "Carte {variant} ouverte",
       "segmented": "Liste segmentée",
@@ -950,6 +952,40 @@
         "wholesale": "Gros",
         "online": "En ligne",
         "export": "Export"
+      }
+    },
+    "featured": {
+      "glance": "En bref",
+      "note": "Cette page est sortie de la carte touchée. Revenez en arrière, par la barre ou le geste système, et elle se referme dans la carte.",
+      "range": {
+        "title": "Gamme d'été",
+        "text": "Quatre nouveaux parfums sur la ligne 1 L",
+        "body": "La gamme d'été arrive en rayon en juin. Chaque tournée transporte les quatre nouveaux parfums dès la première semaine, et les magasins qui prennent toute la ligne reçoivent un présentoir.",
+        "facts": {
+          "products": "Produits",
+          "flavours": "Nouveaux parfums",
+          "wilayas": "Wilayas"
+        }
+      },
+      "stores": {
+        "title": "Nouveaux magasins",
+        "text": "Sept ouvertures sur les tournées de la semaine",
+        "body": "Sept magasins ont ouvert le long des tournées existantes. Chacun reçoit une première visite dans la semaine, avec le catalogue et une commande d'ouverture.",
+        "facts": {
+          "opened": "Ouverts",
+          "visits": "Visites prévues",
+          "orders": "Premières commandes"
+        }
+      },
+      "route": {
+        "title": "Tournée côtière",
+        "text": "Quatorze arrêts d'Oran à Mostaganem",
+        "body": "La tournée côtière quitte le dépôt d'Oran à sept heures et longe la côte vers l'est. Les arrêts sont ordonnés pour livrer d'abord les commandes les plus lourdes.",
+        "facts": {
+          "stops": "Arrêts",
+          "distance": "Kilomètres",
+          "hours": "Heures de route"
+        }
       }
     },
     "chat": {

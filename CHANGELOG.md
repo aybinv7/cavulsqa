@@ -323,8 +323,10 @@ menu; `f7-app` stays the default.
   isolates so a Latin value cannot scramble the line. A device set to any Arabic opens in it. A
   test keeps every locale's keys and placeholders in step with English. Language names are shown
   in their own language. The translation is AI-assisted and needs a native speaker's review.
-- A list row expands into its page as one surface (a container transform): the card's corners and
-  colour grow into the page and shrink back into the same row on back. The order search uses it.
+- A card expands into its page as one surface (a container transform): its corners and colour grow
+  into the page and shrink back into the same card on back. The gallery's Surfaces section
+  demonstrates it with three cards; the demo's orders and the order search open an order with it,
+  and the rest of the app keeps the standard push.
 - The chat demo names who reacted, and the agenda's day view swipes to the previous and next day.
 - The chat's attach sheet sends a location, a contact, a poll or an event. Location asks the
   device (the web view's own geolocation) and, when that fails, says why and offers the depot;

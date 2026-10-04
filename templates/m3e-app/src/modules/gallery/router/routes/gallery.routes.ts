@@ -38,6 +38,11 @@ const galleryRoutes: Router.RouteParameters[] = [
     async: lazyRoute(() => import("@/modules/gallery/views/GalleryAgendaView.vue")),
   },
   {
+    name: "gallery-featured",
+    path: "/gallery/featured/:id/",
+    async: lazyRoute(() => import("@/modules/gallery/views/GalleryFeaturedView.vue")),
+  },
+  {
     name: "gallery-section",
     path: "/gallery/:section/",
     async: lazyRoute(() => import("@/modules/gallery/views/GallerySectionView.vue")),

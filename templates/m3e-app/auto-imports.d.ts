@@ -62,9 +62,11 @@ declare global {
   const extendRef: typeof import('@vueuse/core').extendRef
   const f7: typeof import('framework7-vue').f7
   const f7ready: typeof import('framework7-vue').f7ready
+  const featuredStories: typeof import('./src/modules/gallery/composables/featuredStories').featuredStories
   const features: typeof import('./src/modules/home/composables/useHomeFeatures').features
   const findFeature: typeof import('./src/modules/home/composables/useHomeFeatures').findFeature
   const findSection: typeof import('./src/modules/gallery/composables/useGallerySections').findSection
+  const findStory: typeof import('./src/modules/gallery/composables/featuredStories').findStory
   const formatMobile: typeof import('./src/modules/gallery/composables/fieldFormats').formatMobile
   const formatMoney: typeof import('./src/modules/demo/composables/useOrderStatus').formatMoney
   const framework7Parameters: typeof import('./src/plugins/framework7.plugin').framework7Parameters

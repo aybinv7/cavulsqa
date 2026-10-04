@@ -16,7 +16,7 @@
         clickable
         :headline="t(feature.titleKey)"
         :supporting="t(feature.subtitleKey)"
-        @click="openFeature(feature, $event)"
+        @click="f7router.navigate(`/home/feature/${feature.id}/`)"
       >
         <template #leading>
           <M3Shape :shape="feature.shape" class="size-10" :class="TONE_CLASSES[feature.tone]">
@@ -32,18 +32,12 @@
 <script setup lang="ts">
 import type { Router } from "framework7/types";
 import HomeHero from "@/modules/home/components/HomeHero.vue";
-import { features, type HomeFeature } from "@/modules/home/composables/useHomeFeatures";
+import { features } from "@/modules/home/composables/useHomeFeatures";
 import { TONE_CLASSES } from "@/shared/utils/tone";
 
 const { t } = useI18n();
-const props = defineProps<{ f7router: Router.Router }>();
+defineProps<{ f7router: Router.Router }>();
 const tabs = useActiveTab();
-const { open } = useContainerTransform();
-
-function openFeature(feature: HomeFeature, event: MouseEvent) {
-  open(props.f7router, event, `/home/feature/${feature.id}/`);
-}
-
 function openStudio() {
   tabs.open("settings", "/settings/studio/");
 }

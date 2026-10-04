@@ -47,6 +47,7 @@ declare module 'vue' {
     GalleryContactsView: typeof import('./src/modules/gallery/views/GalleryContactsView.vue')['default']
     GalleryCustomerForm: typeof import('./src/modules/gallery/components/GalleryCustomerForm.vue')['default']
     GalleryFabs: typeof import('./src/modules/gallery/components/sections/GalleryFabs.vue')['default']
+    GalleryFeaturedView: typeof import('./src/modules/gallery/views/GalleryFeaturedView.vue')['default']
     GalleryInputs: typeof import('./src/modules/gallery/components/sections/GalleryInputs.vue')['default']
     GalleryLoginView: typeof import('./src/modules/gallery/views/GalleryLoginView.vue')['default']
     GalleryNavigation: typeof import('./src/modules/gallery/components/sections/GalleryNavigation.vue')['default']
@@ -255,5 +256,6 @@ declare module 'vue' {
     SettingsChoice: typeof import('./src/modules/settings/components/SettingsChoice.vue')['default']
     SettingsView: typeof import('./src/modules/settings/views/SettingsView.vue')['default']
     StudioPreview: typeof import('./src/modules/settings/components/StudioPreview.vue')['default']
+    SurfacesContainerTransform: typeof import('./src/modules/gallery/components/surfaces/SurfacesContainerTransform.vue')['default']
   }
 }

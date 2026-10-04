@@ -697,6 +697,8 @@
     "surfaces": {
       "cards": "Cards",
       "cardsNote": "Elevated, filled and outlined; a whole card can be one target.",
+      "containerTransform": "Container transform",
+      "containerTransformNote": "A card that is the way into its page: tap one and it grows into it, colour and corners included; back shrinks the page into the same card.",
       "cardText": "Tap to open",
       "tapped": "Opened the {variant} card",
       "segmented": "Segmented list",
@@ -950,6 +952,40 @@
         "wholesale": "Wholesale",
         "online": "Online",
         "export": "Export"
+      }
+    },
+    "featured": {
+      "glance": "At a glance",
+      "note": "This page grew out of the card you tapped. Go back, by the bar or the system gesture, and it shrinks into the card again.",
+      "range": {
+        "title": "Summer range",
+        "text": "Four new flavours across the 1L line",
+        "body": "The summer range reaches the shelves in June. Every route carries the four new flavours from the first week, and stores that stock the whole line get a display stand.",
+        "facts": {
+          "products": "Products",
+          "flavours": "New flavours",
+          "wilayas": "Wilayas"
+        }
+      },
+      "stores": {
+        "title": "New stores",
+        "text": "Seven openings on this week's routes",
+        "body": "Seven stores opened along existing routes. Each gets a first visit within the week, with the catalogue and an opening order.",
+        "facts": {
+          "opened": "Opened",
+          "visits": "Visits planned",
+          "orders": "First orders"
+        }
+      },
+      "route": {
+        "title": "Coast route",
+        "text": "Fourteen stops from Oran to Mostaganem",
+        "body": "The coast route leaves the Oran depot at seven and follows the shore east. Stops are ordered so the heaviest deliveries come first.",
+        "facts": {
+          "stops": "Stops",
+          "distance": "Kilometres",
+          "hours": "Hours on the road"
+        }
       }
     },
     "chat": {
