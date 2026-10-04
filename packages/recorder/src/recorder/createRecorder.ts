@@ -1,3 +1,4 @@
+import packageJson from "../../package.json" with { type: "json" };
 import { buildArchive } from "../capu/archive.js";
 import { createManifest } from "../capu/manifest.js";
 import { createSessionId } from "../capu/sessionId.js";
@@ -24,7 +25,7 @@ import {
   type TrackRecorder,
 } from "./types.js";
 
-const RECORDER_VERSION = "0.1.0";
+const RECORDER_VERSION = packageJson.version;
 const TRACK_START_DEADLINE_MS = 5000;
 const ROTATE_INTERVAL_MS = 60_000;
 

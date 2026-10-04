@@ -2,7 +2,8 @@
 
 Starts at `1.0.0`. Earlier versions are in the git history and are not documented here.
 
-`mobile-db`, `reactive-db` and `reactive-vue` share one version and release together — see
+The libraries (`mobile-db`, `reactive-db`, `reactive-vue`, `repository`, `m3e`, `m3e-vue`,
+`recorder`) share one version and release together — see
 [docs/RELEASING.md](docs/RELEASING.md). `@cavulsqa/create` tracks template changes on its own
 cadence and has its own section.
 
