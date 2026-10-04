@@ -93,8 +93,28 @@
         :aria-label="photo.alt"
         @click="openPhoto(position)"
       >
-        <img :src="photo.src" alt="" class="size-full object-cover" decoding="async" />
+        <M3Image :src="photo.src" alt="" ratio="1 / 1" class="size-full" />
       </button>
+    </div>
+  </GalleryBlock>
+
+  <GalleryBlock :title="t('gallery.carousels.lazy')" :note="t('gallery.carousels.lazyNote')" stack>
+    <div class="grid grid-cols-2 gap-3">
+      <M3Image
+        v-if="photos[0]"
+        :src="photos[0].src"
+        :alt="photos[0].alt"
+        :width="photos[0].width"
+        :height="photos[0].height"
+        placeholder="var(--md-sys-color-secondary-container)"
+        class="rounded-lg"
+      />
+      <M3Image
+        src="/missing-photo.jpg"
+        :alt="t('gallery.carousels.missing')"
+        ratio="4 / 3"
+        class="rounded-lg"
+      />
     </div>
   </GalleryBlock>
 

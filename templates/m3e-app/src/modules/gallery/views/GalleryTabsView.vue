@@ -69,11 +69,37 @@
         />
       </M3TabPanel>
     </M3TabPanels>
+
+    <template #fab>
+      <M3FabMorph
+        v-model:open="actionsOpen"
+        variant="toolbar"
+        :label="t('gallery.tabs.quickActions')"
+      >
+        <template #icon><i-ms-bolt-outline-rounded /></template>
+        <template #default="{ close }">
+          <M3IconButton
+            v-for="action in ACTIONS"
+            :key="action.id"
+            :label="t(`gallery.tabs.actions.${action.id}`)"
+            @click="run(action.id, close)"
+          >
+            <component :is="action.icon" />
+          </M3IconButton>
+        </template>
+      </M3FabMorph>
+    </template>
   </AppPage>
 </template>
 
 <script setup lang="ts">
 import { createTabPager } from "@cavulsqa/m3e-vue";
+import { markRaw } from "vue";
+import AddIcon from "~icons/material-symbols/add-shopping-cart-rounded";
+import CallIcon from "~icons/material-symbols/call-outline-rounded";
+import CloseIcon from "~icons/material-symbols/close-rounded";
+import MapIcon from "~icons/material-symbols/map-outline-rounded";
+import ScanIcon from "~icons/material-symbols/barcode-scanner-rounded";
 
 const TABS = ["orders", "invoices", "payments", "returns"] as const;
 const METHODS = ["cash", "cheque", "transfer", "credit"] as const;
@@ -81,6 +107,21 @@ const METHODS = ["cash", "cheque", "transfer", "credit"] as const;
 const { t } = useI18n();
 const tab = ref<string>("orders");
 const pager = createTabPager();
+const snackbar = useSnackbar();
+const actionsOpen = ref(false);
+
+const ACTIONS = [
+  { id: "order", icon: markRaw(AddIcon) },
+  { id: "scan", icon: markRaw(ScanIcon) },
+  { id: "call", icon: markRaw(CallIcon) },
+  { id: "map", icon: markRaw(MapIcon) },
+  { id: "close", icon: markRaw(CloseIcon) },
+] as const;
+
+function run(id: (typeof ACTIONS)[number]["id"], close: () => void) {
+  close();
+  if (id !== "close") void snackbar.show(t(`gallery.tabs.actions.${id}`));
+}
 
 function methodKey(method: (typeof METHODS)[number]) {
   return method;

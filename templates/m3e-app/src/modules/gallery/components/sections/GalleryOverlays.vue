@@ -109,6 +109,40 @@
     </M3Menu>
   </GalleryBlock>
 
+  <GalleryBlock :title="t('gallery.overlays.popover')" :note="t('gallery.overlays.popoverNote')">
+    <div ref="popoverAnchor" class="inline-flex">
+      <M3Button variant="tonal" :aria-expanded="popoverOpen" @click="popoverOpen = !popoverOpen">
+        {{ t("gallery.overlays.cases", { n: cases }) }}
+        <template #trailing><i-ms-expand-more-rounded /></template>
+      </M3Button>
+    </div>
+    <M3Popover
+      v-model:open="popoverOpen"
+      :anchor="popoverAnchor"
+      :label="t('gallery.overlays.quantity')"
+    >
+      <template #default="{ close }">
+        <div class="flex flex-col gap-3 p-4">
+          <span class="type-title-small text-on-surface">{{ t("gallery.overlays.quantity") }}</span>
+          <M3Stepper
+            v-model="cases"
+            :label="t('gallery.overlays.quantity')"
+            :min="1"
+            :max="48"
+            :decrement-label="t('gallery.selection.decrease')"
+            :increment-label="t('gallery.selection.increase')"
+          />
+          <span class="type-body-small text-on-surface-variant">{{
+            t("gallery.overlays.quantityNote")
+          }}</span>
+          <M3Button variant="text" class="self-end" @click="close">{{
+            t("gallery.overlays.done")
+          }}</M3Button>
+        </div>
+      </template>
+    </M3Popover>
+  </GalleryBlock>
+
   <GalleryBlock
     :title="t('gallery.overlays.notification')"
     :note="t('gallery.overlays.notificationNote')"
@@ -239,6 +273,9 @@ const menuOpen = ref(false);
 const sort = ref<(typeof ORDERS)[number]>("recent");
 const groupBy = ref<(typeof GROUPS)[number]>("none");
 const menuAnchor = useTemplateRef<HTMLElement>("menuAnchor");
+const popoverOpen = ref(false);
+const cases = ref(6);
+const popoverAnchor = useTemplateRef<HTMLElement>("popoverAnchor");
 
 function toggleStandard() {
   standardDetent.value = standardDetent.value === "hidden" ? "peek" : "hidden";

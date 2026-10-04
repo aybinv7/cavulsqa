@@ -10,6 +10,9 @@
     @close="confirmDiscard"
   >
     <div class="flex flex-col gap-4">
+      <p v-if="restored" class="type-body-small m-0 text-on-surface-variant">
+        {{ t("gallery.overlays.draftRestored") }}
+      </p>
       <M3TextField
         v-model="form.name"
         :label="t('gallery.overlays.customerName')"
@@ -35,6 +38,7 @@
 </template>
 
 <script setup lang="ts">
+import { useFormDraft } from "@cavulsqa/m3e-vue";
 import { WILAYA_OPTIONS } from "@/modules/gallery/composables/wilayas";
 
 const open = defineModel<boolean>("open", { default: false });
@@ -46,13 +50,12 @@ const blank = () => ({ name: "", phone: "", wilaya: null as number | null, note:
 const form = reactive(blank());
 const dirty = computed(() => Boolean(form.name || form.phone || form.note) || form.wilaya !== null);
 
-watch(open, (value) => {
-  if (value) Object.assign(form, blank());
-});
+const { restored, clear } = useFormDraft("gallery.customer", form);
 
 function save() {
   emit("saved", form.name.trim());
   Object.assign(form, blank());
+  void clear();
   open.value = false;
 }
 
@@ -67,6 +70,7 @@ async function confirmDiscard() {
   });
   if (!discard) return;
   Object.assign(form, blank());
+  void clear();
   open.value = false;
 }
 </script>

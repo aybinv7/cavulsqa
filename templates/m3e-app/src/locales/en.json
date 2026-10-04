@@ -263,6 +263,14 @@
       "chat": {
         "title": "Messages",
         "subtitle": "Bubbles, history and a composer"
+      },
+      "onboarding": {
+        "title": "Onboarding",
+        "subtitle": "A pager with page dots"
+      },
+      "login": {
+        "title": "Sign-in screen",
+        "subtitle": "Validation and a remembered email"
       }
     },
     "buttons": {
@@ -459,7 +467,13 @@
       "discardText": "What you typed will be lost.",
       "discard": "Discard",
       "keepEditing": "Keep editing",
-      "customerSaved": "Saved {name}"
+      "customerSaved": "Saved {name}",
+      "popover": "Popover",
+      "popoverNote": "Anchored to what opened it, grows out of it, closes on a tap outside, Escape or back.",
+      "cases": "{n} cases",
+      "quantity": "Quantity",
+      "quantityNote": "Pallet price from 24 cases.",
+      "draftRestored": "Your unsaved draft was restored."
     },
     "selection": {
       "stepper": "Stepper",
@@ -584,7 +598,10 @@
         "city": "City skyline",
         "forest": "Pine forest",
         "harbour": "Harbour at dusk"
-      }
+      },
+      "lazy": "Lazy images",
+      "lazyNote": "Space reserved before loading, a placeholder colour, a fade once decoded, and a failure that keeps its description.",
+      "missing": "A photo that failed to load"
     },
     "surfaces": {
       "cards": "Cards",
@@ -752,7 +769,15 @@
         "credit": "Credit"
       },
       "noReturns": "No returns",
-      "noReturnsText": "Returned goods show up here."
+      "noReturnsText": "Returned goods show up here.",
+      "quickActions": "Quick actions",
+      "actions": {
+        "order": "New order",
+        "scan": "Scan a barcode",
+        "call": "Call the customer",
+        "map": "Open the route map",
+        "close": "Close"
+      }
     },
     "contacts": {
       "title": "Customers A–Z",
@@ -870,6 +895,46 @@
         "r3": "Good work today 💪",
         "r4": "I'll pass by the depot later."
       }
+    },
+    "onboarding": {
+      "title": "Welcome tour",
+      "skip": "Skip",
+      "next": "Next",
+      "start": "Get started",
+      "page": "Page {n}",
+      "pages": {
+        "route": {
+          "title": "Your route, in order",
+          "text": "Every visit of the day in the order you drive it, with what each shop ordered last time."
+        },
+        "orders": {
+          "title": "Orders in seconds",
+          "text": "Scan, adjust quantities, and the totals and promotions follow as you type."
+        },
+        "offline": {
+          "title": "No signal, no problem",
+          "text": "Everything is kept on the phone and goes out as soon as there is a connection."
+        }
+      }
+    },
+    "login": {
+      "title": "Sign in",
+      "heading": "Welcome back",
+      "subtitle": "Sign in to see today's route.",
+      "email": "Email",
+      "password": "Password",
+      "show": "Show password",
+      "hide": "Hide password",
+      "forgot": "Forgot password?",
+      "forgotSent": "A reset link would be sent to your email",
+      "signIn": "Sign in",
+      "signingIn": "Signing in…",
+      "emailInvalid": "Enter a valid email address",
+      "passwordMissing": "Enter your password",
+      "rejected": "Wrong email or password",
+      "welcome": "Signed in as {email}",
+      "restored": "Restored from your last visit",
+      "hint": "Demo: any email, with the password demo."
     }
   },
   "settings": {

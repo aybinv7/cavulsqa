@@ -263,6 +263,14 @@
       "chat": {
         "title": "Messages",
         "subtitle": "Bulles, historique et zone de saisie"
+      },
+      "onboarding": {
+        "title": "Accueil",
+        "subtitle": "Un pager avec ses points"
+      },
+      "login": {
+        "title": "Écran de connexion",
+        "subtitle": "Validation et e-mail mémorisé"
       }
     },
     "buttons": {
@@ -459,7 +467,13 @@
       "discardText": "Ce que vous avez saisi sera perdu.",
       "discard": "Abandonner",
       "keepEditing": "Continuer",
-      "customerSaved": "{name} enregistré"
+      "customerSaved": "{name} enregistré",
+      "popover": "Popover",
+      "popoverNote": "Ancré à ce qui l'ouvre, il en jaillit et se ferme d'un appui ailleurs, avec Échap ou retour.",
+      "cases": "{n} cartons",
+      "quantity": "Quantité",
+      "quantityNote": "Prix palette dès 24 cartons.",
+      "draftRestored": "Votre brouillon non enregistré a été restauré."
     },
     "selection": {
       "stepper": "Compteur",
@@ -584,7 +598,10 @@
         "city": "Silhouette de la ville",
         "forest": "Forêt de pins",
         "harbour": "Port au crépuscule"
-      }
+      },
+      "lazy": "Images différées",
+      "lazyNote": "Place réservée avant le chargement, une couleur d'attente, un fondu une fois décodée, et un échec qui garde sa description.",
+      "missing": "Une photo qui n'a pas pu se charger"
     },
     "surfaces": {
       "cards": "Cartes",
@@ -752,7 +769,15 @@
         "credit": "Crédit"
       },
       "noReturns": "Aucun retour",
-      "noReturnsText": "Les marchandises retournées apparaissent ici."
+      "noReturnsText": "Les marchandises retournées apparaissent ici.",
+      "quickActions": "Actions rapides",
+      "actions": {
+        "order": "Nouvelle commande",
+        "scan": "Scanner un code-barres",
+        "call": "Appeler le client",
+        "map": "Ouvrir la carte de tournée",
+        "close": "Fermer"
+      }
     },
     "contacts": {
       "title": "Clients de A à Z",
@@ -870,6 +895,46 @@
         "r3": "Bon travail aujourd'hui 💪",
         "r4": "Je passe au dépôt plus tard."
       }
+    },
+    "onboarding": {
+      "title": "Visite guidée",
+      "skip": "Passer",
+      "next": "Suivant",
+      "start": "Commencer",
+      "page": "Page {n}",
+      "pages": {
+        "route": {
+          "title": "Votre tournée, dans l'ordre",
+          "text": "Chaque visite du jour dans l'ordre où vous roulez, avec la dernière commande de chaque magasin."
+        },
+        "orders": {
+          "title": "Des commandes en quelques secondes",
+          "text": "Scannez, ajustez les quantités : totaux et promotions suivent pendant la saisie."
+        },
+        "offline": {
+          "title": "Pas de réseau, pas de souci",
+          "text": "Tout reste sur le téléphone et part dès que la connexion revient."
+        }
+      }
+    },
+    "login": {
+      "title": "Connexion",
+      "heading": "Bon retour",
+      "subtitle": "Connectez-vous pour voir la tournée du jour.",
+      "email": "E-mail",
+      "password": "Mot de passe",
+      "show": "Afficher le mot de passe",
+      "hide": "Masquer le mot de passe",
+      "forgot": "Mot de passe oublié ?",
+      "forgotSent": "Un lien de réinitialisation serait envoyé par e-mail",
+      "signIn": "Se connecter",
+      "signingIn": "Connexion…",
+      "emailInvalid": "Saisissez une adresse e-mail valide",
+      "passwordMissing": "Saisissez votre mot de passe",
+      "rejected": "E-mail ou mot de passe incorrect",
+      "welcome": "Connecté en tant que {email}",
+      "restored": "Restauré depuis votre dernière visite",
+      "hint": "Démo : n'importe quel e-mail, avec le mot de passe demo."
     }
   },
   "settings": {

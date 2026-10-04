@@ -17,6 +17,8 @@ declare global {
   const EffectScope: typeof import('vue').EffectScope
   const Framework7VueResolver: typeof import('./src/shared/utils/resolvers/resolvers').Framework7VueResolver
   const LOCALES: typeof import('./src/plugins/i18n.plugin').LOCALES
+  const LOGIN_SECTION: typeof import('./src/modules/gallery/composables/useGallerySections').LOGIN_SECTION
+  const ONBOARDING_SECTION: typeof import('./src/modules/gallery/composables/useGallerySections').ONBOARDING_SECTION
   const ORDER_STATUSES: typeof import('./src/modules/demo/composables/useOrderStatus').ORDER_STATUSES
   const STATUS_LOOK: typeof import('./src/modules/demo/composables/useOrderStatus').STATUS_LOOK
   const TABS_SECTION: typeof import('./src/modules/gallery/composables/useGallerySections').TABS_SECTION
@@ -422,6 +424,8 @@ declare module 'vue' {
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
     readonly Framework7VueResolver: UnwrapRef<typeof import('./src/shared/utils/resolvers/resolvers')['Framework7VueResolver']>
     readonly LOCALES: UnwrapRef<typeof import('./src/plugins/i18n.plugin')['LOCALES']>
+    readonly LOGIN_SECTION: UnwrapRef<typeof import('./src/modules/gallery/composables/useGallerySections')['LOGIN_SECTION']>
+    readonly ONBOARDING_SECTION: UnwrapRef<typeof import('./src/modules/gallery/composables/useGallerySections')['ONBOARDING_SECTION']>
     readonly ORDER_STATUSES: UnwrapRef<typeof import('./src/modules/demo/composables/useOrderStatus')['ORDER_STATUSES']>
     readonly STATUS_LOOK: UnwrapRef<typeof import('./src/modules/demo/composables/useOrderStatus')['STATUS_LOOK']>
     readonly TABS_SECTION: UnwrapRef<typeof import('./src/modules/gallery/composables/useGallerySections')['TABS_SECTION']>

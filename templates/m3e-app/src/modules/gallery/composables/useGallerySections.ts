@@ -14,6 +14,8 @@ import TableIcon from "~icons/material-symbols/table-outline-rounded";
 import ChartIcon from "~icons/material-symbols/monitoring-rounded";
 import ContactsIcon from "~icons/material-symbols/contacts-outline-rounded";
 import ChatIcon from "~icons/material-symbols/forum-outline-rounded";
+import LoginIcon from "~icons/material-symbols/login-rounded";
+import OnboardingIcon from "~icons/material-symbols/swipe-rounded";
 import CalendarIcon from "~icons/material-symbols/calendar-today-outline-rounded";
 import SpeedIcon from "~icons/material-symbols/speed-rounded";
 import CarouselIcon from "~icons/material-symbols/view-carousel-outline-rounded";
@@ -184,6 +186,30 @@ export const CHAT_SECTION: GallerySection = {
   subtitleKey: "gallery.sections.chat.subtitle",
   component: { render: () => null },
   path: "/gallery/chat/",
+};
+
+/** Full-height pages swiped one at a time, with Skip and Next beside the page dots. */
+export const ONBOARDING_SECTION: GallerySection = {
+  id: "onboarding",
+  icon: OnboardingIcon,
+  shape: "sunny",
+  tone: "tertiary",
+  titleKey: "gallery.sections.onboarding.title",
+  subtitleKey: "gallery.sections.onboarding.subtitle",
+  component: { render: () => null },
+  path: "/gallery/onboarding/",
+};
+
+/** A sign-in screen: validation, a password toggle, a draft of the email. */
+export const LOGIN_SECTION: GallerySection = {
+  id: "login",
+  icon: LoginIcon,
+  shape: "cookie12Sided",
+  tone: "secondary",
+  titleKey: "gallery.sections.login.title",
+  subtitleKey: "gallery.sections.login.subtitle",
+  component: { render: () => null },
+  path: "/gallery/login/",
 };
 
 export function findSection(id: string): GallerySection | undefined {

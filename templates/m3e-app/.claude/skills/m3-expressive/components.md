@@ -31,6 +31,11 @@ down). One FAB per screen, for its single most important constructive action, in
 **`M3FabMenu` + `M3FabMenuItem`** - when the main action has 2-6 variants. Items take `index`
 (0 nearest the FAB). → fab-menu/specs
 
+**`M3FabMorph`** - Framework7's FAB morph as a container transform: the FAB grows into a floating
+toolbar of icon buttons (`variant="toolbar"`) or a panel (`panel`, with a scrim) and shrinks back.
+`v-model:open`, `label`, `#icon`, default slot with `{ close }`. Use it when the FAB opens a set of
+peer actions on one screen; variants of one action are a FAB menu.
+
 ## Navigation
 
 **`M3NavigationBar` / `M3NavigationRail` + `M3NavigationItem`** - the shell already renders these from
@@ -138,6 +143,12 @@ to open; a snackbar is for feedback on what they just did. One at a time - a new
 the content. **`M3ModalNavigationRail`** - the expressive replacement for the navigation drawer;
 closes itself once a destination is chosen. → side-sheets/specs, navigation-rail/specs
 
+**`M3Popover`** - Framework7's popover: any content anchored to an element. `anchor` (element),
+`v-model:open`, `label`, `side` bottom | top, `align` start | center | end, `modal` (scrim + focus
+trap); default slot gets `{ close }`. Flips and stays on screen, grows out of the anchor, closes on a
+tap outside, Escape or back, and focus returns to the anchor. For a few controls or an explanation
+tied to one element; a list of actions is `M3Menu`.
+
 **`M3Tooltip`** - plain (long-press, hover, focus; labels an icon button) or rich (`title`, text,
 actions; explains, never holds the only path to a task). Placed so it never leaves the screen.
 → tooltips/specs
@@ -172,6 +183,15 @@ piece.
 pinch or double-tap to zoom, pan when zoomed, swipe up or down to close; only neighbours load. Give
 `width`/`height` when known. It is drawn on black - call `useDarkStatusBar(() => open.value)` so the
 status bar icons turn light while it shows.
+
+**`M3Image`** - lazy image: `src`, `alt` (`""` when decorative), `width` + `height` or `ratio` to
+reserve its space, `placeholder` (a colour or a tiny image, drawn blurred), `fit`, `eager` for the
+first screen, `#error`. Fades in once decoded; cached pictures appear at once.
+
+**`M3Pager`** + **`M3PagerPage`** - Framework7's swiper as a pager on native scroll-snap: one page per
+swipe, `v-model:page`, `label`; dots underneath, or `#footer` with `{ page, count, progress, go,
+next, previous }` for Skip / Next. **`M3PageIndicator`** (`count`, `progress`, `@select`) is the
+dots alone; its pill follows the finger. Onboarding, a product's photos, a feature tour.
 
 ## Lists at scale
 
@@ -244,6 +264,14 @@ library: `labels` + `series` (`{ label, values, color? }`, `null` breaks a line)
 `Intl.NumberFormat` compact). Colours come from the theme's roles; touching reads values;
 screen readers get a hidden table. Lines for change over time, bars to compare categories, a
 donut for parts of one whole (at most ~6 segments). Feed them aggregates from SQL, never raw rows.
+
+## Forms
+
+**`useFormDraft(key, state, options)`** - keeps what is typed into a form as a draft (debounced,
+written at once when the app goes to the background) and restores it when the form opens again.
+Returns `{ restored, savedAt, error, clear, flush }`; call `clear()` on submit or discard. `storage`
+takes any async store (default `localStorage`), `version` drops drafts from an older form, `maxAge`
+expires them. Never draft passwords or card numbers - give it only the fields worth keeping.
 
 ## Messages
 
