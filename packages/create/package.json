@@ -1,6 +1,6 @@
 {
   "name": "@cavulsqa/create",
-  "version": "2.10.0",
+  "version": "2.10.1",
   "description": "Create a Vue + Capacitor + SQLite app from the cavulsqa templates: Framework7 (iOS and Material) or Material 3 Expressive.",
   "keywords": [
     "capacitor",
@@ -67,5 +67,5 @@
       }
     ]
   },
-  "templatesFingerprint": "sha256-3YSsClBPuShazZVtnS9LabHQ330E0wPZiedhN6vIadU="
+  "templatesFingerprint": "sha256-rGqnILJ0mL3Tjp8wsotbcajPFpJWqAEtS9G80QBcA/Q="
 }
