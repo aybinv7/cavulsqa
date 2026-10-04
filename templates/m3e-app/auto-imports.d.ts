@@ -13,6 +13,7 @@ declare global {
   const AppContextKey: typeof import('./src/shared/composables/theme/useAppTheme').AppContextKey
   const CHAT_SECTION: typeof import('./src/modules/gallery/composables/useGallerySections').CHAT_SECTION
   const CONTACTS_SECTION: typeof import('./src/modules/gallery/composables/useGallerySections').CONTACTS_SECTION
+  const CONTAINER_TRANSITION: typeof import('./src/shared/composables/navigation/useContainerTransform').CONTAINER_TRANSITION
   const CONTRAST_LEVELS: typeof import('./src/shared/utils/theme/themeSettings').CONTRAST_LEVELS
   const DEFAULT_THEME: typeof import('./src/shared/utils/theme/themeSettings').DEFAULT_THEME
   const Dom7: typeof import('framework7/lite').Dom7
@@ -207,6 +208,7 @@ declare global {
   const useCloned: typeof import('@vueuse/core').useCloned
   const useColorMode: typeof import('@vueuse/core').useColorMode
   const useConfirmDialog: typeof import('@vueuse/core').useConfirmDialog
+  const useContainerTransform: typeof import('./src/shared/composables/navigation/useContainerTransform').useContainerTransform
   const useCountdown: typeof import('@vueuse/core').useCountdown
   const useCounter: typeof import('@vueuse/core').useCounter
   const useCssModule: typeof import('vue').useCssModule
@@ -446,6 +448,7 @@ declare module 'vue' {
     readonly AGENDA_VIEWS: UnwrapRef<typeof import('./src/modules/gallery/composables/useAgenda')['AGENDA_VIEWS']>
     readonly CHAT_SECTION: UnwrapRef<typeof import('./src/modules/gallery/composables/useGallerySections')['CHAT_SECTION']>
     readonly CONTACTS_SECTION: UnwrapRef<typeof import('./src/modules/gallery/composables/useGallerySections')['CONTACTS_SECTION']>
+    readonly CONTAINER_TRANSITION: UnwrapRef<typeof import('./src/shared/composables/navigation/useContainerTransform')['CONTAINER_TRANSITION']>
     readonly CONTRAST_LEVELS: UnwrapRef<typeof import('./src/shared/utils/theme/themeSettings')['CONTRAST_LEVELS']>
     readonly DEFAULT_THEME: UnwrapRef<typeof import('./src/shared/utils/theme/themeSettings')['DEFAULT_THEME']>
     readonly Dom7: UnwrapRef<typeof import('framework7/lite')['Dom7']>
@@ -635,6 +638,7 @@ declare module 'vue' {
     readonly useCloned: UnwrapRef<typeof import('@vueuse/core')['useCloned']>
     readonly useColorMode: UnwrapRef<typeof import('@vueuse/core')['useColorMode']>
     readonly useConfirmDialog: UnwrapRef<typeof import('@vueuse/core')['useConfirmDialog']>
+    readonly useContainerTransform: UnwrapRef<typeof import('./src/shared/composables/navigation/useContainerTransform')['useContainerTransform']>
     readonly useCountdown: UnwrapRef<typeof import('@vueuse/core')['useCountdown']>
     readonly useCounter: UnwrapRef<typeof import('@vueuse/core')['useCounter']>
     readonly useCssModule: UnwrapRef<typeof import('vue')['useCssModule']>

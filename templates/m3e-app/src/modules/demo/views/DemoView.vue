@@ -110,6 +110,7 @@ import { useReactiveDemo } from "@/modules/demo/composables/useReactiveDemo";
 const { t } = useI18n();
 const props = defineProps<{ f7router: Router.Router }>();
 const snackbar = useSnackbar();
+const { open } = useContainerTransform();
 const dialog = useDialog();
 const actionSheet = useActionSheet();
 
@@ -151,8 +152,8 @@ async function run(action: () => Promise<void>): Promise<boolean> {
   }
 }
 
-function openOrder(order: OrderRow) {
-  props.f7router.navigate(`/demo/order/${String(order.id)}/`);
+function openOrder(order: OrderRow, event: MouseEvent) {
+  open(props.f7router, event, `/demo/order/${String(order.id)}/`);
 }
 
 async function saveOrder(draft: { customerId: number; reference: string; lines: DraftLine[] }) {

@@ -8,7 +8,7 @@
       swipe-full="end"
       :headline="order.reference"
       :supporting="`${order.customerName} · ${t('demo.lines', { count: order.lines }, order.lines)}`"
-      @click="emit('open', order)"
+      @click="emit('open', order, $event)"
     >
       <template #leading>
         <M3Shape
@@ -62,7 +62,7 @@ import { formatMoney, statusLook } from "@/modules/demo/composables/useOrderStat
  */
 defineProps<{ orders: OrderRow[] }>();
 const emit = defineEmits<{
-  open: [order: OrderRow];
+  open: [order: OrderRow, event: MouseEvent];
   more: [order: OrderRow];
   advance: [order: OrderRow];
   delete: [order: OrderRow];

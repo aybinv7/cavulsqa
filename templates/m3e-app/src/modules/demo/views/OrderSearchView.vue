@@ -23,7 +23,7 @@
         :headline="order.reference"
         :supporting="`${order.customerName} · ${order.city}`"
         :trailing-text="formatMoney(order.totalCents)"
-        @click="f7router.navigate(`/demo/order/${String(order.id)}/`)"
+        @click="open(f7router, $event, `/demo/order/${String(order.id)}/`)"
       >
         <template #leading>
           <M3Shape
@@ -57,6 +57,7 @@ import { useReactiveQuery } from "@/shared/database/queries";
 
 defineProps<{ f7router: Router.Router }>();
 const { t } = useI18n();
+const { open } = useContainerTransform();
 const term = ref("");
 
 /**

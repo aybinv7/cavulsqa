@@ -16,7 +16,7 @@
         clickable
         :headline="t(feature.titleKey)"
         :supporting="t(feature.subtitleKey)"
-        @click="openFeature(feature)"
+        @click="openFeature(feature, $event)"
       >
         <template #leading>
           <M3Shape :shape="feature.shape" class="size-10" :class="TONE_CLASSES[feature.tone]">
@@ -38,9 +38,10 @@ import { TONE_CLASSES } from "@/shared/utils/tone";
 const { t } = useI18n();
 const props = defineProps<{ f7router: Router.Router }>();
 const tabs = useActiveTab();
+const { open } = useContainerTransform();
 
-function openFeature(feature: HomeFeature) {
-  props.f7router.navigate(`/home/feature/${feature.id}/`);
+function openFeature(feature: HomeFeature, event: MouseEvent) {
+  open(props.f7router, event, `/home/feature/${feature.id}/`);
 }
 
 function openStudio() {
