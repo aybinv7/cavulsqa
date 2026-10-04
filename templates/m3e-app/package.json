@@ -44,6 +44,7 @@
     "@intlify/unplugin-vue-i18n": "catalog:",
     "@types/node": "catalog:",
     "@vitejs/plugin-vue": "^6.0.3",
+    "happy-dom": "catalog:",
     "sql.js": "catalog:",
     "typescript": "catalog:",
     "unplugin-auto-import": "catalog:",
