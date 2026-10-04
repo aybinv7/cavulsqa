@@ -1,4 +1,51 @@
 <template>
+  <GalleryBlock
+    :title="t('gallery.inputs.searchView')"
+    :note="t('gallery.inputs.searchViewNote')"
+    stack
+  >
+    <M3SearchView
+      v-model="customerQuery"
+      :placeholder="t('gallery.inputs.searchCustomers')"
+      :back-label="t('shell.back')"
+      :clear-label="t('gallery.inputs.clear')"
+    >
+      <template #trailing>
+        <M3IconButton :label="t('gallery.inputs.voice')"><i-ms-mic-outline-rounded /></M3IconButton>
+      </template>
+      <template #default="{ query: term }">
+        <M3List variant="standard" :label="t('gallery.inputs.searchCustomers')">
+          <template v-if="term">
+            <M3ListItem
+              v-for="customer in matches(term)"
+              :key="customer"
+              clickable
+              :headline="customer"
+              @click="customerQuery = customer"
+            >
+              <template #leading><i-ms-person-outline-rounded /></template>
+            </M3ListItem>
+            <M3ListItem
+              v-if="matches(term).length === 0"
+              :headline="t('gallery.inputs.noMatches')"
+            />
+          </template>
+          <template v-else>
+            <M3ListItem
+              v-for="recent in RECENT"
+              :key="recent"
+              clickable
+              :headline="recent"
+              @click="customerQuery = recent"
+            >
+              <template #leading><i-ms-history-rounded /></template>
+            </M3ListItem>
+          </template>
+        </M3List>
+      </template>
+    </M3SearchView>
+  </GalleryBlock>
+
   <GalleryBlock :title="t('gallery.inputs.search')" :note="t('gallery.inputs.searchNote')" stack>
     <M3SearchBar
       v-model="query"
@@ -57,6 +104,22 @@ import GalleryBlock from "@/modules/gallery/components/GalleryBlock.vue";
 
 const { t } = useI18n();
 const query = ref("");
+const customerQuery = ref("");
+const CUSTOMERS = [
+  "Alger Distribution",
+  "Annaba Market",
+  "Béjaïa Foods",
+  "Blida Wholesale",
+  "Constantine Retail",
+  "Oran Hypermarché",
+  "Sétif Grocers",
+  "Tlemcen Pharma",
+];
+const RECENT = ["Oran", "Constantine Retail", "Blida"];
+const matches = (term: string) => {
+  const needle = term.trim().toLocaleLowerCase();
+  return CUSTOMERS.filter((customer) => customer.toLocaleLowerCase().includes(needle));
+};
 const name = ref("");
 const amount = ref("12,5x");
 const email = ref("");

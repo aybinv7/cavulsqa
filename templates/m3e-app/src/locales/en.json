@@ -437,7 +437,11 @@
       "outlined": "Outlined fields",
       "outlinedNote": "For dense forms; the label cuts into the outline.",
       "email": "Email",
-      "note": "Delivery note"
+      "note": "Delivery note",
+      "searchView": "Search view",
+      "searchViewNote": "The bar opens into a full-screen view on one spring: recent searches first, then matches as you type. Back closes it.",
+      "searchCustomers": "Search customers",
+      "noMatches": "No customer matches"
     },
     "surfaces": {
       "cards": "Cards",

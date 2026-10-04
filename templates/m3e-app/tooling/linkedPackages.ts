@@ -42,10 +42,10 @@ function exportedFiles(packageDir: string): string[] {
  * One clean reload per rebuild of a linked package. Left to itself the dev server reloads on the
  * first file the build touches - often while `dist` has just been emptied, so the page asks for an
  * entry that is not there yet and boots blank. It also never notices the stylesheet `app.css`
- * imports, so a rebuild paired new JavaScript with old scoped styles. Here every write under a
- * linked `dist` is held back until writing stops and every exported file exists again with the same
- * size on two checks in a row - a file that exists can still be half written - then the cached CSS
- * is dropped and the page reloads once.
+ * imports, so a rebuild paired new JavaScript with old scoped styles. Here every change or
+ * deletion under a linked `dist` - through both of Vite's HMR hooks - is held back until writing
+ * stops and every exported file exists again with the same size on two checks in a row (a file that
+ * exists can still be half written); then the cached CSS is dropped and the page reloads once.
  */
 export function linkedRebuilds(root: string, names: readonly string[]): Plugin {
   const packages = names.map((name) => realpathSync(join(root, "node_modules", name)));
@@ -93,6 +93,9 @@ export function linkedRebuilds(root: string, names: readonly string[]): Plugin {
           if (inDist(file)) schedule();
         });
       }
+    },
+    hotUpdate({ file }) {
+      if (inDist(file)) return [];
     },
     handleHotUpdate({ file }) {
       if (inDist(file)) return [];

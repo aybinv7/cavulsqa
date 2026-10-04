@@ -38,6 +38,7 @@ export { default as M3NavigationRail } from "./components/navigation/M3Navigatio
 export { default as M3PullToRefresh } from "./components/progress/M3PullToRefresh.vue";
 export { default as M3Radio } from "./components/selection/M3Radio.vue";
 export { default as M3SearchBar } from "./components/search/M3SearchBar.vue";
+export { default as M3SearchView } from "./components/search/M3SearchView.vue";
 export { default as M3Shape } from "./components/shape/M3Shape.vue";
 export { default as M3ShapeMorph } from "./components/shape/M3ShapeMorph.vue";
 export { default as M3SideSheet } from "./components/sheet/M3SideSheet.vue";

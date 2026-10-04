@@ -437,7 +437,11 @@
       "outlined": "Champs à contour",
       "outlinedNote": "Pour les formulaires denses ; le libellé entaille le contour.",
       "email": "E-mail",
-      "note": "Note de livraison"
+      "note": "Note de livraison",
+      "searchView": "Vue de recherche",
+      "searchViewNote": "La barre s’ouvre en vue plein écran sur un seul ressort : recherches récentes d’abord, puis résultats à la frappe. Retour la ferme.",
+      "searchCustomers": "Rechercher des clients",
+      "noMatches": "Aucun client ne correspond"
     },
     "surfaces": {
       "cards": "Cartes",
