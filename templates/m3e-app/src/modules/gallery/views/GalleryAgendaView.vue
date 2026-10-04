@@ -48,6 +48,7 @@
         :today="today"
         :heading="heading"
         :visits="visits"
+        @step="day = addDays(day, $event)"
       />
       <AgendaMonth
         v-else-if="view === 'month'"
@@ -65,6 +66,7 @@
 </template>
 
 <script setup lang="ts">
+import { addDays } from "@cavulsqa/m3e-vue";
 import AgendaDay from "@/modules/gallery/components/agenda/AgendaDay.vue";
 import AgendaMonth from "@/modules/gallery/components/agenda/AgendaMonth.vue";
 import AgendaVisitList from "@/modules/gallery/components/agenda/AgendaVisitList.vue";

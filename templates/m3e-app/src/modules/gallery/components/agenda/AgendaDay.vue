@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div ref="swipe" class="agenda-day">
     <h2 class="type-title-medium m-0 px-6 pt-4 text-on-surface">{{ heading }}</h2>
     <M3DayTimeline
       ref="timeline"
@@ -34,6 +34,7 @@ import {
   formatMinutes,
   minutesOfDay,
   useSnackbar,
+  useSwipeStep,
   type TimelineEvent,
   type TimelineTone,
 } from "@cavulsqa/m3e-vue";
@@ -42,6 +43,8 @@ import type { Visit, VisitState } from "@/modules/gallery/composables/routePlan"
 interface VisitEvent extends TimelineEvent {
   visit: Visit;
 }
+
+const emit = defineEmits<{ step: [days: 1 | -1] }>();
 
 const props = defineProps<{
   day: string;
@@ -58,6 +61,9 @@ const TONE: Record<VisitState, TimelineTone> = {
 
 const { t, locale } = useI18n();
 const snackbar = useSnackbar();
+const swipe = useTemplateRef<HTMLElement>("swipe");
+
+useSwipeStep({ target: swipe, onStep: (step) => emit("step", step) });
 const timeline = useTemplateRef<{
   scrollToMinute: (minute: number, behavior?: ScrollBehavior) => void;
 }>("timeline");
@@ -92,3 +98,9 @@ watch(
   () => nextTick(() => timeline.value?.scrollToMinute(focusMinute())),
 );
 </script>
+
+<style scoped>
+.agenda-day {
+  touch-action: pan-y;
+}
+</style>
