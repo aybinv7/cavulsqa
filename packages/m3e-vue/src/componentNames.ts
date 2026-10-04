@@ -64,6 +64,7 @@ export const COMPONENT_NAMES = [
   "M3Shape",
   "M3ShapeMorph",
   "M3SideSheet",
+  "M3SignaturePad",
   "M3Skeleton",
   "M3SkeletonBlock",
   "M3SkeletonText",

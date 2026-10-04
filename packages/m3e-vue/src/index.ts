@@ -65,6 +65,7 @@ export { default as M3SearchView } from "./components/search/M3SearchView.vue";
 export { default as M3Shape } from "./components/shape/M3Shape.vue";
 export { default as M3ShapeMorph } from "./components/shape/M3ShapeMorph.vue";
 export { default as M3SideSheet } from "./components/sheet/M3SideSheet.vue";
+export { default as M3SignaturePad } from "./components/signature/M3SignaturePad.vue";
 export { default as M3Skeleton } from "./components/skeleton/M3Skeleton.vue";
 export { default as M3SkeletonBlock } from "./components/skeleton/M3SkeletonBlock.vue";
 export { default as M3SkeletonText } from "./components/skeleton/M3SkeletonText.vue";
@@ -133,6 +134,7 @@ export { useInView } from "./composables/useInView.js";
 export { useElementSize, type ElementSize } from "./composables/useElementSize.js";
 export { useFocusTrap } from "./composables/useFocusTrap.js";
 export { sanitizeHtml, isSafeHref } from "./utils/sanitizeHtml.js";
+export type { SignaturePoint, SignatureStroke } from "./utils/signature.js";
 export type { EditorCommand } from "./components/editor/commands.js";
 export {
   useFormDraft,
