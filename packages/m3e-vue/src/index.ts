@@ -4,6 +4,7 @@ export { default as M3ActionSheetHost } from "./components/sheet/M3ActionSheetHo
 export { default as M3Badge } from "./components/badge/M3Badge.vue";
 export { default as M3BarChart } from "./components/chart/M3BarChart.vue";
 export { default as M3BottomSheet } from "./components/sheet/M3BottomSheet.vue";
+export { default as M3Breadcrumbs } from "./components/navigation/M3Breadcrumbs.vue";
 export { default as M3Button } from "./components/button/M3Button.vue";
 export { default as M3ButtonGroup } from "./components/button/M3ButtonGroup.vue";
 export { default as M3Calendar } from "./components/datetime/M3Calendar.vue";
@@ -13,6 +14,7 @@ export { default as M3Checkbox } from "./components/selection/M3Checkbox.vue";
 export { default as M3Chip } from "./components/chip/M3Chip.vue";
 export { default as M3CircularProgress } from "./components/progress/M3CircularProgress.vue";
 export { default as M3ClockDial } from "./components/datetime/M3ClockDial.vue";
+export { default as M3ColorPicker } from "./components/color/M3ColorPicker.vue";
 export { default as M3DataTable } from "./components/table/M3DataTable.vue";
 export { default as M3DatePicker } from "./components/datetime/M3DatePicker.vue";
 export { default as M3DatePickerPanel } from "./components/datetime/M3DatePickerPanel.vue";
@@ -78,6 +80,7 @@ export { default as M3Tab } from "./components/tabs/M3Tab.vue";
 export { default as M3TabPanel } from "./components/tabs/M3TabPanel.vue";
 export { default as M3TabPanels } from "./components/tabs/M3TabPanels.vue";
 export { default as M3Tabs } from "./components/tabs/M3Tabs.vue";
+export { default as M3TextEditor } from "./components/editor/M3TextEditor.vue";
 export { default as M3TextField } from "./components/textfield/M3TextField.vue";
 export { default as M3Timeline } from "./components/timeline/M3Timeline.vue";
 export { default as M3TimelineItem } from "./components/timeline/M3TimelineItem.vue";
@@ -129,6 +132,8 @@ export { useFrame, subscribeFrame, type FrameCallback } from "./composables/useF
 export { useInView } from "./composables/useInView.js";
 export { useElementSize, type ElementSize } from "./composables/useElementSize.js";
 export { useFocusTrap } from "./composables/useFocusTrap.js";
+export { sanitizeHtml, isSafeHref } from "./utils/sanitizeHtml.js";
+export type { EditorCommand } from "./components/editor/commands.js";
 export {
   useFormDraft,
   localDraftStorage,

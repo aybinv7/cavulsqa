@@ -40,6 +40,13 @@ describe("popover placement", () => {
     expect(placePopover(anchor, size, VIEW, { align: "start", rtl: true }).left).toBe(8);
   });
 
+  test("an anchor pushed under the keyboard leaves the popover inside what is visible", () => {
+    const keyboardUp = { width: 360, height: 616 };
+    const spot = placePopover(box(300, 698), { width: 280, height: 140 }, keyboardUp);
+    expect(spot.top + 140).toBeLessThanOrEqual(616 - 8);
+    expect(spot.top).toBeGreaterThanOrEqual(8);
+  });
+
   test("too tall for either side takes the roomier one and caps its height", () => {
     const spot = placePopover(box(160, 200), { width: 200, height: 900 }, VIEW);
     expect(spot.side).toBe("bottom");

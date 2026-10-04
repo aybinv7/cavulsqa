@@ -25,7 +25,8 @@ const MARGIN = 8;
  * Where a popover of `size` goes against `anchor`: on the preferred side when it fits, else on the
  * side with more room, aligned to the anchor's start, centre or end (mirrored right to left) and
  * held inside the viewport. When neither side fits, it takes the roomier one and its height is
- * capped there, so its content scrolls instead of running off screen.
+ * capped there, so its content scrolls instead of running off screen. It never leaves the viewport,
+ * even when the anchor has - a keyboard that rose over the anchor leaves the popover above it.
  */
 export function placePopover(
   anchor: Rect,
@@ -45,7 +46,10 @@ export function placePopover(
       : roomBelow >= roomAbove
         ? "bottom"
         : "top";
-  const maxHeight = Math.max(0, side === "top" ? roomAbove : roomBelow);
+  const maxHeight = Math.min(
+    viewport.height - 2 * MARGIN,
+    Math.max(0, side === "top" ? roomAbove : roomBelow),
+  );
   const height = Math.min(size.height, maxHeight);
 
   const start = rtl ? anchor.right - size.width : anchor.left;
@@ -53,7 +57,8 @@ export function placePopover(
   const centre = anchor.left + anchor.width / 2 - size.width / 2;
   const raw = align === "start" ? start : align === "end" ? end : centre;
   const left = Math.min(viewport.width - MARGIN - size.width, Math.max(MARGIN, raw));
-  const top = side === "bottom" ? anchor.bottom + gap : anchor.top - gap - height;
+  const beside = side === "bottom" ? anchor.bottom + gap : anchor.top - gap - height;
+  const top = Math.min(viewport.height - MARGIN - height, Math.max(MARGIN, beside));
 
   return {
     top,
@@ -61,6 +66,6 @@ export function placePopover(
     side,
     maxHeight,
     originX: Math.min(size.width, Math.max(0, anchor.left + anchor.width / 2 - left)),
-    originY: side === "bottom" ? 0 : height,
+    originY: Math.min(height, Math.max(0, (side === "bottom" ? anchor.bottom : anchor.top) - top)),
   };
 }
