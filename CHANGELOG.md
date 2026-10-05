@@ -290,6 +290,15 @@ If you are on something older, the breaking changes you have to cross were relea
 
 ## @cavulsqa/create
 
+### 2.11.1
+
+- **Fixed:** with updates on, the flavour files in `build/<env>/` left out `VITE_STORAGE_ENGINE` and
+  `VITE_PRAGMA_PROFILE`, which only the git-ignored `.env` carried, so `capuchoo deploy` warned
+  that they came from the machine and refused them for prod. Every flavour now sets both when chosen.
+- **Fixed:** an app generated with `--engine` failed its first `vp check`: pruning left
+  `storage.config.ts` and `candidates/types.ts` with lists oxfmt collapses, and the manifest moved
+  `private` out of oxfmt's package.json order. Every template and engine is now checked with oxfmt.
+
 ### 2.11.0
 
 - **App identity comes from env.** Both templates' `capacitor.config.ts` read `VITE_APP_ID` and
