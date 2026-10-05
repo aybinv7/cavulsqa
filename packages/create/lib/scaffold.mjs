@@ -48,9 +48,13 @@ The app ships no update screen: drive it with \`useUpdater()\` from \`@capuchoo/
 `;
 }
 
+/**
+ * The generated app's manifest. Overridden keys keep the template's order, which oxfmt already
+ * accepts: it sorts package.json, and dropping `private` to re-add it last failed `vp check`.
+ */
 function manifest(source, { name, appName, templateName }) {
   const pkg = JSON.parse(source);
-  const { private: _private, cavulsqa: _cavulsqa, ...rest } = pkg;
+  const { cavulsqa: _cavulsqa, ...rest } = pkg;
   return `${JSON.stringify(
     {
       ...rest,
@@ -118,7 +122,7 @@ export function scaffold({ templateDir, out, name, appId, appName, engine, pragm
     writeFileSync(join(out, ".env"), `${lines.join("\n")}\n`);
   }
 
-  if (updateUrl) addUpdates(out, { appId, appName, updateUrl });
+  if (updateUrl) addUpdates(out, { appId, appName, updateUrl, engine, pragmas });
 
   // pnpm will not finish an install while a dependency's build script is neither allowed nor
   // denied, and vite-plus pulls esbuild in. Without this every generated app fails its first

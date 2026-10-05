@@ -35,7 +35,7 @@ describe.each(TEMPLATES)("%s", (templateName) => {
     out = undefined;
   });
 
-  function generate(updateUrl) {
+  function generate(updateUrl, options = {}) {
     out = join(mkdtempSync(join(tmpdir(), "cavulsqa-")), "app");
     scaffold({
       templateDir: join(PACKAGE, "templates", templateName),
@@ -44,9 +44,43 @@ describe.each(TEMPLATES)("%s", (templateName) => {
       appId: "com.example.caputa",
       appName: "Caputa",
       updateUrl,
+      ...options,
     });
     return (file) => readFileSync(join(out, file), "utf8");
   }
+
+  const keysOf = (text) =>
+    text
+      .split("\n")
+      .map((line) => line.match(/^(VITE_\w+)=/)?.[1])
+      .filter(Boolean);
+
+  /**
+   * `.env` is git-ignored, so a value only it holds is this machine's, not the app's: `capuchoo
+   * deploy` warns about every `VITE_` key a local env file sets and the flavour file does not, and
+   * refuses a prod deploy over it. The engine and the PRAGMA profile were exactly those keys.
+   */
+  test("every value the generated .env sets is set by each flavour too", () => {
+    const read = generate(URL_, { engine: "sqlite-wasm-opfs-sahpool", pragmas: "fast" });
+    const local = keysOf(read(".env"));
+    expect(local).toEqual(["VITE_STORAGE_ENGINE", "VITE_PRAGMA_PROFILE"]);
+
+    for (const env of ["dev", "staging", "prod"]) {
+      const flavour = read(`build/${env}/.env.${env}`);
+      expect(keysOf(flavour), env).toEqual(expect.arrayContaining(local));
+      expect(flavour).toMatch(/^VITE_STORAGE_ENGINE=sqlite-wasm-opfs-sahpool$/m);
+      expect(flavour).toMatch(/^VITE_PRAGMA_PROFILE=fast$/m);
+    }
+  });
+
+  test("a flavour names no engine or profile that was never chosen", () => {
+    const read = generate(URL_);
+    for (const env of ["dev", "staging", "prod"]) {
+      expect(read(`build/${env}/.env.${env}`), env).not.toMatch(
+        /VITE_STORAGE_ENGINE|VITE_PRAGMA_PROFILE/,
+      );
+    }
+  });
 
   test("without updates the app carries no updater at all", () => {
     const read = generate(undefined);

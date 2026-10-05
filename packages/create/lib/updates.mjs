@@ -133,7 +133,15 @@ export function wireEntry(text) {
   return lines.join("\n");
 }
 
-export function flavourFile({ env, idSuffix, nameSuffix }, { appId, appName, updateUrl }) {
+/**
+ * One flavour's env file. The engine and PRAGMA profile are repeated from `.env` because `.env` is
+ * git-ignored: a flavour that left them out would build with whatever the deploying machine has,
+ * which `capuchoo deploy` warns about and refuses for prod.
+ */
+export function flavourFile(
+  { env, idSuffix, nameSuffix },
+  { appId, appName, updateUrl, engine, pragmas },
+) {
   return [
     `# The ${env} flavour. The Capuchoo CLI exports these values when it builds ${env}; see .env.example.`,
     `VITE_APP_ID=${appId}${idSuffix}`,
@@ -141,6 +149,8 @@ export function flavourFile({ env, idSuffix, nameSuffix }, { appId, appName, upd
     `VITE_ENVIRONMENT=${env}`,
     `VITE_UPDATE_API_URL=${updateUrl}`,
     `VITE_UPDATE_CHANNEL=${env}`,
+    ...(engine ? [`VITE_STORAGE_ENGINE=${engine}`] : []),
+    ...(pragmas ? [`VITE_PRAGMA_PROFILE=${pragmas}`] : []),
     "",
   ].join("\n");
 }
@@ -158,7 +168,7 @@ const ENV_EXAMPLE_UPDATES = `
  * app, its channels, registering the flavour ids - is left to `capuchoo init`, which reports
  * everything written here as already satisfied.
  */
-export function addUpdates(out, { appId, appName, updateUrl }) {
+export function addUpdates(out, { appId, appName, updateUrl, engine, pragmas }) {
   const packagePath = join(out, "package.json");
   const pkg = JSON.parse(readFileSync(packagePath, "utf8"));
   writeFileSync(packagePath, `${JSON.stringify(withUpdatePackages(pkg), null, 2)}\n`);
@@ -174,7 +184,7 @@ export function addUpdates(out, { appId, appName, updateUrl }) {
     mkdirSync(dir, { recursive: true });
     writeFileSync(
       join(dir, `.env.${flavour.env}`),
-      flavourFile(flavour, { appId, appName, updateUrl }),
+      flavourFile(flavour, { appId, appName, updateUrl, engine, pragmas }),
     );
   }
 
