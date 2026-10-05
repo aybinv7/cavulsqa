@@ -1,6 +1,6 @@
 {
   "name": "@cavulsqa/m3e",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Framework-free Material 3 Expressive core: 2025-spec dynamic colour, the 35-shape library with morphing, spring motion tokens, wavy progress geometry, the loading indicator and every system token as CSS.",
   "keywords": [
     "material-3",
