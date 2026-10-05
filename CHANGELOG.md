@@ -9,6 +9,19 @@ cadence and has its own section.
 
 ## Libraries
 
+### 1.4.1
+
+**Fixed: destroying a `createSqlJsDialect` database never closed it.** The driver's `destroy` was a
+no-op, so `kysely.destroy()` left every sql.js database resident. The test dialect uses the asm.js
+build, whose heap is fixed at about 21 MB and shared by every database in a test file, so a file
+that seeds a sizeable dataset per test aborted with `Aborted(OOM)` after about ten tests. `destroy`
+now closes the database, a second `destroy` is a no-op, and a query on a destroyed database fails
+with an error that says so - sql.js itself reports "out of memory" there, which reads as the leak
+this fixes. A test that seeded its own teardown (dropping tables, `VACUUM`) can go back to
+`db.destroy()`.
+
+The other libraries carry no change of their own at 1.4.1.
+
 ### 1.4.0
 
 `mobile-db`, `reactive-db`, `reactive-vue` and `repository` were not published at 1.3.0, so 1.4.0
@@ -289,6 +302,11 @@ If you are on something older, the breaking changes you have to cross were relea
   the key so it re-runs when the key moves.
 
 ## @cavulsqa/create
+
+### 2.11.2
+
+- Generated apps depend on the 1.4.1 libraries, whose sql.js test dialect releases its memory on
+  `destroy`.
 
 ### 2.11.1
 

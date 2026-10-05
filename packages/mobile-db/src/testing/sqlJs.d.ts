@@ -11,6 +11,7 @@ declare module "sql.js/dist/sql-asm.js" {
     run(sql: string, values?: readonly unknown[]): void;
     exec(sql: string): Array<{ columns: string[]; values: unknown[][] }>;
     getRowsModified(): number;
+    close(): void;
   }
 
   const initSqlJs: (options?: {
