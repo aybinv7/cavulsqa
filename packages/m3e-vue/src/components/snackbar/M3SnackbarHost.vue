@@ -1,14 +1,20 @@
 <script setup lang="ts">
 import M3Glyph from "../icon/M3Glyph.vue";
-import { onBeforeUnmount, watch } from "vue";
+import { MOTION_SCHEMES, animateSpring, type SpringAnimation } from "@cavulsqa/m3e";
+import { onBeforeUnmount, useTemplateRef, watch } from "vue";
 import { useM3eConfig } from "../../services/config.js";
 import type { SnackbarItem } from "../../services/snackbar.js";
 import { vRipple } from "../../directives/ripple.js";
+import { useDismissDrag } from "../../composables/useDismissDrag.js";
+import { useReducedMotion } from "../../composables/useReducedMotion.js";
+import { dismissDirection } from "../../utils/dismiss.js";
 
 /**
  * Shows `useSnackbar().show(...)` messages one at a time at the bottom of the screen. The timer
  * pauses while the snackbar is touched or hovered, so nobody loses an action they were reaching
- * for. Raise it above a navigation bar with `--m3-snackbar-offset`. It sits under dialogs and modal
+ * for. Swiping it sideways or down dismisses it, as Compose's `SwipeToDismissBox` does for a
+ * snackbar; a shorter swipe springs back. Raise it above a navigation bar with
+ * `--m3-snackbar-offset`. It sits under dialogs and modal
  * sheets, as Compose's does under their windows. Mount it once.
  *
  * @see https://m3.material.io/components/snackbar/specs
@@ -22,6 +28,13 @@ const props = withDefaults(
 );
 
 const { snackbar } = useM3eConfig();
+const card = useTemplateRef<HTMLElement>("card");
+const reduced = useReducedMotion();
+const motion = MOTION_SCHEMES.expressive;
+let x = 0;
+let y = 0;
+let animation: SpringAnimation | null = null;
+let leaving = false;
 let timer = 0;
 let remaining = 0;
 let startedAt = 0;
@@ -50,16 +63,82 @@ function resume() {
     run(Math.max(remaining, 1500));
 }
 
+function draw() {
+  const element = card.value;
+  if (!element) return;
+  element.style.transform = x || y ? `translate3d(${x}px, ${y}px, 0)` : "";
+  const travel = Math.max(Math.abs(x) / Math.max(1, element.offsetWidth), Math.abs(y) / 96);
+  element.style.opacity = String(1 - Math.min(1, travel));
+}
+
+function animateTo(toX: number, toY: number, velocity: number) {
+  animation?.stop();
+  const fromX = x;
+  const fromY = y;
+  const distance = Math.hypot(toX - fromX, toY - fromY) || 1;
+  animation = animateSpring({
+    from: 0,
+    to: 1,
+    spring: motion.fastSpatial.spring,
+    velocity: velocity / distance,
+    instant: reduced.value,
+    restDelta: 0.001,
+    onFrame(progress) {
+      x = fromX + (toX - fromX) * progress;
+      y = fromY + (toY - fromY) * progress;
+      draw();
+    },
+  });
+  return animation.finished;
+}
+
+useDismissDrag({
+  target: card,
+  edge: "bottom",
+  enabled: () => snackbar.current.value !== null && !leaving,
+  onStart() {
+    animation?.stop();
+    pause();
+  },
+  onMove(dx, dy) {
+    x = dx;
+    y = dy;
+    draw();
+  },
+  async onRelease(dx, dy, vx, vy) {
+    const width = card.value?.offsetWidth ?? 360;
+    const direction = dismissDirection({ dx, dy, vx, vy, width, edge: "bottom" });
+    if (!direction) {
+      void animateTo(0, 0, 0);
+      resume();
+      return;
+    }
+    leaving = true;
+    const away = width * 1.2;
+    const target: [number, number] =
+      direction === "down" ? [0, 160] : [direction === "left" ? -away : away, 0];
+    await animateTo(target[0], target[1], direction === "down" ? vy : Math.abs(vx));
+    snackbar.settle("dismissed");
+  },
+});
+
 watch(
   snackbar.current,
   (item: SnackbarItem | null) => {
     clear();
+    animation?.stop();
+    x = 0;
+    y = 0;
+    leaving = false;
     if (item) run(item.durationMs);
   },
   { immediate: true },
 );
 
-onBeforeUnmount(clear);
+onBeforeUnmount(() => {
+  clear();
+  animation?.stop();
+});
 </script>
 
 <template>
@@ -69,6 +148,7 @@ onBeforeUnmount(clear);
         <div
           v-if="snackbar.current.value"
           :key="snackbar.current.value.id"
+          ref="card"
           class="m3-snackbar"
           :class="{
             'm3-snackbar--action': snackbar.current.value.action || snackbar.current.value.closable,
@@ -132,6 +212,8 @@ onBeforeUnmount(clear);
   color: var(--md-sys-color-inverse-on-surface);
   box-shadow: var(--md-sys-elevation-level3);
   pointer-events: auto;
+  touch-action: none;
+  user-select: none;
 }
 
 .m3-snackbar--action {

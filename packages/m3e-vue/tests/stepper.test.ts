@@ -57,18 +57,56 @@ describe("M3Stepper", () => {
     return { wrapper, model };
   }
 
-  test("a tap steps once; holding repeats until released", async () => {
+  const press = (target: Element, x = 10, y = 10) =>
+    target.dispatchEvent(
+      new PointerEvent("pointerdown", {
+        button: 0,
+        isPrimary: true,
+        pointerId: 1,
+        clientX: x,
+        clientY: y,
+      }),
+    );
+  const move = (x: number, y: number) =>
+    window.dispatchEvent(new PointerEvent("pointermove", { pointerId: 1, clientX: x, clientY: y }));
+  const release = (target: Element) => {
+    window.dispatchEvent(new PointerEvent("pointerup", { pointerId: 1 }));
+    target.dispatchEvent(new MouseEvent("click", { detail: 1, bubbles: true }));
+  };
+
+  test("a tap steps once, on release", async () => {
     const { wrapper, model } = mountStepper();
-    await vi.advanceTimersByTimeAsync(0);
-    const plus = wrapper.findAll("button")[1]!;
-    plus.element.dispatchEvent(new PointerEvent("pointerdown", { button: 0, isPrimary: true }));
-    plus.element.dispatchEvent(new MouseEvent("click", { detail: 1, bubbles: true }));
+    const plus = wrapper.findAll("button")[1]!.element;
+    press(plus);
+    expect(model.value).toBe(5);
+    release(plus);
     expect(model.value).toBe(6);
+  });
+
+  test("holding repeats until released, and the closing click adds nothing", async () => {
+    const { wrapper, model } = mountStepper();
+    const plus = wrapper.findAll("button")[1]!.element;
+    press(plus);
     await vi.advanceTimersByTimeAsync(400 + 100 * 3);
-    expect(model.value).toBe(10);
-    window.dispatchEvent(new PointerEvent("pointerup"));
+    expect(model.value).toBe(9);
+    release(plus);
     await vi.advanceTimersByTimeAsync(1000);
-    expect(model.value).toBe(10);
+    expect(model.value).toBe(9);
+  });
+
+  test("a finger that lands on a button to scroll the list changes nothing", async () => {
+    const { wrapper, model } = mountStepper();
+    const plus = wrapper.findAll("button")[1]!.element;
+    press(plus);
+    move(12, 60);
+    await vi.advanceTimersByTimeAsync(1000);
+    release(plus);
+    expect(model.value).toBe(5);
+
+    press(plus);
+    window.dispatchEvent(new PointerEvent("pointercancel", { pointerId: 1 }));
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(model.value).toBe(5);
   });
 
   test("keyboard activation of a button steps exactly once", async () => {
