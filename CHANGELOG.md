@@ -9,6 +9,23 @@ cadence and has its own section.
 
 ## Libraries
 
+### 1.6.0
+
+A minor release: `mobile-db` records committed writes as SQLite changesets. The libraries other than
+`mobile-db` carry no change of their own at 1.6.0.
+
+- **`createChangeCapture()`** records every committed write to the attached tables as a SQLite
+  changeset, row values included, inside the OPFS worker through SQLite's session extension. The
+  recording stays in C, so a bulk write costs no JavaScript per row; the worker checks autocommit
+  and emptiness after each statement and posts one changeset per committed transaction. Pass the
+  same instance to `createOpfsDialect({ ..., capture })` and to whoever reads it (`subscribe`). A
+  rolled-back transaction is discarded through the rollback hook, and the capture re-attaches when a
+  replacement dialect binds after a worker restart.
+- It answers `{ supported: false, reason }` instead of throwing on wa-sqlite and on builds without
+  the session extension, so a reader can fall back to its own capture.
+- Tables without a declared `PRIMARY KEY` are reported `tracked: false`: the session extension
+  ignores them.
+
 ### 1.5.0
 
 A minor release: `M3ListItem` gains `#content`, and `useDismissDrag` / `dismissDirection` gain an
@@ -321,6 +338,11 @@ If you are on something older, the breaking changes you have to cross were relea
   the key so it re-runs when the key moves.
 
 ## @cavulsqa/create
+
+### 2.11.4
+
+- Generated apps depend on the 1.6.0 libraries, whose OPFS worker can record committed writes as
+  SQLite changesets (`createChangeCapture`).
 
 ### 2.11.3
 
