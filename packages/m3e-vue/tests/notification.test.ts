@@ -47,6 +47,14 @@ describe("dismiss thresholds", () => {
     expect(dismissDirection({ ...base, dy: -10, vy: -900 })).toBe("up");
     expect(dismissDirection({ ...base, dy: 15 })).toBeNull();
   });
+
+  test("a snackbar at the bottom leaves downward, never up", () => {
+    const bottom = { ...base, edge: "bottom" as const };
+    expect(dismissDirection({ ...bottom, dy: 30 })).toBe("down");
+    expect(dismissDirection({ ...bottom, dy: 10, vy: 900 })).toBe("down");
+    expect(dismissDirection({ ...bottom, dy: -40 })).toBeNull();
+    expect(dismissDirection({ ...bottom, dx: -140 })).toBe("left");
+  });
 });
 
 describe("M3NotificationHost", () => {

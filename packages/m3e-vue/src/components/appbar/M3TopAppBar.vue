@@ -49,14 +49,29 @@ const reduced = useReducedMotion();
 const ROW = 64;
 const enterAlways = computed(() => props.scrollBehavior === "enterAlways" && !flexible.value);
 let offset = 0;
+let placed = { px: 0, following: false };
+let shared = 0;
 let settle: ReturnType<typeof setTimeout> | undefined;
 
+/**
+ * Moves the bar and its `#bottom` only. The scroll container hears the offset - for the sticky
+ * headers of `M3ListGroup` - only once the bar rests fully in or out: a custom property inherits,
+ * so writing it there on every frame would restyle every row of a long list while it scrolls,
+ * which is what made the bar stutter as it came back.
+ */
 function place(px: number, animate: boolean) {
-  container.value?.style.setProperty("--m3-app-bar-offset", `${px}px`);
-  for (const element of [bar.value, bottom.value]) {
-    if (!element) continue;
-    element.classList.toggle("m3-app-bar--following", !animate || reduced.value);
-    element.style.setProperty("--m3-app-bar-offset", `${px}px`);
+  const following = !animate || reduced.value;
+  if (px !== placed.px || following !== placed.following) {
+    placed = { px, following };
+    for (const element of [bar.value, bottom.value]) {
+      if (!element) continue;
+      element.classList.toggle("m3-app-bar--following", following);
+      element.style.setProperty("--m3-app-bar-offset", `${px}px`);
+    }
+  }
+  if ((px === 0 || px === ROW) && px !== shared) {
+    shared = px;
+    container.value?.style.setProperty("--m3-app-bar-offset", `${px}px`);
   }
 }
 

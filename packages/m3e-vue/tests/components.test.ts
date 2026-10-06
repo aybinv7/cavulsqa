@@ -179,3 +179,13 @@ test("a list item's action sits beside its tap target, never inside it", () => {
   expect(surface.find(".more").exists()).toBe(false);
   expect(wrapper.find(".m3-list-item__action .more").exists()).toBe(true);
 });
+
+test("a list item's content slot replaces its parts and keeps the row's selection", () => {
+  const wrapper = mount(M3ListItem, {
+    props: { headline: "Ignored", selected: true },
+    slots: { content: '<div class="product">Product</div>' },
+  });
+  expect(wrapper.find("div.m3-list-item__surface .product").exists()).toBe(true);
+  expect(wrapper.find(".m3-list-item__headline").exists()).toBe(false);
+  expect(wrapper.classes()).toContain("m3-list-item--selected");
+});

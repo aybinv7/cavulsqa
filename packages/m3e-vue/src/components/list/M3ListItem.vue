@@ -31,6 +31,10 @@ import type { SwipeSide } from "../../utils/swipe.js";
  * long swipe fire the outermost action. Vertical scrolling stays native: the row only claims a drag
  * that starts sideways.
  *
+ * `#content` replaces the leading, text and trailing parts with a layout of the screen's own - a
+ * product with its picture, price and stepper - and keeps the row's shape, selection colour and
+ * swipe actions. The row must not be `clickable` then: its controls are the tap targets.
+ *
  * `#details` makes it expandable - Framework7's accordion item: the row toggles a region below it
  * (`v-model:expanded`), a chevron turns, and the region grows on the default spatial spring. Inside
  * `M3List accordion`, opening one closes the others.
@@ -173,20 +177,24 @@ function onClick(event: MouseEvent) {
         :aria-controls="expandable ? detailsId : undefined"
         @click="onClick"
       >
-        <span v-if="$slots.leading" class="m3-list-item__leading"><slot name="leading" /></span>
-        <span class="m3-list-item__text">
-          <span v-if="props.overline" class="m3-list-item__overline">{{ props.overline }}</span>
-          <span :id="headlineId" class="m3-list-item__headline"
-            ><slot>{{ props.headline }}</slot></span
-          >
-          <span v-if="props.supporting || $slots.supporting" class="m3-list-item__supporting">
-            <slot name="supporting">{{ props.supporting }}</slot>
+        <slot name="content">
+          <span v-if="$slots.leading" class="m3-list-item__leading"><slot name="leading" /></span>
+          <span class="m3-list-item__text">
+            <span v-if="props.overline" class="m3-list-item__overline">{{ props.overline }}</span>
+            <span :id="headlineId" class="m3-list-item__headline"
+              ><slot>{{ props.headline }}</slot></span
+            >
+            <span v-if="props.supporting || $slots.supporting" class="m3-list-item__supporting">
+              <slot name="supporting">{{ props.supporting }}</slot>
+            </span>
           </span>
-        </span>
-        <span v-if="props.trailingText" class="m3-list-item__trailing-text">{{
-          props.trailingText
-        }}</span>
-        <span v-if="$slots.trailing" class="m3-list-item__trailing"><slot name="trailing" /></span>
+          <span v-if="props.trailingText" class="m3-list-item__trailing-text">{{
+            props.trailingText
+          }}</span>
+          <span v-if="$slots.trailing" class="m3-list-item__trailing"
+            ><slot name="trailing"
+          /></span>
+        </slot>
         <span v-if="expandable" class="m3-list-item__expand" aria-hidden="true"
           ><M3Glyph name="expandMore"
         /></span>

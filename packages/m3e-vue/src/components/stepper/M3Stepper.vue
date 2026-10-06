@@ -8,8 +8,10 @@ import { decimalsOf, parseTyped, repeatSteps, snapStep, stepBy } from "../../uti
 
 /**
  * Framework7's stepper in Material dress: minus and plus around the value, for small quantities
- * where a slider is too coarse and a keyboard too slow - items in a cart, guests, a dose. Holding a
- * button repeats and, across a wide range, speeds up as Framework7's dynamic auto-repeat does.
+ * where a slider is too coarse and a keyboard too slow - items in a cart, guests, a dose. A tap
+ * steps on release, never on press, so a finger that lands on a button to scroll a list changes
+ * nothing; holding a button still repeats and, across a wide range, speeds up as Framework7's
+ * dynamic auto-repeat does.
  * `editable` lets the value be typed (a decimal comma is accepted); it snaps to the step on commit.
  *
  * The value is one spinbutton: arrow keys step, Page keys move ten steps, Home and End jump to the

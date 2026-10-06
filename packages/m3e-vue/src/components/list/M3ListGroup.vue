@@ -51,5 +51,7 @@ const titleId = useId();
   font: var(--md-sys-typescale-title-small-weight) var(--md-sys-typescale-title-small-size) /
     var(--md-sys-typescale-title-small-line-height) var(--md-sys-typescale-title-small-font);
   letter-spacing: var(--md-sys-typescale-title-small-tracking);
+  transition: top var(--md-sys-motion-spring-fast-spatial-duration)
+    var(--md-sys-motion-spring-fast-spatial);
 }
 </style>

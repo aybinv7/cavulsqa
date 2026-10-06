@@ -9,6 +9,25 @@ cadence and has its own section.
 
 ## Libraries
 
+### 1.5.0
+
+A minor release: `M3ListItem` gains `#content`, and `useDismissDrag` / `dismissDirection` gain an
+`edge`. The libraries other than `m3e-vue` carry no change of their own at 1.5.0.
+
+- **Fixed: `M3Stepper` stepped when a scroll started on one of its buttons.** The step ran on
+  `pointerdown`, before the browser could tell a tap from a scroll, so every list of steppers
+  changed quantities under a scrolling finger. A tap now steps on its click, a hold still repeats
+  after 400 ms, and a press that travels past 10 px or is cancelled by a scroll never steps.
+- **Fixed: a small top app bar with `scrollBehavior="enterAlways"` stuttered as it came back.** It
+  wrote `--m3-app-bar-offset` on the scroll container on every frame; a custom property inherits,
+  so each frame restyled every row of the page. The container now hears the offset only when the
+  bar rests fully in or out, and `M3ListGroup`'s sticky headers ease to it.
+- **`M3SnackbarHost`: swipe a snackbar sideways or down to dismiss it**, as Compose's
+  `SwipeToDismissBox` does; a shorter swipe springs back. `useDismissDrag` and
+  `dismissDirection` take an `edge` (`top`, the default, or `bottom`).
+- `M3ListItem` takes `#content`, a layout of the screen's own in place of the leading, text and
+  trailing parts, keeping the row's shape, selection colour and swipe actions.
+
 ### 1.4.1
 
 **Fixed: destroying a `createSqlJsDialect` database never closed it.** The driver's `destroy` was a
@@ -302,6 +321,11 @@ If you are on something older, the breaking changes you have to cross were relea
   the key so it re-runs when the key moves.
 
 ## @cavulsqa/create
+
+### 2.11.3
+
+- Generated apps depend on the 1.5.0 libraries: steppers that ignore a scrolling finger, a top app
+  bar that comes back without stutter, and swipe-to-dismiss snackbars.
 
 ### 2.11.2
 

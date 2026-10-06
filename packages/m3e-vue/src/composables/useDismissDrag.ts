@@ -8,14 +8,17 @@ export interface DismissDragOptions {
   /** The offset to draw, already resisted where the banner should not go. */
   onMove: (dx: number, dy: number) => void;
   onRelease: (dx: number, dy: number, vx: number, vy: number) => void;
+  /** The edge the banner sits against: it moves freely toward it and resists the other way. */
+  edge?: "top" | "bottom";
 }
 
 const SLOP = 8;
 const DOWN_RESISTANCE = 0.2;
 
 /**
- * Drags a banner along whichever axis the gesture starts on: sideways freely, upward freely, and
- * downward only a little against resistance. The click that ends a drag is swallowed, so swiping
+ * Drags a banner along whichever axis the gesture starts on: sideways freely, toward its edge
+ * freely (up for a top banner, down for a bottom one), and the other way only a little against
+ * resistance. The click that ends a drag is swallowed, so swiping
  * a notification never opens it.
  */
 export function useDismissDrag(options: DismissDragOptions) {
@@ -36,7 +39,8 @@ export function useDismissDrag(options: DismissDragOptions) {
     const dx = event.clientX - startX;
     const dy = event.clientY - startY;
     if (axis === "x") return [dx, 0];
-    return [0, dy > 0 ? dy * DOWN_RESISTANCE : dy];
+    const away = options.edge === "bottom" ? dy < 0 : dy > 0;
+    return [0, away ? dy * DOWN_RESISTANCE : dy];
   }
 
   function onPointerDown(event: PointerEvent) {
