@@ -75,6 +75,7 @@ function settle(event: Event) {
         'm3-text-field--error': props.error,
         'm3-text-field--disabled': props.disabled,
         'm3-text-field--leading': $slots.leading,
+        'm3-text-field--multiline': props.multiline,
       },
     ]"
   >
@@ -256,6 +257,35 @@ function settle(event: Event) {
 
 .m3-text-field--filled .m3-text-field__input {
   padding: 0 0 8px;
+}
+
+/*
+ * A multi-line field grows downward, so its label rests on the first line, not the vertical middle:
+ * centred, the floated label landed on that first line and the typed text ran through it.
+ */
+.m3-text-field--multiline .m3-text-field__body {
+  justify-content: flex-start;
+}
+
+.m3-text-field--multiline .m3-text-field__label {
+  top: 16px;
+  transform: none;
+}
+
+.m3-text-field--outlined.m3-text-field--multiline .m3-text-field__row {
+  padding-top: 8px;
+}
+
+.m3-text-field--filled.m3-text-field--multiline .m3-text-field__row {
+  padding-top: 24px;
+}
+
+.m3-text-field--filled.m3-text-field--multiline .m3-text-field__label {
+  top: 24px;
+}
+
+.m3-text-field--filled.m3-text-field--multiline.m3-text-field--floated .m3-text-field__label {
+  transform: translateY(-16px) scale(0.75);
 }
 
 .m3-text-field:not(.m3-text-field--floated) .m3-text-field__input::placeholder {
