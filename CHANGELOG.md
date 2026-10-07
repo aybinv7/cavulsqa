@@ -9,6 +9,20 @@ cadence and has its own section.
 
 ## Libraries
 
+### 1.6.1
+
+**Fixed: migrations on the worker engines ran one autocommitted statement at a time.** The worker
+adapter inherited Kysely's `supportsTransactionalDdl = false` from `SqliteAdapter`, so the migrator
+committed every DDL statement on its own, and on OPFS each commit is a flush. An app's first install
+measured 35.9 s of migrations behind the splash for about 450 statements; in one transaction it
+took 2.6 s. The adapter now declares transactional DDL, so `migrateToLatest` runs the whole set in
+one transaction, and an interrupted migration rolls back instead of leaving half a schema. An app
+that wrapped its dialect to set `supportsTransactionalDdl` itself can drop the wrapper for the
+worker engines. The Capacitor-native adapter is unchanged: it is not yet verified on a device, so
+keep the wrapper there.
+
+The other libraries carry no change of their own at 1.6.1.
+
 ### 1.6.0
 
 A minor release: `mobile-db` records committed writes as SQLite changesets. The libraries other than
@@ -338,6 +352,11 @@ If you are on something older, the breaking changes you have to cross were relea
   the key so it re-runs when the key moves.
 
 ## @cavulsqa/create
+
+### 2.12.1
+
+- Generated apps depend on the 1.6.1 libraries, whose worker engines run migrations in one
+  transaction.
 
 ### 2.12.0
 

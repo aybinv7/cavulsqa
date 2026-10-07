@@ -1,6 +1,6 @@
 {
   "name": "@cavulsqa/m3e-vue",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "Material 3 Expressive components for Vue 3: wavy progress, the shape-morphing loading indicator, spring-driven sheets, button groups, flexible navigation, expressive lists and menus, built on @cavulsqa/m3e.",
   "keywords": [
     "capacitor",
