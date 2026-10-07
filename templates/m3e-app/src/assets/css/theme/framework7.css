@@ -13,6 +13,5 @@
     --f7-theme-color: var(--md-sys-color-primary);
     --f7-font-family: var(--md-ref-typeface-plain);
     --f7-bars-bg-color: transparent;
-    --f7-page-transition-duration: var(--md-sys-motion-spring-slow-spatial-duration);
   }
 }

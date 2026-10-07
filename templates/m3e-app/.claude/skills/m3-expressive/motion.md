@@ -33,8 +33,11 @@ dialogs entering, fades.
 
 ## Patterns already in the app
 
-- Page change: `m3e-axis` shared-axis X (`assets/css/layout/transitions.css`) - slide 64px on slow
-  spatial, fade-through. Do not set per-route transitions.
+- Page change: Framework7's own Material slide (400ms in, 200ms back), mirrored for right-to-left
+  and stilled to 1ms under reduced motion in `assets/css/layout/transitions.css`. Do not set
+  per-route transitions.
+- Card or list item opening its detail: `m3e-container` container transform
+  (`assets/css/layout/container-transform.css`), opened through `useContainerTransform`.
 - Press: shapes tighten on default effects (no bounce); selection reshapes on spatial.
 - Enter from a FAB or anchor: scale/translate from that corner, stagger 15-30ms per item.
 - Exit is always shorter than enter and accelerates.
