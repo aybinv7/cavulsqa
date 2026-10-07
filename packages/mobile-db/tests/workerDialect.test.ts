@@ -283,3 +283,15 @@ test("an outside read waits for a transaction rollback", async () => {
   await transactionFailure;
   await read;
 });
+
+test("the adapter lets the migrator run a whole migration set in one transaction", () => {
+  const dialect = createWorkerDialect<OpenPayload>({
+    label: "test",
+    worker: {} as Worker,
+    open: { name: "db" },
+  });
+  const adapter = dialect.createAdapter();
+
+  expect(adapter.supportsTransactionalDdl).toBe(true);
+  expect(adapter.supportsMultipleConnections).toBe(true);
+});

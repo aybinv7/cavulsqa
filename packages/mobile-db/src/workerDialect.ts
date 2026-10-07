@@ -371,6 +371,16 @@ class WorkerSQLiteAdapter extends SqliteAdapter {
   override get supportsMultipleConnections(): boolean {
     return true;
   }
+
+  /**
+   * SQLite runs DDL inside transactions; kysely's adapter does not say so, so the migrator
+   * autocommitted every statement and each commit flushed OPFS. A Presalio first install measured
+   * 35.9 s of migrations behind the splash for ~450 statements; in one transaction it took 2.6 s,
+   * and an interrupted migration now rolls back instead of leaving half a schema.
+   */
+  override get supportsTransactionalDdl(): boolean {
+    return true;
+  }
 }
 
 export function createWorkerDialect<TOpen>(spec: WorkerDialectSpec<TOpen>): Dialect {
