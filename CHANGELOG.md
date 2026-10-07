@@ -339,6 +339,17 @@ If you are on something older, the breaking changes you have to cross were relea
 
 ## @cavulsqa/create
 
+### 2.12.0
+
+- **Pages move with Framework7's own Material slide** in `m3e-app`: 400 ms in, 200 ms back,
+  replacing the 650 ms `m3e-axis` shared-axis fade-through. `transitions.css` mirrors the four
+  movements under `dir="rtl"`, which Framework7 does not, and cuts them to 1 ms under reduced motion
+  so `animationend` still fires and the router completes. `transition: "m3e-axis"` leaves the view
+  parameters and `--f7-page-transition-duration` leaves the Framework7 theme. Named transitions -
+  the container transform and the Home demo's per-feature ones - are untouched.
+- An app already generated keeps `m3e-axis` until it ports `assets/css/layout/transitions.css`,
+  `assets/css/theme/framework7.css` and `plugins/framework7.plugin.ts`.
+
 ### 2.11.4
 
 - Generated apps depend on the 1.6.0 libraries, whose OPFS worker can record committed writes as
