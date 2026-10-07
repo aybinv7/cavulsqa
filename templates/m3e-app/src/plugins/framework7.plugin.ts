@@ -4,9 +4,9 @@ import routes from "@/router";
 /**
  * Framework7 runs as the navigation engine: routing, the per-tab view stacks and the page
  * lifecycle. The theme is pinned to Material because its Material page metrics are what the M3
- * components sit in; nothing visual of Framework7's own is used. Pages move with `m3e-axis`, the
- * shared-axis transition in `assets/css/layout/transitions.css`, and Framework7 plays it backwards
- * on back.
+ * components sit in; nothing visual of Framework7's own is used except the page transition: its
+ * Material slide, mirrored for right-to-left and stilled under reduced motion in
+ * `assets/css/layout/transitions.css`.
  */
 export function framework7Parameters(): Framework7Parameters {
   return {
@@ -28,7 +28,6 @@ export function framework7Parameters(): Framework7Parameters {
     statusbar: { enabled: false },
     view: {
       animate: true,
-      transition: "m3e-axis",
       browserHistory: false,
       mdSwipeBack: false,
     },

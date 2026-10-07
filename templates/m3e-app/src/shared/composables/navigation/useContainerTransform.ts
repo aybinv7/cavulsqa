@@ -1,6 +1,6 @@
 import type { Router } from "framework7/types";
 
-/** The Framework7 transition name; its CSS is `m3e-container` in `assets/css/layout/transitions.css`. */
+/** The Framework7 transition name; its CSS is `m3e-container` in `assets/css/layout/container-transform.css`. */
 export const CONTAINER_TRANSITION = "m3e-container";
 
 const PENDING_FOR_MS = 1500;
