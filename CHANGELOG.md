@@ -9,6 +9,15 @@ cadence and has its own section.
 
 ## Libraries
 
+### 1.6.2
+
+**Fixed: a multi-line `M3TextField`'s label ran through the typed text.** The field grows
+downward, but its label was centred vertically like a single-line field's, so once floated it landed
+on the first line of text. A `multiline` field now rests its label on the first line, and the filled
+variant leaves room above the text for the floated label.
+
+The other libraries carry no change of their own at 1.6.2.
+
 ### 1.6.1
 
 **Fixed: migrations on the worker engines ran one autocommitted statement at a time.** The worker
@@ -352,6 +361,11 @@ If you are on something older, the breaking changes you have to cross were relea
   the key so it re-runs when the key moves.
 
 ## @cavulsqa/create
+
+### 2.12.2
+
+- Generated apps depend on the 1.6.2 libraries, whose multi-line text field keeps its label off the
+  typed text.
 
 ### 2.12.1
 
