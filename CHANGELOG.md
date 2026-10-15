@@ -9,6 +9,32 @@ cadence and has its own section.
 
 ## Libraries
 
+### 1.6.3
+
+**Changed: an enter-always `M3TopAppBar` slides away whole instead of following the finger.** It
+used to move with every pixel the content scrolled, written from the main thread each frame. On a
+mid-range Android phone with a long product list, the main thread ran every 20-40 ms during a drag,
+so the bar stepped behind content the compositor was scrolling smoothly. When the finger stopped
+the bar sat half-hidden for a third of a second, then sprang into place and overshot. It now hides
+once the content has scrolled past it and comes back the moment it scrolls up - Android's snapping
+`enterAlways`, with the travel threshold of the navigation bar's hide-on-scroll - as one transition
+per change of direction, which the compositor runs while the list scrolls. It eases out with
+emphasized-accelerate and back in with emphasized-decelerate, and moves without easing under
+reduced motion. `followOffset` and `snapOffset` stay exported but nothing in the package uses them.
+
+**Fixed: the bar restyled the whole list whenever it came to rest.** It set `--m3-app-bar-offset`
+on the scroll container; the property inherits, so every descendant was restyled - about 130 ms on
+a ~5,000-node list, felt as a 70-250 ms frame as a fling began. The bar now publishes its offset
+beside the container instead of on it, and each `M3ListGroup` writes it on its own sticky title
+alone, so the titles still sit under the bar when it is shown and at the top when it is hidden, and
+move with the same easing as the bar.
+
+`useAppBarOffset(anchor)` returns that offset for any element pinned under the bar. Code that read
+`var(--m3-app-bar-offset)` inherited from the scroll container gets the fallback now: bind the
+offset to the pinned element with `useAppBarOffset` instead.
+
+The other libraries carry no change of their own at 1.6.3.
+
 ### 1.6.2
 
 **Fixed: a multi-line `M3TextField`'s label ran through the typed text.** The field grows
@@ -361,6 +387,11 @@ If you are on something older, the breaking changes you have to cross were relea
   the key so it re-runs when the key moves.
 
 ## @cavulsqa/create
+
+### 2.12.3
+
+- Generated apps depend on the 1.6.3 libraries, whose enter-always top app bar slides away whole
+  on the compositor and no longer restyles the whole list when it moves.
 
 ### 2.12.2
 
