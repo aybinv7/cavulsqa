@@ -6,6 +6,7 @@ import {
   M3TopAppBar,
   createM3e,
   followOffset,
+  followPastThreshold,
   nextHideState,
   snapOffset,
   useHideOnScroll,
@@ -20,6 +21,21 @@ describe("scroll-away maths", () => {
     expect(snapOffset(40, 300, 64)).toBe(64);
     expect(snapOffset(20, 300, 64)).toBe(0);
     expect(snapOffset(60, 40, 64)).toBe(0);
+  });
+
+  test("an enter-always bar holds still inside the deadband and a reversal restarts the count", () => {
+    let state = followPastThreshold({ offset: 0, travel: 0 }, 20, 300, 64);
+    expect(state).toEqual({ offset: 0, travel: 20 });
+    state = followPastThreshold(state, 10, 300, 64);
+    expect(state).toEqual({ offset: 6, travel: 30 });
+    state = followPastThreshold(state, 10, 300, 64);
+    expect(state.offset).toBe(16);
+    state = followPastThreshold(state, -20, 300, 64);
+    expect(state).toEqual({ offset: 16, travel: -20 });
+    state = followPastThreshold(state, -10, 300, 64);
+    expect(state).toEqual({ offset: 10, travel: -30 });
+    expect(followPastThreshold({ offset: 64, travel: 0 }, -5, 40, 64).offset).toBe(40);
+    expect(followPastThreshold({ offset: 0, travel: 0 }, 32, 300, 64, 32).offset).toBe(0);
   });
 
   test("a bottom bar hides past the threshold, flips back on the way up and shows at both ends", () => {
@@ -82,7 +98,7 @@ describe("hiding on scroll", () => {
     expect(hidden.value).toBe(false);
   });
 
-  test("an enter-always app bar slides away whole once past it and comes back on the way up", async () => {
+  test("an enter-always app bar ignores small moves, follows past the deadband and settles", async () => {
     const { element, scrollTo } = scroller();
     mount(M3TopAppBar, {
       props: { title: "Customers", scrollBehavior: "enterAlways" },
@@ -92,20 +108,24 @@ describe("hiding on scroll", () => {
     await nextTick();
     const bar = element.querySelector<HTMLElement>(".m3-app-bar")!;
     const offset = () => bar.style.getPropertyValue("--m3-app-bar-offset");
-    await scrollTo(40);
+    await scrollTo(20);
     expect(offset()).toBe("");
-    await scrollTo(120);
-    expect(offset()).toBe("64px");
-    expect(bar.hasAttribute("data-away")).toBe(true);
-    expect(bar.hasAttribute("data-still")).toBe(false);
-    await scrollTo(110);
-    expect(offset()).toBe("64px");
-    await scrollTo(80);
+    await scrollTo(60);
+    expect(offset()).toBe("36px");
+    expect(bar.hasAttribute("data-following")).toBe(true);
+    await vi.advanceTimersByTimeAsync(200);
     expect(offset()).toBe("0px");
-    expect(bar.hasAttribute("data-away")).toBe(false);
-    await scrollTo(200);
-    await scrollTo(30);
-    expect(offset()).toBe("0px");
+    expect(bar.hasAttribute("data-following")).toBe(false);
+    await scrollTo(300);
+    await vi.advanceTimersByTimeAsync(200);
+    expect(offset()).toBe("64px");
+    await scrollTo(285);
+    expect(offset()).toBe("64px");
+    await vi.advanceTimersByTimeAsync(200);
+    await scrollTo(270);
+    expect(offset()).toBe("64px");
+    await scrollTo(250);
+    expect(offset()).toBe("53px");
   });
 
   test("a resting enter-always bar reaches the list-group titles, never the scroll container", async () => {
@@ -123,11 +143,12 @@ describe("hiding on scroll", () => {
     const title = element.querySelector<HTMLElement>(".m3-list-group__title")!;
     expect(title.classList.contains("m3-list-group__title--still")).toBe(true);
     await scrollTo(120);
+    await vi.advanceTimersByTimeAsync(200);
     expect(title.style.getPropertyValue("--m3-app-bar-offset")).toBe("64px");
-    expect(title.hasAttribute("data-away")).toBe(true);
-    expect(element.querySelector(".m3-app-bar")!.hasAttribute("data-still")).toBe(true);
     expect(element.style.getPropertyValue("--m3-app-bar-offset")).toBe("");
     await scrollTo(50);
+    await vi.advanceTimersByTimeAsync(200);
+    expect(element.querySelector(".m3-app-bar")!.hasAttribute("data-following")).toBe(true);
     expect(title.style.getPropertyValue("--m3-app-bar-offset")).toBe("0px");
     expect(element.style.getPropertyValue("--m3-app-bar-offset")).toBe("");
     expect(written).not.toHaveBeenCalledWith("--m3-app-bar-offset", expect.anything());

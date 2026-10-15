@@ -25,16 +25,9 @@ const title = useTemplateRef<HTMLElement>("title");
 const offset = useAppBarOffset(title);
 const reduced = useReducedMotion();
 
-watch(
-  offset,
-  (px) => {
-    const element = title.value;
-    if (!element) return;
-    element.toggleAttribute("data-away", px > 0);
-    element.style.setProperty("--m3-app-bar-offset", `${px}px`);
-  },
-  { flush: "post" },
-);
+watch(offset, (px) => title.value?.style.setProperty("--m3-app-bar-offset", `${px}px`), {
+  flush: "post",
+});
 </script>
 
 <template>
@@ -74,17 +67,11 @@ watch(
   font: var(--md-sys-typescale-title-small-weight) var(--md-sys-typescale-title-small-size) /
     var(--md-sys-typescale-title-small-line-height) var(--md-sys-typescale-title-small-font);
   letter-spacing: var(--md-sys-typescale-title-small-tracking);
-  transition: top var(--md-sys-motion-duration-medium1)
-    var(--md-sys-motion-easing-emphasized-decelerate);
+  transition: top var(--md-sys-motion-spring-fast-spatial-duration)
+    var(--md-sys-motion-spring-fast-spatial);
 }
 
-.m3-list-group__title[data-away] {
-  transition: top var(--md-sys-motion-duration-short4)
-    var(--md-sys-motion-easing-emphasized-accelerate);
-}
-
-.m3-list-group__title--still,
-.m3-list-group__title--still[data-away] {
+.m3-list-group__title--still {
   transition: none;
 }
 </style>

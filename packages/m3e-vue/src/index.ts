@@ -152,7 +152,14 @@ export { useScrollContainer, type ScrollTarget } from "./composables/useScrollCo
 export { useAppBarOffset } from "./composables/useAppBarOffset.js";
 export { useHideOnScroll, type HideOnScrollOptions } from "./composables/useHideOnScroll.js";
 export { useSwipeStep, type SwipeStep, type SwipeStepOptions } from "./composables/useSwipeStep.js";
-export { followOffset, snapOffset, nextHideState, type HideState } from "./utils/scrollHide.js";
+export {
+  followOffset,
+  followPastThreshold,
+  snapOffset,
+  nextHideState,
+  type FollowState,
+  type HideState,
+} from "./utils/scrollHide.js";
 export { vRipple } from "./directives/ripple.js";
 export { applyColorScheme, applySystemTokens, setDarkMode } from "./theme/applyTheme.js";
 export { BUTTON_METRICS, type ButtonSize } from "./components/button/sizes.js";

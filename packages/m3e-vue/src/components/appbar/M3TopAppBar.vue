@@ -3,7 +3,7 @@ import { computed, onScopeDispose, useTemplateRef, watch } from "vue";
 import { publishAppBarOffset, withdrawAppBarOffset } from "../../composables/useAppBarOffset.js";
 import { useReducedMotion } from "../../composables/useReducedMotion.js";
 import { useScrollContainer, type ScrollTarget } from "../../composables/useScrollContainer.js";
-import { nextHideState, type HideState } from "../../utils/scrollHide.js";
+import { followPastThreshold, snapOffset, type FollowState } from "../../utils/scrollHide.js";
 
 /**
  * The top app bar: `small` (64dp), or the flexible `medium` and `large` whose big title scrolls
@@ -15,9 +15,10 @@ import { nextHideState, type HideState } from "../../utils/scrollHide.js";
  * sits below a flexible bar's big title and sticks under the bar once that title has scrolled
  * away, taking the bar's colour with it.
  *
- * `scrollBehavior="enterAlways"` (small bars) slides the whole bar away once the content has
- * scrolled down past it, and brings it back the moment it scrolls up - the snapping enter-always of
- * Android's `AppBarLayout`. The status-bar strip stays covered and `#bottom` travels with it.
+ * `scrollBehavior="enterAlways"` (small bars) is Compose's enter-always behaviour: once the content
+ * has moved 24px one way the bar slides away with it as it scrolls down and comes back as it
+ * scrolls up, following the finger, then settles fully in or out; the status-bar strip stays
+ * covered and `#bottom` travels with it.
  *
  * Tapping the bar anywhere but its buttons scrolls the content back to the top - the Android
  * stand-in for iOS's status-bar tap, which Android keeps for its own shade. `scrollToTop` turns it
@@ -48,45 +49,53 @@ const flexible = computed(() => props.variant !== "small");
 const reduced = useReducedMotion();
 const ROW = 64;
 const enterAlways = computed(() => props.scrollBehavior === "enterAlways" && !flexible.value);
-let hide: HideState = { hidden: false, travel: 0 };
-let placed = 0;
+let follow: FollowState = { offset: 0, travel: 0 };
+let placed = { px: 0, following: false };
+let shared = 0;
+let settle: ReturnType<typeof setTimeout> | undefined;
 
 /**
- * Slides the bar and its `#bottom` fully out or back in: one transition per change of direction,
- * which the compositor runs while the content scrolls. Following the finger instead wrote the bar
- * from the main thread every frame, so on a busy list it stepped behind the content and stalled
- * half-hidden before snapping. The offset is published for the scroll container - `M3ListGroup`'s
- * sticky titles read it through `useAppBarOffset` - and never written on the container itself: a
- * custom property inherits, so setting it there restyled every row of a long list.
+ * Moves the bar and its `#bottom` only - cheap on every frame, since nothing below them inherits
+ * the offset. It is published for the scroll container once the bar rests fully in or out, for the
+ * sticky titles of `M3ListGroup` through `useAppBarOffset`, and never written on the container
+ * itself: a custom property inherits, so setting it there restyled every row of a long list, about
+ * 130 ms at the start of each fling.
  */
-function place(px: number) {
-  if (px === placed) return;
-  placed = px;
-  for (const element of [bar.value, bottom.value]) {
-    if (!element) continue;
-    element.toggleAttribute("data-still", reduced.value);
-    element.toggleAttribute("data-away", px > 0);
-    element.style.setProperty("--m3-app-bar-offset", `${px}px`);
+function place(px: number, animate: boolean) {
+  if (px !== placed.px) {
+    const following = !animate || reduced.value;
+    placed = { px, following };
+    for (const element of [bar.value, bottom.value]) {
+      if (!element) continue;
+      element.toggleAttribute("data-following", following);
+      element.style.setProperty("--m3-app-bar-offset", `${px}px`);
+    }
   }
-  if (container.value) publishAppBarOffset(container.value, px);
+  if ((px === 0 || px === ROW) && px !== shared && container.value) {
+    shared = px;
+    publishAppBarOffset(container.value, px);
+  }
 }
 
-/** Hides the bar only once the content has scrolled past it, so no empty band opens above it. */
 function track(scrollTop: number, delta: number) {
-  hide =
-    scrollTop < ROW
-      ? { hidden: false, travel: 0 }
-      : nextHideState(hide, delta, { top: scrollTop, max: Number.POSITIVE_INFINITY });
-  place(hide.hidden ? ROW : 0);
+  follow = followPastThreshold(follow, delta, scrollTop, ROW);
+  place(follow.offset, false);
+  clearTimeout(settle);
+  settle = setTimeout(() => {
+    follow = { offset: snapOffset(follow.offset, container.value?.scrollTop ?? 0, ROW), travel: 0 };
+    place(follow.offset, true);
+  }, 140);
 }
 
 watch(enterAlways, (on) => {
   if (on) return;
-  hide = { hidden: false, travel: 0 };
-  place(0);
+  clearTimeout(settle);
+  follow = { offset: 0, travel: 0 };
+  place(0, true);
 });
 
 onScopeDispose(() => {
+  clearTimeout(settle);
   if (container.value) withdrawAppBarOffset(container.value);
 });
 
@@ -175,16 +184,8 @@ function onTap(event: MouseEvent) {
   transition:
     background-color var(--md-sys-motion-spring-default-effects-duration)
       var(--md-sys-motion-spring-default-effects),
-    transform var(--md-sys-motion-duration-medium1)
-      var(--md-sys-motion-easing-emphasized-decelerate);
-}
-
-.m3-app-bar[data-away],
-.m3-app-bar-bottom[data-away] {
-  transition:
-    background-color var(--md-sys-motion-spring-default-effects-duration)
-      var(--md-sys-motion-spring-default-effects),
-    transform var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-emphasized-accelerate);
+    transform var(--md-sys-motion-spring-fast-spatial-duration)
+      var(--md-sys-motion-spring-fast-spatial);
 }
 
 .m3-app-bar::before {
@@ -199,9 +200,9 @@ function onTap(event: MouseEvent) {
   pointer-events: none;
 }
 
-.m3-app-bar[data-still],
-.m3-app-bar-bottom[data-still],
-.m3-app-bar[data-still]::before {
+.m3-app-bar[data-following],
+.m3-app-bar-bottom[data-following],
+.m3-app-bar[data-following]::before {
   transition: background-color var(--md-sys-motion-spring-default-effects-duration)
     var(--md-sys-motion-spring-default-effects);
 }

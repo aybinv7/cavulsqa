@@ -13,6 +13,32 @@ export function followOffset(
   return Math.max(0, Math.min(next, scrollTop));
 }
 
+export interface FollowState {
+  offset: number;
+  /** Movement in the current direction since it last changed or since the bar last settled. */
+  travel: number;
+}
+
+/**
+ * `followOffset` behind a deadband: the bar holds still until the content has moved `threshold`
+ * pixels one way, and a reversal starts the count again, so a jittery finger, a tap that nudges the
+ * list or a short drag leave it where it is. Past the threshold it follows every pixel from the
+ * excess, so it never jumps, and it still cannot be further off than the content is scrolled.
+ */
+export function followPastThreshold(
+  state: FollowState,
+  delta: number,
+  scrollTop: number,
+  height: number,
+  threshold = 24,
+): FollowState {
+  const sameWay = Math.sign(delta) === Math.sign(state.travel);
+  const travel = delta === 0 ? state.travel : sameWay ? state.travel + delta : delta;
+  const excess = Math.max(0, Math.abs(travel) - threshold);
+  const moved = Math.sign(delta) * Math.min(Math.abs(delta), excess);
+  return { offset: followOffset(state.offset, moved, scrollTop, height), travel };
+}
+
 /** Where a half-hidden bar settles once the scroll stops: the nearer of fully in and fully out. */
 export function snapOffset(offset: number, scrollTop: number, height: number): number {
   if (scrollTop < height) return 0;
