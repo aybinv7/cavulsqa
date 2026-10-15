@@ -149,6 +149,7 @@ export {
 } from "./composables/useFormDraft.js";
 export { useOverlay, type UseOverlayOptions } from "./composables/useOverlay.js";
 export { useScrollContainer, type ScrollTarget } from "./composables/useScrollContainer.js";
+export { useAppBarOffset } from "./composables/useAppBarOffset.js";
 export { useHideOnScroll, type HideOnScrollOptions } from "./composables/useHideOnScroll.js";
 export { useSwipeStep, type SwipeStep, type SwipeStepOptions } from "./composables/useSwipeStep.js";
 export { followOffset, snapOffset, nextHideState, type HideState } from "./utils/scrollHide.js";

@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed, onScopeDispose, useTemplateRef } from "vue";
+import { computed, onScopeDispose, useTemplateRef, watch } from "vue";
+import { publishAppBarOffset, withdrawAppBarOffset } from "../../composables/useAppBarOffset.js";
 import { useReducedMotion } from "../../composables/useReducedMotion.js";
 import { useScrollContainer, type ScrollTarget } from "../../composables/useScrollContainer.js";
-import { followOffset, snapOffset } from "../../utils/scrollHide.js";
+import { nextHideState, type HideState } from "../../utils/scrollHide.js";
 
 /**
  * The top app bar: `small` (64dp), or the flexible `medium` and `large` whose big title scrolls
@@ -14,10 +15,9 @@ import { followOffset, snapOffset } from "../../utils/scrollHide.js";
  * sits below a flexible bar's big title and sticks under the bar once that title has scrolled
  * away, taking the bar's colour with it.
  *
- * `scrollBehavior="enterAlways"` (small bars) is Compose's enter-always behaviour: the bar slides
- * away with the content as it scrolls down and comes back the moment it scrolls up, following the
- * finger, then settles fully in or out; the status-bar strip stays covered and `#bottom` travels
- * with it.
+ * `scrollBehavior="enterAlways"` (small bars) slides the whole bar away once the content has
+ * scrolled down past it, and brings it back the moment it scrolls up - the snapping enter-always of
+ * Android's `AppBarLayout`. The status-bar strip stays covered and `#bottom` travels with it.
  *
  * Tapping the bar anywhere but its buttons scrolls the content back to the top - the Android
  * stand-in for iOS's status-bar tap, which Android keeps for its own shade. `scrollToTop` turns it
@@ -48,44 +48,47 @@ const flexible = computed(() => props.variant !== "small");
 const reduced = useReducedMotion();
 const ROW = 64;
 const enterAlways = computed(() => props.scrollBehavior === "enterAlways" && !flexible.value);
-let offset = 0;
-let placed = { px: 0, following: false };
-let shared = 0;
-let settle: ReturnType<typeof setTimeout> | undefined;
+let hide: HideState = { hidden: false, travel: 0 };
+let placed = 0;
 
 /**
- * Moves the bar and its `#bottom` only. The scroll container hears the offset - for the sticky
- * headers of `M3ListGroup` - only once the bar rests fully in or out: a custom property inherits,
- * so writing it there on every frame would restyle every row of a long list while it scrolls,
- * which is what made the bar stutter as it came back.
+ * Slides the bar and its `#bottom` fully out or back in: one transition per change of direction,
+ * which the compositor runs while the content scrolls. Following the finger instead wrote the bar
+ * from the main thread every frame, so on a busy list it stepped behind the content and stalled
+ * half-hidden before snapping. The offset is published for the scroll container - `M3ListGroup`'s
+ * sticky titles read it through `useAppBarOffset` - and never written on the container itself: a
+ * custom property inherits, so setting it there restyled every row of a long list.
  */
-function place(px: number, animate: boolean) {
-  const following = !animate || reduced.value;
-  if (px !== placed.px || following !== placed.following) {
-    placed = { px, following };
-    for (const element of [bar.value, bottom.value]) {
-      if (!element) continue;
-      element.classList.toggle("m3-app-bar--following", following);
-      element.style.setProperty("--m3-app-bar-offset", `${px}px`);
-    }
+function place(px: number) {
+  if (px === placed) return;
+  placed = px;
+  for (const element of [bar.value, bottom.value]) {
+    if (!element) continue;
+    element.toggleAttribute("data-still", reduced.value);
+    element.toggleAttribute("data-away", px > 0);
+    element.style.setProperty("--m3-app-bar-offset", `${px}px`);
   }
-  if ((px === 0 || px === ROW) && px !== shared) {
-    shared = px;
-    container.value?.style.setProperty("--m3-app-bar-offset", `${px}px`);
-  }
+  if (container.value) publishAppBarOffset(container.value, px);
 }
 
-function follow(scrollTop: number, delta: number) {
-  offset = followOffset(offset, delta, scrollTop, ROW);
-  place(offset, false);
-  clearTimeout(settle);
-  settle = setTimeout(() => {
-    offset = snapOffset(offset, container.value?.scrollTop ?? 0, ROW);
-    place(offset, true);
-  }, 140);
+/** Hides the bar only once the content has scrolled past it, so no empty band opens above it. */
+function track(scrollTop: number, delta: number) {
+  hide =
+    scrollTop < ROW
+      ? { hidden: false, travel: 0 }
+      : nextHideState(hide, delta, { top: scrollTop, max: Number.POSITIVE_INFINITY });
+  place(hide.hidden ? ROW : 0);
 }
 
-onScopeDispose(() => clearTimeout(settle));
+watch(enterAlways, (on) => {
+  if (on) return;
+  hide = { hidden: false, travel: 0 };
+  place(0);
+});
+
+onScopeDispose(() => {
+  if (container.value) withdrawAppBarOffset(container.value);
+});
 
 const INTERACTIVE = "button, a, input, select, textarea, [role=button], [role=menuitem]";
 
@@ -95,7 +98,7 @@ const container = useScrollContainer(
   (scrollTop, delta) => {
     const element = bar.value;
     if (!element) return;
-    if (enterAlways.value) follow(scrollTop, delta);
+    if (enterAlways.value) track(scrollTop, delta);
     element.toggleAttribute("data-scrolled", scrollTop > 0);
     bottom.value?.toggleAttribute("data-scrolled", scrollTop > 0);
     if (!flexible.value) return;
@@ -172,8 +175,16 @@ function onTap(event: MouseEvent) {
   transition:
     background-color var(--md-sys-motion-spring-default-effects-duration)
       var(--md-sys-motion-spring-default-effects),
-    transform var(--md-sys-motion-spring-fast-spatial-duration)
-      var(--md-sys-motion-spring-fast-spatial);
+    transform var(--md-sys-motion-duration-medium1)
+      var(--md-sys-motion-easing-emphasized-decelerate);
+}
+
+.m3-app-bar[data-away],
+.m3-app-bar-bottom[data-away] {
+  transition:
+    background-color var(--md-sys-motion-spring-default-effects-duration)
+      var(--md-sys-motion-spring-default-effects),
+    transform var(--md-sys-motion-duration-short4) var(--md-sys-motion-easing-emphasized-accelerate);
 }
 
 .m3-app-bar::before {
@@ -188,9 +199,9 @@ function onTap(event: MouseEvent) {
   pointer-events: none;
 }
 
-.m3-app-bar.m3-app-bar--following,
-.m3-app-bar-bottom.m3-app-bar--following,
-.m3-app-bar--following::before {
+.m3-app-bar[data-still],
+.m3-app-bar-bottom[data-still],
+.m3-app-bar[data-still]::before {
   transition: background-color var(--md-sys-motion-spring-default-effects-duration)
     var(--md-sys-motion-spring-default-effects);
 }

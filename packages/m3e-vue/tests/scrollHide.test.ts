@@ -2,6 +2,7 @@ import { mount } from "@vue/test-utils";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test";
 import { defineComponent, h, nextTick, shallowRef } from "vue";
 import {
+  M3ListGroup,
   M3TopAppBar,
   createM3e,
   followOffset,
@@ -81,21 +82,56 @@ describe("hiding on scroll", () => {
     expect(hidden.value).toBe(false);
   });
 
-  test("an enter-always app bar slides away with the content and settles fully out", async () => {
+  test("an enter-always app bar slides away whole once past it and comes back on the way up", async () => {
     const { element, scrollTo } = scroller();
     mount(M3TopAppBar, {
       props: { title: "Customers", scrollBehavior: "enterAlways" },
       attachTo: element,
-      global: { plugins: [createM3e({ reducedMotion: true })] },
+      global: { plugins: [createM3e({ reducedMotion: false })] },
     });
     await nextTick();
     const bar = element.querySelector<HTMLElement>(".m3-app-bar")!;
-    await scrollTo(30);
-    expect(bar.style.getPropertyValue("--m3-app-bar-offset")).toBe("30px");
+    const offset = () => bar.style.getPropertyValue("--m3-app-bar-offset");
+    await scrollTo(40);
+    expect(offset()).toBe("");
     await scrollTo(120);
-    await vi.advanceTimersByTimeAsync(200);
-    expect(bar.style.getPropertyValue("--m3-app-bar-offset")).toBe("64px");
-    await scrollTo(100);
-    expect(bar.style.getPropertyValue("--m3-app-bar-offset")).toBe("44px");
+    expect(offset()).toBe("64px");
+    expect(bar.hasAttribute("data-away")).toBe(true);
+    expect(bar.hasAttribute("data-still")).toBe(false);
+    await scrollTo(110);
+    expect(offset()).toBe("64px");
+    await scrollTo(80);
+    expect(offset()).toBe("0px");
+    expect(bar.hasAttribute("data-away")).toBe(false);
+    await scrollTo(200);
+    await scrollTo(30);
+    expect(offset()).toBe("0px");
+  });
+
+  test("a resting enter-always bar reaches the list-group titles, never the scroll container", async () => {
+    const { element, scrollTo } = scroller();
+    const written = vi.spyOn(element.style, "setProperty");
+    const Page = defineComponent(() => () => [
+      h(M3TopAppBar, { title: "Products", scrollBehavior: "enterAlways" }),
+      h(M3ListGroup, { title: "Drinks" }, () => h("li", "Water")),
+    ]);
+    mount(Page, {
+      attachTo: element,
+      global: { plugins: [createM3e({ reducedMotion: true })] },
+    });
+    await nextTick();
+    const title = element.querySelector<HTMLElement>(".m3-list-group__title")!;
+    expect(title.classList.contains("m3-list-group__title--still")).toBe(true);
+    await scrollTo(120);
+    expect(title.style.getPropertyValue("--m3-app-bar-offset")).toBe("64px");
+    expect(title.hasAttribute("data-away")).toBe(true);
+    expect(element.querySelector(".m3-app-bar")!.hasAttribute("data-still")).toBe(true);
+    expect(element.style.getPropertyValue("--m3-app-bar-offset")).toBe("");
+    await scrollTo(50);
+    expect(title.style.getPropertyValue("--m3-app-bar-offset")).toBe("0px");
+    expect(element.style.getPropertyValue("--m3-app-bar-offset")).toBe("");
+    expect(written).not.toHaveBeenCalledWith("--m3-app-bar-offset", expect.anything());
+    for (const node of element.querySelectorAll<HTMLElement>(".m3-list-group, li"))
+      expect(node.style.getPropertyValue("--m3-app-bar-offset")).toBe("");
   });
 });
