@@ -25,7 +25,7 @@ export function createOpfsDialect(options: OpfsDialectOptions): Dialect {
   return createWorkerDialect<OpfsOpenPayload>({
     label: "the OPFS worker",
     worker: options.worker,
-    open: { name: options.name, capacity: options.capacity },
+    open: { name: options.name, capacity: options.capacity, directory: options.directory },
     requestTimeoutMs: options.requestTimeoutMs,
     capture: options.capture,
   });

@@ -13,6 +13,13 @@ export interface OpfsOpenPayload {
    * generous rather than exact; it only applies the first time a pool is created.
    */
   capacity?: number;
+  /**
+   * The OPFS directory the pool owns. A pool takes its directory exclusively, so two browsing
+   * contexts of one origin - two tabs of a web app - cannot open the same one: give each its own.
+   * Omitted, the pool uses sqlite-wasm's default directory, which is where existing databases live;
+   * changing it later orphans them rather than moving them.
+   */
+  directory?: string;
 }
 
 export type OpfsRequest = WorkerRequest<OpfsOpenPayload>;

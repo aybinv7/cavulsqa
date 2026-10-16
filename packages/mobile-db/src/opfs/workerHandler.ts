@@ -54,14 +54,18 @@ export function runOpfsWorker(
     return { supported: true, tables: capture.start(tables) };
   }
 
-  async function open(name: string, capacity: number): Promise<void> {
+  async function open(name: string, capacity: number, directory?: string): Promise<void> {
     const { default: sqlite3InitModule } = await import("@sqlite.org/sqlite-wasm");
     const runtime = await sqlite3InitModule();
 
     // The SAH pool VFS, not the plain `opfs` one: it needs neither SharedArrayBuffer nor
     // cross-origin isolation, so it works under Capacitor's https://localhost without the
     // COOP/COEP headers a WebView cannot easily be given.
-    const pool = await runtime.installOpfsSAHPoolVfs({ initialCapacity: capacity });
+    const pool = await runtime.installOpfsSAHPoolVfs(
+      directory === undefined
+        ? { initialCapacity: capacity }
+        : { initialCapacity: capacity, directory },
+    );
 
     sqlite3 = runtime;
     database = new pool.OpfsSAHPoolDb(`/${name}`);
@@ -109,7 +113,7 @@ export function runOpfsWorker(
     };
 
     if (request.type === "open") {
-      settle(() => open(request.name, request.capacity ?? 12).then(() => null));
+      settle(() => open(request.name, request.capacity ?? 12, request.directory).then(() => null));
       return;
     }
     if (request.type === "capture") {
