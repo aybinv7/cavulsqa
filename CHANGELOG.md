@@ -9,7 +9,7 @@ cadence and has its own section.
 
 ## Libraries
 
-### Unreleased
+### 1.6.4
 
 **Added: `createOpfsDialect({ directory })` puts the SAH pool in a directory of your choosing.** The
 pool takes its directory exclusively, so a web app opened in two tabs failed to open the database in
@@ -390,6 +390,11 @@ If you are on something older, the breaking changes you have to cross were relea
   the key so it re-runs when the key moves.
 
 ## @cavulsqa/create
+
+### 2.12.4
+
+- Generated apps depend on the 1.6.4 libraries, whose OPFS dialect can put the SAH pool in a
+  directory of the app's choosing.
 
 ### 2.12.3
 
