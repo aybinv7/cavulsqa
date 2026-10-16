@@ -48,6 +48,21 @@ import OpfsWorker from "./db/opfs.worker?worker";
 const dialect = createOpfsDialect({ worker: new OpfsWorker(), name: "app.sqlite3" });
 ```
 
+The SAH pool takes its OPFS directory exclusively, so a second tab of the same origin cannot open the
+pool the first one holds. A web app that can be open in several tabs gives each one its own
+`directory`; their data are invisible to each other, so treat each as its own cache:
+
+```ts
+const dialect = createOpfsDialect({
+  worker: new OpfsWorker(),
+  name: "app.sqlite3",
+  directory: `app/${tabId}`,
+});
+```
+
+Leaving `directory` out keeps sqlite-wasm's default, where every database written before this option
+existed lives - changing it later orphans those files rather than moving them.
+
 `createWaDialect` takes the same shape plus a `kind`, which picks the VFS **and** the wasm build:
 `access-handle-pool` runs on the plain build, `origin-private-file-system` and `idb-batch-atomic`
 need the Asyncify one. Loading the wrong pair fails at the first query, not at startup.

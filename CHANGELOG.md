@@ -9,6 +9,13 @@ cadence and has its own section.
 
 ## Libraries
 
+### Unreleased
+
+**Added: `createOpfsDialect({ directory })` puts the SAH pool in a directory of your choosing.** The
+pool takes its directory exclusively, so a web app opened in two tabs failed to open the database in
+the second one; each tab can now own its own pool. Omitted, the pool stays in sqlite-wasm's default
+directory, so existing databases are untouched.
+
 ### 1.6.3
 
 **Fixed: an enter-always `M3TopAppBar` restyled the whole list whenever it came to rest.** It set
